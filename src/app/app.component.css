@@ -1,0 +1,17 @@
+#page1{ 
+    background-color: red;
+    left: 100px;
+    top: 100px;
+}
+
+#page2{ 
+    background-color: blue;
+    left: 400px;
+    top: 500px;
+}
+
+.page {
+    position : absolute;
+    width: 100px;
+    height: 100px;
+}
