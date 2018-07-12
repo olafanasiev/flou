@@ -1,3 +1,7 @@
-<app-page [page]="page" *ngFor="let page of pages">
-
-</app-page>
+<div class="main-canvas">
+    <div fxLayoutAlign="row" class="pages">
+        <app-page [page]="page" *ngFor="let page of pages">
+        </app-page>
+    </div>
+    <button (click)="addPage()" mat-fab [ngClass]="'add-page-button'">+</button>
+</div>

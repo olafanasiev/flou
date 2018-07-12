@@ -12,6 +12,10 @@ export class AppComponent implements AfterViewInit {
 
   constructor(private flouService: FlouService) {}
   ngAfterViewInit() {
-  this.pages =  this.flouService.getPages();
+    this.pages =  this.flouService.getPages();
+  }
+
+  addPage() {
+    this.flouService.addPage();
   }
 }

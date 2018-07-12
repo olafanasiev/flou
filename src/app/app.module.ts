@@ -9,6 +9,7 @@ import { ChoiceItemComponent } from './choice-item/choice-item.component';
 import { TextItemComponent } from './text-item/text-item.component';
 import { InputItemComponent } from './input-item/input-item.component';
 import { FlouService } from '../services/flou.service';
+import { SharedModule } from './shared/shared.module';
 
 
 @NgModule({
@@ -21,7 +22,7 @@ import { FlouService } from '../services/flou.service';
     InputItemComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule, SharedModule
   ],
   providers: [FlouService],
   bootstrap: [AppComponent]
