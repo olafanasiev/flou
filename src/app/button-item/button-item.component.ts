@@ -10,6 +10,7 @@ export class ButtonItemComponent extends PageItemComponent implements OnInit {
 
   constructor() {
     super();
+    this.type = 'button';
    }
 
   ngOnInit() {

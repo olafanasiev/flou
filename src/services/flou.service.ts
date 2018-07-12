@@ -30,4 +30,15 @@ export class FlouService {
         this.pageCounts++;
         return `Page ${this.pageCounts}`;
     }
+
+    addItem(page: Page, type?: string) {
+        let item: PageItem = null;
+        if ( !type ) {
+            item = {position: 0, type: 'input'};
+        } else {
+            item = {position: 0, type: type};
+        }
+
+        page.items.push(item);
+    }
 }

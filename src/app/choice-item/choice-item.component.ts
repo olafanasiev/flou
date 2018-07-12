@@ -10,6 +10,7 @@ export class ChoiceItemComponent extends PageItemComponent implements OnInit {
 
   constructor() {
     super();
+    this.type = 'choice';
   }
 
   ngOnInit() {

@@ -10,6 +10,7 @@ export class InputItemComponent extends PageItemComponent implements OnInit {
 
   constructor() {
     super();
+    this.type = 'input';
   }
 
   ngOnInit() {
