@@ -18,7 +18,7 @@ export class PageComponent implements OnInit {
   }
 
   addItem() {
-     this.flouService.addItem(this. page);
+     this.flouService.addItem(this.page);
   }
 
 }
