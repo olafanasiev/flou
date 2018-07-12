@@ -1,5 +1,5 @@
 import { Component, AfterViewInit } from '@angular/core';
-import { jsPlumb } from 'jsplumb';
+import { FlouService } from '../services/flou.service';
 
 @Component({
   selector: 'app-root',
@@ -8,14 +8,10 @@ import { jsPlumb } from 'jsplumb';
 })
 export class AppComponent implements AfterViewInit {
   title = 'app';
-  jsPlumbInstance;
+  pages = [];
 
+  constructor(private flouService: FlouService) {}
   ngAfterViewInit() {
-    this.jsPlumbInstance = jsPlumb.getInstance();
-    const endpoint1 = this.jsPlumbInstance.addEndpoint('page1'),
-        endpoint2 = this.jsPlumbInstance.addEndpoint('page2');
-        this.jsPlumbInstance.connect({ source: endpoint1, target: endpoint2 });
-        this.jsPlumbInstance.draggable('page1');
-        this.jsPlumbInstance.draggable('page2');
+  this.pages =  this.flouService.getPages();
   }
 }

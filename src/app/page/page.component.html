@@ -1,0 +1,13 @@
+<div class="page">
+    <div class="page__title">{{page.title}}</div>
+    <div class="page__items">
+      <div *ngFor="let item of page.items">
+          <ng-container [ngSwitch]="item.type">
+             <app-choice-item *ngSwitchCase="'choice'"></app-choice-item>
+             <app-input-item *ngSwitchCase="'input'"></app-input-item>
+             <app-button-item *ngSwitchCase="'button'"></app-button-item>
+             <app-text-item *ngSwitchCase="'text'"></app-text-item>
+          </ng-container>
+      </div>
+    </div>
+</div>
