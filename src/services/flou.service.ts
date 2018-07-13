@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { jsPlumb } from 'jsplumb';
 import { Page } from '../app/models/page';
+import { PageItem } from '../app/models/page-item';
 
 @Injectable()
 export class FlouService {
