@@ -8,28 +8,43 @@ export class FlouService {
     jsPlumbInstance;
     pages: Page[];
     pageCounts = 0;
+    anEndpointSource = {
+        endpoint: 'Rectangle',
+        isSource: true,
+        isTarget: false,
+        maxConnections: 1,
+
+        anchor: [1, 0, 1, 0]
+    };
+
+    anEndpointDestination = {
+        endpoint: 'Dot',
+        isSource: false,
+        isTarget: true,
+        maxConnections: 1,
+
+        anchor: [0, 1, -1, 0]
+    };
 
     constructor() {
-        this.jsPlumbInstance = jsPlumb.getInstance();
+        this.jsPlumbInstance = jsPlumb.getInstance({Container: document.getElementById('pages')});
         this.pages = [];
     }
 
     getPages() {
         return this.pages;
     }
-
-    // this.jsPlumbInstance = jsPlumb.getInstance();
-    // const endpoint1 = this.jsPlumbInstance.addEndpoint('page1'),
-    //     endpoint2 = this.jsPlumbInstance.addEndpoint('page2');
-    //     this.jsPlumbInstance.connect({ source: endpoint1, target: endpoint2 });
-    //     this.jsPlumbInstance.draggable('page1');
-    //     this.jsPlumbInstance.draggable('page2');
     addPage() {
-        this.pages.push({  x: 0,
+        const newPage = {  x: 0,
             y: 0,
             htmlId: `page-${this.pageCounts}`,
             title: this._getPageTitle(),
-            items: []});
+            items: []};
+        this.pages.push(newPage);
+        setTimeout(() => {
+            // this.jsPlumbInstance.draggable(newPage.htmlId);
+            // $(`#${newPage.htmlId}`).draggable();
+        } , 0 );
     }
 
     private _getPageTitle() {
@@ -37,6 +52,8 @@ export class FlouService {
         return `Page ${this.pageCounts}`;
     }
 
+
+    
     addItem(page: Page, type?: string) {
         let item: PageItem = null;
         if ( !type ) {
@@ -47,13 +64,18 @@ export class FlouService {
         }
         page.items.push(item);
         setTimeout(() => {
-        this.jsPlumbInstance.addEndpoint(item.htmlId);
-        $(`#${page.htmlId} .page__items`).sortable({
-            stop: function(event, ui) {
-                this.jsPlumbInstance.recalculateOffsets($(ui.item).parents('.draggable'));
-                this.jsPlumbInstance.repaintEverything();
-            }
-        });
+       this.jsPlumbInstance.addEndpoint(item.htmlId,
+       {isSource: true,
+        isTarget: true,
+        anchor: ['RightMiddle']});
+    //    const e2 = this.jsPlumbInstance.addEndpoint(item.htmlId);
+    //    this.jsPlumbInstance.connect({ source: e1, target: e2 });
+        // $(`#${page.htmlId} .page__items`).sortable({
+        //     stop: function(event, ui) {
+        //         this.jsPlumbInstance.recalculateOffsets($(ui.item).parents('.draggable'));
+        //         this.jsPlumbInstance.repaintEverything();
+        //     }
+        // });
         }, 0);
     }
 }
