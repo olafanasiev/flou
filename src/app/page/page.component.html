@@ -1,4 +1,4 @@
-<div class="page">
+<div class="page" [id]="page.htmlId">
     <div (click)="startEditing()" class="page__title">
         <app-editable-title [title]="page.title" (done)="stopEditing($event)" [editTitle]="editMode"></app-editable-title>
     </div>
