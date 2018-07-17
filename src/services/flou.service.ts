@@ -20,11 +20,10 @@ export class FlouService {
 
 
     addPage() {
-        const pageItems = [];
         this.pages.push({  x: 0,
             y: 0,
             title: this._getPageTitle(),
-            items: pageItems });
+            items: []});
     }
 
     private _getPageTitle() {
@@ -35,9 +34,9 @@ export class FlouService {
     addItem(page: Page, type?: string) {
         let item: PageItem = null;
         if ( !type ) {
-            item = {position: 0, type: 'input'};
+            item = {position: 0, type: 'input', title: `Item ${page.items.length + 1}`};
         } else {
-            item = {position: 0, type: type};
+            item = {position: 0, type: type, title: `Item ${page.items.length + 1}`};
         }
 
         page.items.push(item);

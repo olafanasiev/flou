@@ -10,6 +10,7 @@ import { TextItemComponent } from './text-item/text-item.component';
 import { InputItemComponent } from './input-item/input-item.component';
 import { FlouService } from '../services/flou.service';
 import { SharedModule } from './shared/shared.module';
+import { EditableTitleComponent } from './editable-title/editable-title.component';
 
 
 @NgModule({
@@ -19,7 +20,8 @@ import { SharedModule } from './shared/shared.module';
     ButtonItemComponent,
     ChoiceItemComponent,
     TextItemComponent,
-    InputItemComponent
+    InputItemComponent,
+    EditableTitleComponent
   ],
   imports: [
     BrowserModule, SharedModule

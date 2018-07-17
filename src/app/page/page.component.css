@@ -5,4 +5,20 @@
     -moz-box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.75);
     box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.75);
     margin: 10px;
+    position: relative;
+}
+
+.page__add-item {
+    width: 25px;
+    height: 25px;
+    line-height: 25px;
+    padding: 0;
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+}
+
+.mat-fab.page__add-item .mat-button-wrapper {
+    padding: 0;
+    color: #FFF;
 }

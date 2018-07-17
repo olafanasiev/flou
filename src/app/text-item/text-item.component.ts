@@ -8,7 +8,6 @@ import { PageItem } from '../models/page-item';
   styleUrls: ['./text-item.component.css']
 })
 export class TextItemComponent extends PageItemComponent implements OnInit {
-
   constructor() {
     super();
     this.type = 'text';
