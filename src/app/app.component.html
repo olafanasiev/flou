@@ -1,4 +1,4 @@
-<div class="main-canvas">
+<div (mousedown)="addEndpoint($event)" (mouseup)="addEndpoint($event)" class="main-canvas">
     <div fxLayoutAlign="row" id="pages" class="pages">
         <app-page [page]="page" *ngFor="let page of pages">
         </app-page>

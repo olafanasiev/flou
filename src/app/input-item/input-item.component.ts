@@ -1,15 +1,18 @@
-import { Component, OnInit } from '@angular/core';
-import { PageItemComponent } from '../page/page-item/page-item.component';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-input-item',
   templateUrl: './input-item.component.html',
   styleUrls: ['./input-item.component.css']
 })
-export class InputItemComponent extends PageItemComponent implements OnInit {
-
+export class InputItemComponent implements OnInit {
+  @Input()
+  type = 'input';
+  @Input()
+  position: number;
+  @Input()
+  title: string;
   constructor() {
-    super();
     this.type = 'input';
   }
 

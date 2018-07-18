@@ -22,3 +22,8 @@
     padding: 0;
     color: #FFF;
 }
+
+.title-item{ 
+    outline: none;
+    border: none;
+}

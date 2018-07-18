@@ -1,5 +1,10 @@
 .input-item {
-    width: 100px;
+    width: 100%;
     height: 30px;
-    background: red;
+}
+
+.title-item { 
+    width: 100%;
+    outline: none;
+    border:none;
 }

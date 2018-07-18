@@ -1,8 +1,0 @@
-<div class="editable-title"> 
-  <input *ngIf="editTitle else view" (keyup)="stopEditing($event)" matInput [value]="title">
-  <ng-template #view>
-    <div class="text-input__title">
-        {{title}}
-    </div>
-  </ng-template>
-</div>

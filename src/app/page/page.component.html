@@ -1,15 +1,10 @@
 <div class="page" [id]="page.htmlId">
-    <div (click)="startEditing()" class="page__title">
-        <app-editable-title [title]="page.title" (done)="stopEditing($event)" [editTitle]="editMode"></app-editable-title>
+    <div class="page__title">
+        <input type="text" class="title-item" [value]="page.title"/>
     </div>
     <div class="page__items">
       <div *ngFor="let item of page.items">
-          <ng-container [ngSwitch]="item.type">
-             <app-choice-item [data]="item" *ngSwitchCase="'choice'"></app-choice-item>
-             <app-input-item [data]="item" *ngSwitchCase="'input'"></app-input-item>
-             <app-button-item [data]="item" *ngSwitchCase="'button'"></app-button-item>
-             <app-text-item [data]="item" *ngSwitchCase="'text'"></app-text-item>
-          </ng-container>
+          <app-input-item [type]="item.type" [title]="item.title"></app-input-item>
       </div>
     </div>
     <button [ngClass]="'page__add-item'" (click)="addItem()" mat-fab>+</button>

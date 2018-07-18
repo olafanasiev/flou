@@ -18,4 +18,9 @@ export class AppComponent implements AfterViewInit {
   addPage() {
     this.flouService.addPage();
   }
+
+  addEndpoint(e) {
+    console.log(e);
+    console.log(e.target);
+  }
 }
