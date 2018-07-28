@@ -25,7 +25,7 @@
         "../node_modules/jquery/dist/jquery.min.js",
         "../node_modules/jsplumb/dist/js/jsplumb.min.js",
         "../node_modules/jquery-ui-dist/jquery-ui.js",
-        "../node_modules/jquery-ui-touch-punch/jquery-ui-touch-punch.min.js"
+        "../node_modules/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"
       ],
       "environmentSource": "environments/environment.ts",
       "environments": {
