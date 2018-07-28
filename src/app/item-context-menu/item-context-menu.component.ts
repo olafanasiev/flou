@@ -24,7 +24,9 @@ export class ItemContextMenuComponent implements OnInit {
   }
 
   closePanel() {
-    this.isPanelShowed = false;
+    if ( this.isPanelShowed ) {
+      this.isPanelShowed = false;
+    }
   }
 
 
@@ -36,6 +38,10 @@ export class ItemContextMenuComponent implements OnInit {
       this.leftPosition = item$.offset().left - 50;
       this.isPanelShowed = true;
       this._cd.detectChanges();
+     });
+
+     this._inputItemService.panelHideEvent.subscribe(() => {
+       this.isPanelShowed = false;
      });
   }
 

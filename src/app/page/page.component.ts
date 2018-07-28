@@ -2,6 +2,7 @@ import { Component, OnInit, Input, ViewEncapsulation,
   AfterViewInit, ViewContainerRef, ViewChildren, QueryList, ElementRef, ViewChild, Output, EventEmitter } from '@angular/core';
 import { FlouService } from '../../services/flou.service';
 import { Page } from '../models/page';
+import { InputItemService } from '../../services/input-item.service';
 import { InputItemComponent } from '../input-item/input-item.component';
 import { PerfectScrollbarComponent } from 'ngx-perfect-scrollbar';
 import { PageService } from '../../services/page.service';
@@ -22,6 +23,7 @@ export class PageComponent implements OnInit, AfterViewInit {
   @ViewChildren(InputItemComponent) items: QueryList<InputItemComponent>;
   constructor(private _flouService: FlouService,
               private _viewRef: ViewContainerRef,
+              private _inputItemService: InputItemService,
               private _pageService: PageService) { }
 
   ngOnInit() {
@@ -46,10 +48,13 @@ export class PageComponent implements OnInit, AfterViewInit {
 
     $('.page__items').sortable({ update: () => {
       this._flouService.getJsPlumbInstance().repaintEverything();
+    }, start: () => {
+      this._inputItemService.emitPanelHideEvent();
     }});
 
     $(this._viewRef.element.nativeElement).draggable({
       drag: () => {
+        this._inputItemService.emitPanelHideEvent();
         this._flouService.getJsPlumbInstance().repaintEverything();
       }
     });
