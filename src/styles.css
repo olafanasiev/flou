@@ -11,6 +11,8 @@ html, body {
     width: 100px;
     outline: none;
     border:none;
+    position: relative;
+    z-index: 9999;
     font-style: normal;
 }
 

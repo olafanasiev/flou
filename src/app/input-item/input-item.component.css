@@ -5,16 +5,27 @@
 }
 
 .item-anchor {
-    width: 8px;
-    height: 8px;
-    border-radius: 8px;
+    width: 10px;
+    height: 10px;
+    border-radius: 10px;
     background: black;
-    position: absolute;
     z-index: 9999;
-    right: 15px;
-    top: 12px;
     display: block;
     cursor: pointer;
+    right: 15px;
+    transition: width 0.2s, height 0.2s, border-radius 0.2s, right 0.2s;
+    transition-timing-function: ease-in-out;
+    position: absolute;
+}
+
+
+.item-anchor:hover {
+    width: 15px;
+    border-radius: 15px;
+    height: 15px;
+    right: 13px;
+    transition: width 0.2s, height 0.2s, border-radius 0.2s, right 0.2s;
+    transition-timing-function: ease-in-out;
 }
 
 .item-sortable-icon{ 

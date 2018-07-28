@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { jsPlumb, jsPlumbInstance } from 'jsplumb';
 import { Page } from '../app/models/page';
 import { UUID } from 'angular2-uuid';
 import { PageItem } from '../app/models/page-item';
 declare var $: any;
+declare var jsPlumb, jsPlumbInstance: any;
 @Injectable()
 export class FlouService {
     jsPlumbInstance;
