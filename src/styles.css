@@ -48,11 +48,11 @@ html, body {
     height: 25px;
     margin-right: 4px;
     margin-left: 4px;
-    background: url('./assets/button.svg') no-repeat 0 0 transparent;
+    background: url('./assets/button.png') no-repeat left bottom transparent;
 }
 
 .input-icon{ 
-    padding: 3px;
+    margin-top: 10px;
 }
 
 .input-icon:hover{ 

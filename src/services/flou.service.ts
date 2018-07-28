@@ -22,7 +22,7 @@ export class FlouService {
     getPages() {
         return this.pages;
     }
-    
+
     addPage() {
         this.pages.forEach((page) => {
             page.isActive = false;
