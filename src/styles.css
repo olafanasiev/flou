@@ -12,6 +12,7 @@ html, body {
     border:none;
     position: relative;
     z-index: 9999;
+    height: 30px;
     font-style: normal;
 }
 
@@ -54,6 +55,7 @@ html, body {
 
 .input-icon{ 
     margin-top: 10px;
+    cursor: pointer;
 }
 
 .input-icon:hover{ 

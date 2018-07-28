@@ -40,8 +40,9 @@
 }
 
 .mat-fab.page__add-item .mat-button-wrapper {
-    padding: 0;
+    padding: 0 8px;
     color: #FFF;
+
 }
 
 .title-item{ 

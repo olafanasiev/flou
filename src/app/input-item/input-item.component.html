@@ -1,7 +1,7 @@
 
 
 <div fxFlexLayout="row" fxLayoutAlign="start center" class="input-item">
-  <span (mouseenter)="showItemTypes()" class="{{'input-icon--' + type}}"></span> 
+  <span (click)="showItemTypes()" class="{{'input-icon--' + type}}"></span> 
   <input type="text" class="title-item" [value]="title"/>
   <div fxLayout="column" fxLayoutAlign="space-around" class="item-sortable-icon">
     <div class="line"></div>
