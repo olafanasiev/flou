@@ -9,7 +9,6 @@ html, body {
 
 .input-item .title-item { 
     width: 100px;
-    outline: none;
     border:none;
     position: relative;
     z-index: 9999;

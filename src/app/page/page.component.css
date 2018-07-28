@@ -20,6 +20,13 @@
     z-index: 2;
 }
 
+.page__add-item:hover{
+    width: 35px;
+    height: 35px;
+    transition: width 0.2s, height 0.2s;
+    transition-timing-function: ease-in-out;
+}
+
 .page__add-item {
     width: 25px;
     height: 25px;
@@ -28,6 +35,8 @@
     position: absolute;
     bottom: 5px;
     right: 5px;
+    transition: width 0.2s, height 0.2s;
+    transition-timing-function: ease-in-out;
 }
 
 .mat-fab.page__add-item .mat-button-wrapper {
@@ -36,7 +45,6 @@
 }
 
 .title-item{ 
-    outline: none;
     border: none;
     margin-left: 4px;
     font-style: italic;
