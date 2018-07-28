@@ -24,12 +24,15 @@
     "@angular/platform-browser": "^6.0.9",
     "@angular/platform-browser-dynamic": "^6.0.9",
     "@angular/router": "^6.0.9",
+    "angular2-uuid": "^1.1.1",
     "core-js": "^2.4.1",
     "jquery": "^3.3.1",
     "jquery-ui-dist": "^1.12.1",
     "jsplumb": "^2.7.9",
-    "rxjs-compat": "^6.2.1",
+    "ng-click-outside": "^4.0.0",
+    "ngx-perfect-scrollbar": "^6.2.1",
     "rxjs": "^6.0.0",
+    "rxjs-compat": "^6.2.1",
     "zone.js": "^0.8.19"
   },
   "devDependencies": {

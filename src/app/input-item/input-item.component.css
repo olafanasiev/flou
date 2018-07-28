@@ -3,8 +3,16 @@
     height: 30px;
 }
 
-.title-item { 
-    width: 100%;
-    outline: none;
-    border:none;
+.item-anchor {
+    width: 5px;
+    height: 2px;
+    background: black;
+    position: absolute;
+    z-index: 9999;
+    right: 5px;
+    display: block;
+    cursor: pointer;
 }
+
+
+

@@ -1,4 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewContainerRef } from '@angular/core';
+import { InputItemService } from '../../services/input-item.service';
 
 @Component({
   selector: 'app-input-item',
@@ -12,11 +13,19 @@ export class InputItemComponent implements OnInit {
   position: number;
   @Input()
   title: string;
-  constructor() {
+  @Input()
+  htmlId: string;
+  isJsPlumbed = false;
+  constructor(public viewRef: ViewContainerRef, private inputItemService: InputItemService) {
     this.type = 'input';
   }
 
   ngOnInit() {
+      this.viewRef.element.nativeElement.id = this.htmlId;
+  }
+
+  showItemTypes() {
+    this.inputItemService.emitPanelShowEvent(this);
   }
 
 }

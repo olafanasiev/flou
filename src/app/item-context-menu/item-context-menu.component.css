@@ -1,0 +1,10 @@
+
+.item-type-panel.--show {
+    display: block;
+}
+
+.item-type-panel{ 
+    display: none;
+    position: absolute;
+    background: white;
+}

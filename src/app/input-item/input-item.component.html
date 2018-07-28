@@ -1,3 +1,7 @@
-<div class="input-item">
+
+
+<div fxFlexLayout="row" fxLayoutAlign="start center" class="input-item">
+  <span (mouseenter)="showItemTypes()" class="{{'input-icon--' + type}}"></span> 
   <input type="text" class="title-item" [value]="title"/>
+  <span class="item-anchor" id="anchor-{{htmlId}}"></span>
 </div>

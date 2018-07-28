@@ -6,3 +6,56 @@ html, body {
     margin: 0;
     padding: 0;
 }
+
+.input-item .title-item { 
+    width: 100%;
+    outline: none;
+    border:none;
+    font-style: normal;
+}
+
+
+.input-icon--input{ 
+    display: block;
+    width: 30px;
+    height: 25px;
+    margin-right: 4px;
+    margin-left: 4px;
+    background: url('./assets/input-text.svg') no-repeat 0 0 transparent;
+}
+
+.input-icon--choice{ 
+    display: block;
+    width: 30px;
+    height: 25px;
+    margin-right: 4px;
+    margin-left: 4px;
+    background: url('./assets/multiple.svg') no-repeat 0 0 transparent;
+}
+
+.input-icon--text{ 
+    display: block;
+    width: 30px;
+    height: 25px;
+    margin-right: 4px;
+    margin-left: 4px;
+    background: url('./assets/text-icon.svg') no-repeat 0 0 transparent;
+}
+
+.input-icon--button{ 
+    display: block;
+    width: 30px;
+    height: 25px;
+    margin-right: 4px;
+    margin-left: 4px;
+    background: url('./assets/button.svg') no-repeat 0 0 transparent;
+}
+
+.input-icon{ 
+    padding: 3px;
+}
+
+.input-icon:hover{ 
+    cursor: pointer;
+    background-color: #f8f8f8;
+}

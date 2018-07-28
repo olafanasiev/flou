@@ -1,12 +1,17 @@
 .page {
     width: 200px;
-    height: 400px;
+    height: 268px;
     -webkit-box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.75);
     -moz-box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.75);
     box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.75);
-    margin: 10px;
     position: relative;
+    background: url('../../assets/papirus.jpg') 0 0 no-repeat transparent;
 }
+
+.page__title { 
+    height: 30px;
+}
+
 
 .page__add-item {
     width: 25px;
@@ -26,4 +31,7 @@
 .title-item{ 
     outline: none;
     border: none;
+    margin-left: 4px;
+    font-style: italic;
+    background: transparent;
 }

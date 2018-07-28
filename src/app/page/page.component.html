@@ -1,11 +1,13 @@
-<div class="page" [id]="page.htmlId">
-    <div class="page__title">
+<div  class="page">
+    <div  [id]="page.htmlId + '__title'" class="page__title">
         <input type="text" class="title-item" [value]="page.title"/>
     </div>
-    <div class="page__items">
-      <div *ngFor="let item of page.items">
-          <app-input-item [type]="item.type" [title]="item.title"></app-input-item>
-      </div>
-    </div>
+    <perfect-scrollbar style="max-height: 200px;">
+        <div class="page__items">
+        <div *ngFor="let item of page.items">
+            <app-input-item fxFlex [htmlId]="item.htmlId" [type]="item.type" [title]="item.title"></app-input-item>
+        </div>
+        </div>
+    </perfect-scrollbar>
     <button [ngClass]="'page__add-item'" (click)="addItem()" mat-fab>+</button>
 </div>
