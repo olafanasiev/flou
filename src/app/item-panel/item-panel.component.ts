@@ -12,4 +12,6 @@ export class ItemPanelComponent implements OnInit {
   ngOnInit() {
   }
 
+  changeType(type: string) {}
+
 }
