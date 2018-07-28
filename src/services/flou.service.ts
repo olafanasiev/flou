@@ -22,12 +22,25 @@ export class FlouService {
     getPages() {
         return this.pages;
     }
+    
     addPage() {
-        const newPage = {  x: 0,
-            y: 0,
+        this.pages.forEach((page) => {
+            page.isActive = false;
+        });
+        const pageWidth = 200;
+        const pageHeight = 268;
+        const halfPageHeight = pageHeight / 2;
+        const halfPageWidth = pageWidth / 2;
+        const y = (window.innerHeight / 2 + window.scrollY) - halfPageHeight;
+        const x = (window.innerWidth / 2 + window.scrollX) - halfPageWidth;
+        const newPage = {  x: x,
+            y: y,
+            width: pageWidth,
+            height: pageHeight,
             htmlId: UUID.UUID(),
             title: this._getPageTitle(),
-            items: []};
+            items: [],
+            isActive: true};
             this.pages.push(newPage);
     }
 

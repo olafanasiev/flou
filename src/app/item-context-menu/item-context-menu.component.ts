@@ -33,7 +33,6 @@ export class ItemContextMenuComponent implements OnInit {
       this.itemComponent = component;
       const item$ = $(component.viewRef.element.nativeElement);
       this.topPosition = item$.offset().top - 50;
-      console.log(this.topPosition);
       this.leftPosition = item$.offset().left - 50;
       this.isPanelShowed = true;
       this._cd.detectChanges();

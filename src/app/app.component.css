@@ -20,3 +20,8 @@
 app-page{ 
     position: absolute;
 }
+
+
+.cache{ 
+    display: none;
+}

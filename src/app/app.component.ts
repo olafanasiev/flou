@@ -1,5 +1,6 @@
 import { Component, AfterViewInit } from '@angular/core';
 import { FlouService } from '../services/flou.service';
+import { Page } from './models/page';
 
 @Component({
   selector: 'app-root',
@@ -8,7 +9,7 @@ import { FlouService } from '../services/flou.service';
 })
 export class AppComponent implements AfterViewInit {
   title = 'app';
-  pages = [];
+  pages: Page[] = [];
 
   constructor(private flouService: FlouService) {}
   ngAfterViewInit() {
@@ -19,8 +20,4 @@ export class AppComponent implements AfterViewInit {
     this.flouService.addPage();
   }
 
-  addEndpoint(e) {
-    console.log(e);
-    console.log(e.target);
-  }
 }

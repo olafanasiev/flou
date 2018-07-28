@@ -1,4 +1,4 @@
-<div  class="page">
+<div [style.width.px]="page.width" [style.height.px]="page.height" (clickOutside)="makeNotActive($event)" (mousedown)="makeActive()" [ngClass]="{'page':true, '--active':page.isActive}">
     <div  [id]="page.htmlId + '__title'" class="page__title">
         <input type="text" class="title-item" [value]="page.title"/>
     </div>
