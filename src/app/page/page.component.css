@@ -20,29 +20,9 @@
     z-index: 2;
 }
 
-.page__add-item:hover{
-    width: 35px;
-    height: 35px;
-    transition: width 0.2s, height 0.2s;
-    transition-timing-function: ease-in-out;
-}
-
-.page__add-item {
-    width: 25px;
-    height: 25px;
-    line-height: 25px;
-    padding: 0;
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    transition: width 0.2s, height 0.2s;
-    transition-timing-function: ease-in-out;
-}
-
-.mat-fab.page__add-item .mat-button-wrapper {
-    padding: 0 8px;
+.mat-mini-fab.page__add-item .mat-button-wrapper {
     color: #FFF;
-
+    font-size: 20px;
 }
 
 .title-item{ 

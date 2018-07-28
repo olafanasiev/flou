@@ -9,5 +9,7 @@
         </div>
         </div>
     </perfect-scrollbar>
-    <button [ngClass]="'page__add-item'" (click)="addItem()" mat-fab>+</button>
+    <div fxLayoutAlign="end">
+        <button [ngClass]="'page__add-item'" (click)="addItem()" mat-mini-fab>+</button>
+    </div>
 </div>
