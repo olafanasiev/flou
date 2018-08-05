@@ -4,8 +4,9 @@ import { FlouService } from '../../services/flou.service';
 import { Page } from '../models/page';
 import { InputItemService } from '../../services/input-item.service';
 import { InputItemComponent } from '../input-item/input-item.component';
-import { PerfectScrollbarComponent } from 'ngx-perfect-scrollbar';
 import { PageService } from '../../services/page.service';
+import * as _ from 'lodash';
+import { PageItem } from '../models/page-item';
 declare var $: any;
 @Component({
   selector: 'app-page',
@@ -15,7 +16,6 @@ declare var $: any;
 })
 export class PageComponent implements OnInit, AfterViewInit {
   @ViewChild('itemTypePanel') itemTypePanel: ElementRef;
-  @ViewChild(PerfectScrollbarComponent) scroll: PerfectScrollbarComponent;
   @Output()
   pageClicked: EventEmitter<Page> = new EventEmitter();
   @Input()
@@ -31,6 +31,13 @@ export class PageComponent implements OnInit, AfterViewInit {
       if ( this.page.htmlId !== htmlId ) {
         this.page.isActive = false;
       }
+    });
+  }
+
+
+  removeEmptyItem( htmlId) { 
+    _.remove( this.page.items,( item: PageItem )=> {
+        return item.htmlId == htmlId;
     });
   }
 
@@ -75,9 +82,14 @@ export class PageComponent implements OnInit, AfterViewInit {
   }
 
 
-  addItem() {
+  addItem(e) {
+    if( e ) { 
+      if( e.target && e.target.classList && e.target.classList.contains('can-add-item')) {
+        this._flouService.addItem(this.page);
+      }
+    } else { 
      this._flouService.addItem(this.page);
-     this.scroll.directiveRef.scrollToBottom();
+    }
   }
 
 }

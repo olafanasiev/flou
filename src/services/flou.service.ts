@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Page } from '../app/models/page';
 import { UUID } from 'angular2-uuid';
 import { PageItem } from '../app/models/page-item';
+import * as _ from 'lodash';
 declare var $: any;
 declare var jsPlumb, jsPlumbInstance: any;
 @Injectable()
@@ -48,6 +49,8 @@ export class FlouService {
         this.pageCounts++;
         return `Page ${this.pageCounts}`;
     }
+
+  
 
     addItem(page: Page, type?: string) {
         let item: PageItem = null;

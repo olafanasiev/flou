@@ -1,15 +1,13 @@
-<div [style.width.px]="page.width" [style.height.px]="page.height" (clickOutside)="makeNotActive($event)" (mousedown)="makeActive()" [ngClass]="{'page':true, '--active':page.isActive}">
+<div [style.width.px]="page.width" [style.height.px]="page.height" (dblclick)="addItem($event)" (clickOutside)="makeNotActive($event)" (mousedown)="makeActive()" [ngClass]="{'page':true, '--active':page.isActive, 'can-add-item': true}">
     <div  [id]="page.htmlId + '__title'" class="page__title">
         <input type="text" class="title-item" [value]="page.title"/>
     </div>
-    <perfect-scrollbar style="max-height: 200px;">
         <div class="page__items">
         <div *ngFor="let item of page.items">
-            <app-input-item fxFlex [htmlId]="item.htmlId" [type]="item.type" [title]="item.title"></app-input-item>
+            <app-input-item fxFlex (enterPressed)="addItem()" (onEmptyField)="removeEmptyItem(item.htmlId)" [htmlId]="item.htmlId" [type]="item.type" [title]="item.title"></app-input-item>
         </div>
         </div>
-    </perfect-scrollbar>
-    <div fxLayoutAlign="end">
+    <div class="can-add-item" fxLayoutAlign="end">
         <button [ngClass]="'page__add-item'" (click)="addItem()" mat-mini-fab>+</button>
     </div>
 </div>

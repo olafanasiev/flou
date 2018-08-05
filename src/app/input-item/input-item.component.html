@@ -2,7 +2,7 @@
 
 <div fxFlexLayout="row" fxLayoutAlign="start center" class="input-item">
   <span (click)="showItemTypes()" class="{{'input-icon--' + type}}"></span> 
-  <input type="text" class="title-item" [value]="title"/>
+  <input (keyup)="onKeyUp($event)" (focusout)="removeIfEmpty(inputButton.value)" #inputButton type="text" class="title-item" [value]="title"/>
   <div fxLayout="column" fxLayoutAlign="space-around" class="item-sortable-icon">
     <div class="line"></div>
     <div class="line"></div>
