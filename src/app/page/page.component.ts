@@ -18,8 +18,11 @@ export class PageComponent implements OnInit, AfterViewInit {
   @ViewChild('itemTypePanel') itemTypePanel: ElementRef;
   @Output()
   pageClicked: EventEmitter<Page> = new EventEmitter();
+  @Output()
+  deletePageEvent: EventEmitter<Page> = new EventEmitter();
   @Input()
   page: Page;
+  @ViewChild('pageTitle') titleElRef: ElementRef;
   @ViewChildren(InputItemComponent) items: QueryList<InputItemComponent>;
   constructor(private _flouService: FlouService,
               private _viewRef: ViewContainerRef,
@@ -68,6 +71,8 @@ export class PageComponent implements OnInit, AfterViewInit {
     this._flouService.getJsPlumbInstance().makeTarget(this.page.htmlId,
       {anchor: 'Continuous', endpoint: ['Rectangle', { width: 1, height: 1}]
     });
+
+    $(this.titleElRef.nativeElement).select();
   }
 
   makeActive() {
@@ -81,8 +86,8 @@ export class PageComponent implements OnInit, AfterViewInit {
     }
   }
 
-  onKeyPress(e) { 
-    console.log(e.keyCode);
+  deletePage(){
+    this.deletePageEvent.next(this.page);
   }
 
   addItem(e) {

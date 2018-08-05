@@ -1,7 +1,8 @@
 <div fxLayout="column" fxLayoutAlign="space-between" [style.width.px]="page.width" [style.minHeight.px]="268" (dblclick)="addItem($event)" (clickOutside)="makeNotActive($event)" (mousedown)="makeActive()" [ngClass]="{'page':true, '--active':page.isActive, 'can-add-item': true}">
     <div>
-        <div  [id]="page.htmlId + '__title'" class="page__title">
-            <input type="text" class="title-item" [value]="page.title"/>
+        <div fxLayout="row"  [id]="page.htmlId + '__title'" class="page__title">
+            <input #pageTitle type="text" class="title-item" [value]="page.title"/>
+            <div (click)="deletePage()" class="page__delete-button">X</div> 
         </div>
         <div class="page__items">
             <div *ngFor="let item of page.items">
