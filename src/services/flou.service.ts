@@ -29,15 +29,14 @@ export class FlouService {
             page.isActive = false;
         });
         const pageWidth = 200;
-        const pageHeight = 268;
-        const halfPageHeight = pageHeight / 2;
+        const defaultPageHeight = 268;
+        const halfPageHeight = defaultPageHeight / 2;
         const halfPageWidth = pageWidth / 2;
         const y = (window.innerHeight / 2 + window.scrollY) - halfPageHeight;
         const x = (window.innerWidth / 2 + window.scrollX) - halfPageWidth;
         const newPage = {  x: x,
             y: y,
             width: pageWidth,
-            height: pageHeight,
             htmlId: UUID.UUID(),
             title: this._getPageTitle(),
             items: [],
@@ -50,7 +49,13 @@ export class FlouService {
         return `Page ${this.pageCounts}`;
     }
 
-  
+    removeItem(page: Page, htmlId ){ 
+        _.remove( 
+                _.first( 
+                    _.filter( this.pages, {htmlId: page.htmlId })).items, (item: PageItem ) => {
+                        return item.htmlId == htmlId;
+        });
+    }
 
     addItem(page: Page, type?: string) {
         let item: PageItem = null;

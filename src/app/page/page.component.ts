@@ -81,6 +81,9 @@ export class PageComponent implements OnInit, AfterViewInit {
     }
   }
 
+  onKeyPress(e) { 
+    console.log(e.keyCode);
+  }
 
   addItem(e) {
     if( e ) { 
