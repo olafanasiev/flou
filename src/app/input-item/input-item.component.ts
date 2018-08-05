@@ -1,6 +1,8 @@
 import { Component, Input, OnInit, ViewContainerRef, Output, EventEmitter, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { InputItemService } from '../../services/input-item.service';
 
+
+declare var $;
 @Component({
   selector: 'app-input-item',
   templateUrl: './input-item.component.html',
@@ -27,10 +29,12 @@ export class InputItemComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
       this.viewRef.element.nativeElement.id = this.htmlId;
+     
   }
 
   ngAfterViewInit() {
     this.inputButton.nativeElement.focus();
+    $(this.inputButton.nativeElement).select();
   }
 
   removeIfEmpty(value){ 
