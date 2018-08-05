@@ -16,8 +16,16 @@ export class AppComponent implements AfterViewInit {
     this.pages =  this.flouService.getPages();
   }
 
-  addPage() {
-    this.flouService.addPage();
+  addPage(e) {
+    if( e && e.target ) {
+      if( e.target.id == 'pages') {
+        this.flouService.addPage();
+      }
+    } else { 
+      this.flouService.addPage();
+    }
+
+  
   }
 
 }
