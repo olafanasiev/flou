@@ -11,6 +11,7 @@ import { InputItemService } from '../services/input-item.service';
 import { ItemContextMenuComponent } from './item-context-menu/item-context-menu.component';
 import { ClickOutsideModule } from 'ng-click-outside';
 import { PageService } from '../services/page.service';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ItemPanelComponent } from './item-panel/item-panel.component';
 @NgModule({
   declarations: [
@@ -18,10 +19,10 @@ import { ItemPanelComponent } from './item-panel/item-panel.component';
     PageComponent,
     InputItemComponent,
     ItemContextMenuComponent,
-    ItemPanelComponent,
+    ItemPanelComponent
   ],
   imports: [
-    ClickOutsideModule, BrowserModule, SharedModule,
+    ClickOutsideModule, BrowserModule, SharedModule, BrowserAnimationsModule
   ],
   providers: [FlouService, InputItemService, PageService],
   bootstrap: [AppComponent]

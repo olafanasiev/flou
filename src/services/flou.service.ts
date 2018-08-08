@@ -3,8 +3,11 @@ import { Page } from '../app/models/page';
 import { UUID } from 'angular2-uuid';
 import { PageItem } from '../app/models/page-item';
 import * as _ from 'lodash';
+import { Subject } from 'rxjs/Subject';
+import { Observable, Subscription } from 'rxjs';
 declare var $: any;
 declare var jsPlumb, jsPlumbInstance: any;
+
 @Injectable()
 export class FlouService {
     jsPlumbInstance;
@@ -24,6 +27,10 @@ export class FlouService {
         return this.pages;
     }
 
+    doesPageIsOverlayingAnotherPage(x,y) {
+      return  _.find(this.pages, {x:x, y:y}) != null;
+    }
+
     addPage() {
         this.pages.forEach((page) => {
             page.isActive = false;
@@ -32,8 +39,16 @@ export class FlouService {
         const defaultPageHeight = 268;
         const halfPageHeight = defaultPageHeight / 2;
         const halfPageWidth = pageWidth / 2;
-        const y = (window.innerHeight / 2 + window.scrollY) - halfPageHeight;
-        const x = (window.innerWidth / 2 + window.scrollX) - halfPageWidth;
+        let y = (window.innerHeight / 2 + window.scrollY) - halfPageHeight;
+        let x = (window.innerWidth / 2 + window.scrollX) - halfPageWidth;
+
+        while( this.doesPageIsOverlayingAnotherPage(x,y) ){ 
+            //we are doing shifting page
+            x=x+15;
+            y=y+15;
+        }
+
+        _.find(this.pages, {x:x, y:y})
         const newPage = {  x: x,
             y: y,
             width: pageWidth,

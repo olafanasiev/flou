@@ -4,8 +4,5 @@
         <app-page (deletePageEvent)="onPageDelete($event)" [style.top.px]="page.y" [style.left.px]="page.x" [page]="page" *ngFor="let page of pages">
         </app-page>
     </div>
-    <button (click)="addPage()" mat-fab [ngClass]="'add-page-button'">+</button>
-</div>
-<div class="cache">
-    <img src="../assets/papirus.jpg">
+    <button (click)="addPage(null)" mat-fab [ngClass]="'add-page-button'">+</button>
 </div>

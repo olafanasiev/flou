@@ -66,6 +66,10 @@ export class PageComponent implements OnInit, AfterViewInit {
       drag: () => {
         this._inputItemService.emitPanelHideEvent();
         this._flouService.getJsPlumbInstance().repaintEverything();
+      },
+      stop: (ev,target) => {
+          this.page.y = target.position.top;
+          this.page.x = target.position.left;
       }
     });
     this._flouService.getJsPlumbInstance().makeTarget(this.page.htmlId,

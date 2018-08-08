@@ -18,6 +18,20 @@ html, body {
     font-style: normal;
 }
 
+.mat-simple-snackbar-action { 
+    color: #FFF;
+}
+
+.mat-simple-snackbar-action button{ 
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.mat-snack-bar-container {
+    background-color: #b0bec5;
+    color: #FFF;
+}
+
 
 .input-icon--input{ 
     display: block;

@@ -2,7 +2,7 @@
 
 <div fxFlexLayout="row" fxLayoutAlign="start center" class="input-item">
   <span (click)="showItemTypes()" class="{{'input-icon--' + type}}"></span> 
-  <input (keyup)="onKeyUp($event)" (focusout)="removeIfEmpty(inputButton.value)" #inputButton type="text" class="title-item" [value]="title"/>
+  <textarea [ngClass]="['input-item__textarea']" (keyup)="onKeyUp($event)" [style.height.px]="textAreaHeight" (focusout)="removeIfEmpty(textArea.value)" #textArea type="text"  [value]="title"></textarea>
   <div fxLayout="column" fxLayoutAlign="space-around" class="item-sortable-icon">
     <div class="line"></div>
     <div class="line"></div>

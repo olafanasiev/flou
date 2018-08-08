@@ -17,7 +17,8 @@ export class InputItemComponent implements OnInit, AfterViewInit {
   title: string;
   @Input()
   htmlId: string;
-  @ViewChild('inputButton') inputButton: ElementRef;
+  textAreaHeight = 20;
+  @ViewChild('textArea') textAreaElRef: ElementRef;
   @Output()
   enterPressed = new EventEmitter<any>();
   @Output()
@@ -33,8 +34,8 @@ export class InputItemComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.inputButton.nativeElement.focus();
-    $(this.inputButton.nativeElement).select();
+    this.textAreaElRef.nativeElement.focus();
+    $(this.textAreaElRef.nativeElement).select();
   }
 
   removeIfEmpty(value){ 
@@ -45,8 +46,12 @@ export class InputItemComponent implements OnInit, AfterViewInit {
 
   onKeyUp(e) {
     //enter press
-    if( e.keyCode == 13 && e.target.value.trim() != "") {
+    if( e.keyCode == 13 && e.target.value.trim() != "" && !e.shiftKey) {
       this.enterPressed.next(e);
+    } 
+
+    if( this.textAreaElRef.nativeElement.scrollHeight > this.textAreaElRef.nativeElement.clientHeight){ 
+      this.textAreaHeight = this.textAreaElRef.nativeElement.scrollHeight;
     }
   }
 

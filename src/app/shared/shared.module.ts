@@ -3,10 +3,12 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
 
 export const modules = [
   MatButtonModule,
   MatInputModule,
+  MatSnackBarModule,
   FlexLayoutModule
 ];
 @NgModule({
