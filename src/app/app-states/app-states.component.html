@@ -1,0 +1,21 @@
+
+<div class="app-state-container">
+    <div (click)="openDialog = !openDialog; action='save'" class="icon">
+      <img width="40" height="40" src="/assets/history.svg"/>
+    </div>  
+</div>
+  
+
+<app-dialog [(visible)]="openDialog">
+  <div class="save-dialog" *ngIf="action=='save'">
+    <ng-select [addTagText]="'Add state'" [items]="appStates" [bindLabel]="'name'" (change)="selectState($event)" [addTag]="true"></ng-select>
+    <div class="state-dialog-control-buttons">    
+      <button (click)="save(); openDialog=false;" class="mat-button">Save</button>
+      <button (click)="load(); openDialog=false;" class="mat-button">Load</button>
+      <button (click)="openDialog=false;" class="mat-button mat-button--gray">Cancel</button>
+    </div>
+  </div>
+  <div *ngIf="action=='load'">
+
+  </div>
+ </app-dialog>

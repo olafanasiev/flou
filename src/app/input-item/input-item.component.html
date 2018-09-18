@@ -1,12 +1,12 @@
 
 
-<div fxFlexLayout="row" fxLayoutAlign="start center" class="input-item">
-  <span (click)="showItemTypes()" class="{{'input-icon--' + type}}"></span> 
-  <textarea [ngClass]="['input-item__textarea']" (keyup)="onKeyUp($event)" [style.height.px]="textAreaHeight" (focusout)="removeIfEmpty(textArea.value)" #textArea type="text"  [value]="title"></textarea>
-  <div fxLayout="column" fxLayoutAlign="space-around" class="item-sortable-icon">
+<div class="input-item">
+  <span (click)="showItemTypes()" class="{{'input-icon--' + item.type}}"></span> 
+  <textarea [ngClass]="['input-item__textarea']" (keyup)="onKeyUp($event)" [style.height.px]="textAreaHeight" (focusout)="removeIfEmpty(textArea.value)" #textArea type="text"  [value]="item.title"></textarea>
+  <div class="item-sortable-icon">
     <div class="line"></div>
     <div class="line"></div>
     <div class="line"></div>
   </div>
-  <span class="item-anchor" id="anchor-{{htmlId}}"></span>
+  <span class="item-anchor" [id]="item.htmlId"></span>
 </div>

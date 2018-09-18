@@ -1,7 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-
-
+import { SnackbarModule } from 'ngx-snackbar';
 import { AppComponent } from './app.component';
 import { PageComponent } from './page/page.component';
 import { InputItemComponent } from './input-item/input-item.component';
@@ -13,18 +12,25 @@ import { ClickOutsideModule } from 'ng-click-outside';
 import { PageService } from '../services/page.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ItemPanelComponent } from './item-panel/item-panel.component';
+import { ErrorService } from '../services/error.service';
+import { FormsModule } from '@angular/forms';
+import { AppStatesComponent } from './app-states/app-states.component';
+import { NgSelectModule } from '@ng-select/ng-select';
+import { AppDialogComponent } from './app-dialog/app-dialog.component';
 @NgModule({
   declarations: [
     AppComponent,
     PageComponent,
     InputItemComponent,
     ItemContextMenuComponent,
-    ItemPanelComponent
+    ItemPanelComponent,
+    AppStatesComponent,
+    AppDialogComponent
   ],
   imports: [
-    ClickOutsideModule, BrowserModule, SharedModule, BrowserAnimationsModule
+    BrowserAnimationsModule, ClickOutsideModule, FormsModule, NgSelectModule, SnackbarModule.forRoot(), BrowserModule, SharedModule
   ],
-  providers: [FlouService, InputItemService, PageService],
+  providers: [FlouService, InputItemService, PageService, ErrorService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

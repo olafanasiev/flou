@@ -1,0 +1,37 @@
+
+
+.icon { 
+    padding: 3px;
+    margin: 1px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+}
+
+.icon:hover{ 
+    background-color: #00000012;
+}
+
+.app-state-container{ 
+    position: absolute;
+    left: 5px;
+    display: flex;
+    top: 40%;
+    flex-direction: column;
+}
+
+.state-dialog-control-buttons button{ 
+    margin: 1px 3px;
+}
+
+.app-state__save {
+    cursor: pointer;
+}
+
+.save-dialog{ 
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    height: 150px;
+    flex-direction: column;
+}

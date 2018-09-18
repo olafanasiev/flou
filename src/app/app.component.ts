@@ -2,7 +2,7 @@ import { Component, AfterViewInit } from '@angular/core';
 import { FlouService } from '../services/flou.service';
 import { Page } from './models/page';
 import * as _ from 'lodash';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import {SnackbarService} from 'ngx-snackbar';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -11,32 +11,39 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class AppComponent implements AfterViewInit {
   title = 'app';
   pages: Page[] = [];
-  constructor(private flouService: FlouService, private snackBar: MatSnackBar) {}
+  constructor(private _flouService: FlouService,
+    private _snackBarRef: SnackbarService) {}//, private snackBar: MatSnackBar) {}
   ngAfterViewInit() {
-    this.pages =  this.flouService.getPages();
+    this.pages =  this._flouService.getPages();
   }
 
-  onPageDelete( pageToRemove: Page ) {
-    let removedPages = _.remove(this.pages, (page) => { 
-      return page.htmlId == pageToRemove.htmlId;
-   });
-
-    let removedPage = _.first(removedPages);
-   let snackBarRef = this.snackBar.open( `Page "${removedPage.title}" was removed`, 'Undo' , {duration: 4000, horizontalPosition: 'center', verticalPosition:'top'} );
-    snackBarRef.onAction().subscribe(() => { 
-        this.pages.push(removedPage);
-        snackBarRef.dismiss();
-    });
-    
+  onPageDelete( removedPage: Page ) {
+      this._snackBarRef.add({
+        msg: `Page "${removedPage.title}" was removed`,
+        timeout: 4000,
+        action: {
+          text: 'Undo',
+          onClick: (snack) => {
+            this._flouService.restorePage(removedPage);
+            this._snackBarRef.clear();
+          },
+        },
+        onAdd: (snack) => {
+          console.log('added: ' + snack.id);
+        },
+        onRemove: (snack) => {
+          console.log('removed: ' + snack.id);
+        }
+      });
   }
 
   addPage(e) {
     if( e && e.target ) {
       if( e.target.id == 'pages') {
-        this.flouService.addPage();
+        this._flouService.addPage();
       }
     } else { 
-      this.flouService.addPage();
+      this._flouService.addPage();
     }
 
   

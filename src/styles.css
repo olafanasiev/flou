@@ -1,5 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
-@import "~@angular/material/prebuilt-themes/pink-bluegrey.css";
+@import "~@ng-select/ng-select/themes/material.theme.css";
 html, body {
     width: 100%;
     height: 100%;
@@ -18,20 +18,55 @@ html, body {
     font-style: normal;
 }
 
-.mat-simple-snackbar-action { 
-    color: #FFF;
+.mat-button{ 
+    border: none;
+    background-color: #ffaf38;
+    color: white;
+    user-select: none;
+    padding: 10px 15px;
+    margin: 0;
+    outline: none;
+    cursor: pointer;
 }
 
-.mat-simple-snackbar-action button{ 
-    text-transform: uppercase;
-    font-weight: bold;
+.mat-button--gray { 
+    background-color: rgb(221, 221, 221);
+}
+.round-button:hover, .mat-button:hover { 
+    box-shadow: 0px 0px 9px 0px rgba(125,125,125,1);
 }
 
-.mat-snack-bar-container {
-    background-color: #b0bec5;
-    color: #FFF;
+.round-button:active, .mat-button:active {
+    background-color: #c57d12;
+    box-shadow: none;
 }
 
+.round-button { 
+    background-color: #ffaf38;
+    padding: 0;
+    margin: 0;
+    border-radius: 50%;
+    border: none;
+    outline:none;
+    user-select: none;
+    cursor: pointer;
+    color: white;
+    box-shadow: none;
+}
+
+.big-button {
+    width: 45px;
+    height: 45px;
+    font-size: 45px;
+    line-height: 45px;
+}
+
+.very-big-round-button{ 
+    width: 60px;
+    height: 60px;
+    font-size: 60px;
+    line-height: 60px;
+}
 
 .input-icon--input{ 
     display: block;

@@ -1,16 +1,14 @@
-<div fxLayout="column" fxLayoutAlign="space-between" [style.width.px]="page.width" [style.minHeight.px]="268" (dblclick)="addItem($event)" (clickOutside)="makeNotActive($event)" (mousedown)="makeActive()" [ngClass]="{'page':true, '--active':page.isActive, 'can-add-item': true}">
+<div [style.width.px]="page.width" [style.minHeight.px]="268" (dblclick)="addItem($event)" (clickOutside)="makeNotActive($event)" (mousedown)="makeActive()" [ngClass]="{'page':true, '--active':page.isActive, 'can-add-item': true}">
     <div>
-        <div fxLayout="row"  [id]="page.htmlId + '__title'" class="page__title">
+        <div class="page__title">
             <input #pageTitle type="text" class="title-item" [value]="page.title"/>
             <div (click)="deletePage()" class="page__delete-button">X</div> 
         </div>
-        <div class="page__items">
-            <div *ngFor="let item of page.items">
-            <app-input-item fxFlex (enterPressed)="addItem()" (onEmptyField)="removeEmptyItem(item.htmlId)" [htmlId]="item.htmlId" [type]="item.type" [title]="item.title"></app-input-item>
-            </div>
+        <div #itemsContainer class="page__items">
+            <app-input-item *ngFor="let item of page.items" (enterPressed)="addItem()" (onEmptyField)="removeEmptyItem(item.htmlId)" [item]="item"></app-input-item>
         </div>
     </div>
-    <div class="can-add-item" fxLayoutAlign="end">
-        <button [ngClass]="'page__add-item'" (click)="addItem(null)" mat-mini-fab>+</button>
+    <div class="can-add-item add-item-panel">
+        <button class="page__add-item round-button big-button" (click)="addItem(null)">+</button>
     </div>
 </div>

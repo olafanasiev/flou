@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, ViewEncapsulation,
-  AfterViewInit, ViewContainerRef, ViewChildren, QueryList, ElementRef, ViewChild, Output, EventEmitter } from '@angular/core';
+  AfterViewInit, ViewContainerRef, ViewChildren, QueryList, ElementRef, ViewChild, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { FlouService } from '../../services/flou.service';
 import { Page } from '../models/page';
 import { InputItemService } from '../../services/input-item.service';
@@ -7,6 +7,9 @@ import { InputItemComponent } from '../input-item/input-item.component';
 import { PageService } from '../../services/page.service';
 import * as _ from 'lodash';
 import { PageItem } from '../models/page-item';
+import { Connection } from '../models/connection';
+import { Subscription } from 'rxjs';
+import { UUID } from 'angular2-uuid';
 declare var $: any;
 @Component({
   selector: 'app-page',
@@ -14,29 +17,37 @@ declare var $: any;
   styleUrls: ['./page.component.css'],
   encapsulation: ViewEncapsulation.None
 })
-export class PageComponent implements OnInit, AfterViewInit {
+export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('itemTypePanel') itemTypePanel: ElementRef;
+  @ViewChild('itemsContainer') itemsContainer: ElementRef;
   @Output()
   pageClicked: EventEmitter<Page> = new EventEmitter();
   @Output()
-  deletePageEvent: EventEmitter<Page> = new EventEmitter();
+  pageDeleted: EventEmitter<Page> = new EventEmitter();
   @Input()
   page: Page;
   @ViewChild('pageTitle') titleElRef: ElementRef;
   @ViewChildren(InputItemComponent) items: QueryList<InputItemComponent>;
+  subscriptions: Subscription[] = [];
   constructor(private _flouService: FlouService,
               private _viewRef: ViewContainerRef,
               private _inputItemService: InputItemService,
               private _pageService: PageService) { }
 
   ngOnInit() {
-    this._pageService.pageActiveEvent.subscribe((htmlId) => {
+    this.subscriptions.push(this._pageService.pageActiveEvent.subscribe((htmlId) => {
       if ( this.page.htmlId !== htmlId ) {
         this.page.isActive = false;
       }
-    });
+    }));
+
   }
 
+  ngOnDestroy() {
+    this.subscriptions.forEach((subscription: Subscription) => {
+      subscription.unsubscribe();
+    });
+  }
 
   removeEmptyItem( htmlId) { 
     _.remove( this.page.items,( item: PageItem )=> {
@@ -45,38 +56,33 @@ export class PageComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this._viewRef.element.nativeElement.id = this.page.htmlId;
-    this.items.changes.subscribe((updatedItems: QueryList<InputItemComponent>) => {
-      updatedItems.forEach((item: InputItemComponent) => {
-        if ( !item.isJsPlumbed ) {
-            this._flouService.getJsPlumbInstance().makeSource( 'anchor-' + item.htmlId, {anchor: ['RightMiddle'],
-                parent: $(this._viewRef.element.nativeElement), endpoint: ['Rectangle', { width: 1, height: 1}] });
-                item.isJsPlumbed = true;
-        }
-      });
+    this._viewRef.element.nativeElement.id = this.page.htmlId ;// UUID.UUID();// this.page.htmlId;
+    this._flouService.getJsPlumbInstance().makeTarget(this.page.htmlId,
+        {anchor: 'Continuous', 
+        parent: this.page.htmlId,
+        endpoint: ['Rectangle', { width: 1, height: 1}],
+        
     });
-
-    $('.page__items').sortable({ update: () => {
-      this._flouService.getJsPlumbInstance().repaintEverything();
+    
+    let $itemsContainer = $(this.itemsContainer.nativeElement);
+      $itemsContainer.sortable({ handle: '.item-sortable-icon' , update: () => {
     }, start: () => {
       this._inputItemService.emitPanelHideEvent();
     }});
-
-    $(this._viewRef.element.nativeElement).draggable({
-      drag: () => {
-        this._inputItemService.emitPanelHideEvent();
-        this._flouService.getJsPlumbInstance().repaintEverything();
-      },
-      stop: (ev,target) => {
-          this.page.y = target.position.top;
-          this.page.x = target.position.left;
+          
+    this._flouService.getJsPlumbInstance().draggable(this._viewRef.element.nativeElement, {
+      stop: (info) => { 
+        this.page.x = info.pos[0];
+        this.page.y = info.pos[1];
       }
     });
-    this._flouService.getJsPlumbInstance().makeTarget(this.page.htmlId,
-      {anchor: 'Continuous', endpoint: ['Rectangle', { width: 1, height: 1}]
-    });
-
+    if( this.page.inputConnections ) { 
+      this.page.inputConnections.forEach((inputConnection: Connection) => { 
+        this._flouService.drawConnection(inputConnection.source, this.page.htmlId);
+      });
+    }
     $(this.titleElRef.nativeElement).select();
+    // this._flouService.getJsPlumbInstance().repaintEverything();
   }
 
   makeActive() {
@@ -91,7 +97,9 @@ export class PageComponent implements OnInit, AfterViewInit {
   }
 
   deletePage(){
-    this.deletePageEvent.next(this.page);
+    this._flouService.removePage(this.page).then((removedPage) => {
+      this.pageDeleted.next(removedPage);
+    });
   }
 
   addItem(e) {

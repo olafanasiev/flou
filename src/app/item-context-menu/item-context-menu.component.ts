@@ -15,7 +15,7 @@ export class ItemContextMenuComponent implements OnInit {
   constructor(private _inputItemService: InputItemService, private _cd: ChangeDetectorRef) { }
 
   changeType(type) {
-    this.itemComponent.type = type;
+    this.itemComponent.item.type = type;
     this.isPanelShowed = false;
   }
 
@@ -33,7 +33,7 @@ export class ItemContextMenuComponent implements OnInit {
   ngOnInit() {
     this._inputItemService.panelShowEvent.subscribe((component: InputItemComponent) => {
       this.itemComponent = component;
-      const item$ = $(component.viewRef.element.nativeElement);
+      const item$ = $(component._viewRef.element.nativeElement);
       this.topPosition = item$.offset().top - 50;
       this.leftPosition = item$.offset().left - 50;
       this.isPanelShowed = true;

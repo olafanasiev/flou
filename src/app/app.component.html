@@ -1,8 +1,10 @@
 <div class="main-canvas">
+    <app-states></app-states>
     <app-item-context-menu></app-item-context-menu>
-    <div (dblclick)="addPage($event)" fxLayoutAlign="row" id="pages" class="pages">
-        <app-page (deletePageEvent)="onPageDelete($event)" [style.top.px]="page.y" [style.left.px]="page.x" [page]="page" *ngFor="let page of pages">
+    <div (dblclick)="addPage($event)" id="pages" class="pages">
+        <app-page (pageDeleted)="onPageDelete($event)" [style.top.px]="page.y" [style.left.px]="page.x" [page]="page" *ngFor="let page of pages">
         </app-page>
     </div>
-    <button (click)="addPage(null)" mat-fab [ngClass]="'add-page-button'">+</button>
+    <ngx-snackbar [position]="'top-center'" [max]="3"></ngx-snackbar>
+    <button (click)="addPage(null)" class="add-page-button round-button very-big-round-button">+</button>
 </div>
