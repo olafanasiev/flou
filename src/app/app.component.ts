@@ -1,4 +1,4 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FlouService } from '../services/flou.service';
 import { Page } from './models/page';
 import * as _ from 'lodash';
@@ -8,13 +8,24 @@ import {SnackbarService} from 'ngx-snackbar';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent implements AfterViewInit, OnInit {
   title = 'app';
   pages: Page[] = [];
   constructor(private _flouService: FlouService,
-    private _snackBarRef: SnackbarService) {}//, private snackBar: MatSnackBar) {}
+    private _snackBarRef: SnackbarService, private _ref: ChangeDetectorRef) {}
+
   ngAfterViewInit() {
     this.pages =  this._flouService.getPages();
+  }
+
+
+  ngOnInit() {
+    
+    this._flouService.stateLoaded$.subscribe((pages) => {
+      this.pages = this._flouService.getPages();
+      });
+
+      this._flouService.initJsPlumb();
   }
 
   onPageDelete( removedPage: Page ) {

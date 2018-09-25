@@ -56,33 +56,41 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    this._viewRef.element.nativeElement.id = this.page.htmlId ;// UUID.UUID();// this.page.htmlId;
-    this._flouService.getJsPlumbInstance().makeTarget(this.page.htmlId,
-        {anchor: 'Continuous', 
-        parent: this.page.htmlId,
-        endpoint: ['Rectangle', { width: 1, height: 1}],
-        
-    });
+    this._viewRef.element.nativeElement.id = this.page.htmlId;
+    this._flouService.makeTarget(this.page.htmlId);
     
     let $itemsContainer = $(this.itemsContainer.nativeElement);
       $itemsContainer.sortable({ handle: '.item-sortable-icon' , update: () => {
     }, start: () => {
       this._inputItemService.emitPanelHideEvent();
+      console.log("DISABLE DRAGGING");
+      this.disableDragging();
+    }, stop: () => { 
+      console.log("ENABLE DRAGGING");
+      this.enableDragging();
     }});
-          
-    this._flouService.getJsPlumbInstance().draggable(this._viewRef.element.nativeElement, {
+    this.enableDragging();
+   
+    $(this.titleElRef.nativeElement).select();
+    this._flouService.pageLoaded.next(this.page);
+  }
+
+  enableDragging() {
+    this._flouService.enableDragging(this._viewRef.element.nativeElement, {
       stop: (info) => { 
         this.page.x = info.pos[0];
         this.page.y = info.pos[1];
       }
     });
-    if( this.page.inputConnections ) { 
-      this.page.inputConnections.forEach((inputConnection: Connection) => { 
-        this._flouService.drawConnection(inputConnection.source, this.page.htmlId);
-      });
-    }
-    $(this.titleElRef.nativeElement).select();
-    // this._flouService.getJsPlumbInstance().repaintEverything();
+  }
+
+  disableDragging() {
+    this._flouService.disableDragging(this._viewRef.element.nativeElement);
+  }
+
+  updatePosition( x, y) {
+    this.page.x = x;
+    this.page.y = y;
   }
 
   makeActive() {

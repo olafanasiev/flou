@@ -29,18 +29,13 @@ export class InputItemComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-    // this._viewRef.element.nativeElement.id = this.item.htmlId;
     this.item.type = 'input';
   }
 
   ngAfterViewInit() {
     this.textAreaElRef.nativeElement.focus();
     $(this.textAreaElRef.nativeElement).select();
-    this._flouService.getJsPlumbInstance().makeSource( this.item.htmlId, {anchor: ['RightMiddle'],
-                parent: $(this._viewRef.element.nativeElement), endpoint: ['Rectangle', { width: 1, height: 1}] });
-                this.item.outputConnections.forEach((outputConnection: Connection) => { 
-        this._flouService.drawConnection(outputConnection.source, outputConnection.target);
-    });
+    this._flouService.makeSource(this.item.htmlId);
   }
 
   removeIfEmpty(value){ 

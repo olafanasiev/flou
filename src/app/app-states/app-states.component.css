@@ -13,11 +13,26 @@
 }
 
 .app-state-container{ 
-    position: absolute;
-    left: 5px;
+    position: fixed;
+    right: 31px;
     display: flex;
-    top: 40%;
+    bottom: 110px;
     flex-direction: column;
+}
+
+.app-state-container button {
+    display: flex;
+    justify-content: center;
+}
+
+.app-state-container button svg { 
+    width: 35px;
+    margin-right: 3px;
+}
+
+.state-dialog-control-buttons{ 
+    display: flex;
+    justify-content: flex-end;
 }
 
 .state-dialog-control-buttons button{ 
@@ -26,6 +41,11 @@
 
 .app-state__save {
     cursor: pointer;
+}
+
+.validation-error {
+    color: red;
+    font-size: 10px;
 }
 
 .save-dialog{ 

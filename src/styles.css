@@ -30,10 +30,20 @@ html, body {
 }
 
 .mat-button--gray { 
-    background-color: rgb(221, 221, 221);
+    background-color: #5d5d5d;
 }
 .round-button:hover, .mat-button:hover { 
     box-shadow: 0px 0px 9px 0px rgba(125,125,125,1);
+}
+
+.mat-button:disabled{ 
+    opacity: 0.6;
+    box-shadow: none;
+    background-color: #ffaf38;
+}
+
+.mat-button.mat-button--gray:active { 
+    background-color:#3e3d3d;
 }
 
 .round-button:active, .mat-button:active {

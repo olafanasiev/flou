@@ -6,6 +6,8 @@ import * as _ from 'lodash';
 import { Connection } from '../app/models/connection';
 import { ErrorService } from './error.service';
 import { AppState } from '../app/models/app-state';
+import { Subject, Observable } from 'rxjs';
+import { PageComponent } from '../app/page/page.component';
 declare var $: any;
 declare var jsPlumb,jsPlumbInstance: any;
 
@@ -16,30 +18,79 @@ export class FlouService {
     pageCounts = 0;
     jsPlumbConnections = [];
     states:AppState[] =  [];
-    htmlId
+    stateLoaded: Subject<any>;
+    stateLoaded$: Observable<any>;
+    pageLoaded: Subject<any>;
+    pageLoaded$: Observable<any>;
+    endpoints  = [];
     constructor(private _errorService: ErrorService) {
-        this.jsPlumbInstance = jsPlumb.getInstance({Container: document.getElementById('pages')});
-        this.jsPlumbInstance.importDefaults({Connector: ['Bezier', { curviness: 50 }]});
+        this.stateLoaded = new Subject<any>();
+        this.stateLoaded$ = this.stateLoaded.asObservable();
+        this.pageLoaded = new Subject<any>();
+        this.pageLoaded$ = this.pageLoaded.asObservable();
         this.pages = [];
-        this.jsPlumbInstance.bind('connection', (newConnectionInfo) => {
-            let targetPage = this.pages.find( page => page.htmlId == newConnectionInfo.targetId );
-            let flouConnection =  new Connection(newConnectionInfo.sourceId, newConnectionInfo.targetId)
-            let connection = _.find( targetPage.inputConnections, (connection) => {
-              return connection.source == newConnectionInfo.sourceId && connection.target == newConnectionInfo.targetId;
-            });    
-            if(!connection) {
-                targetPage.inputConnections.push(flouConnection);
-                this.pages.forEach((page) => {
-                    let sourceItem = page.items.find( item => item.htmlId == newConnectionInfo.sourceId );
-                    if( sourceItem ) { 
-                        sourceItem.outputConnections.push(flouConnection);
-                    }
-                });
+
+        this.pageLoaded$.subscribe((page:Page) => {
+                page.inputConnections.forEach((connection: Connection) => { 
+                    this.drawConnection(connection.source, connection.target);
+                  });
+                    page.items.forEach((pageItem: PageItem) => {
+                        pageItem.outputConnections.forEach((connection:Connection) => {
+                            this.drawConnection(connection.source, connection.target);
+                    });
+                 });
+               
+          });            
+    }
+
+  
+
+    makeSource(inputItemId) { 
+        this.jsPlumbInstance.makeSource( inputItemId, {anchor: ['RightMiddle'],
+                endpoint: ['Rectangle', { width: 1, height: 1}] });
+        this._registerEndpoint(inputItemId);
+        console.log(`registered ${inputItemId} endpoint`);
+    }
+
+    makeTarget(pageId) {
+        this.jsPlumbInstance.makeTarget(pageId,
+           {anchor: 'Continuous', 
+            endpoint: ['Rectangle', { width: 1, height: 1}], 
+        });
+        this._registerEndpoint(pageId);
+    }
+
+    private _registerEndpoint(targetId){ 
+        this.endpoints.push(targetId);
+    } 
+
+    initJsPlumb() { 
+        if( this.jsPlumbInstance ) { 
+            this.jsPlumbInstance.reset();
+        } else { 
+            this.jsPlumbInstance = jsPlumb.getInstance({Container: document.getElementById('pages')});
+        }
+        this.jsPlumbInstance.importDefaults({Connector: ['Bezier', { curviness: 50 }]});
+        this.jsPlumbInstance.bind('connection', (newConnectionInfo, mouseEvent) => {
+            if( mouseEvent ) { 
+                let targetPage = this.pages.find( page => page.htmlId == newConnectionInfo.targetId );
+                let flouConnection =  new Connection(newConnectionInfo.sourceId, newConnectionInfo.targetId)
+                let connection = _.find( targetPage.inputConnections, (connection) => {
+                return connection.source == newConnectionInfo.sourceId && connection.target == newConnectionInfo.targetId;
+                });    
+                if(!connection) {
+                    targetPage.inputConnections.push(flouConnection);
+                    this.pages.forEach((page) => {
+                        let sourceItem = page.items.find( item => item.htmlId == newConnectionInfo.sourceId );
+                        if( sourceItem ) { 
+                            sourceItem.outputConnections.push(flouConnection);
+                        }
+                    });
+                }
             }
             this.jsPlumbConnections.push(newConnectionInfo);
             this.jsPlumbInstance.repaintEverything();
-        });     
-           
+        });  
     }
 
     getJsPlumbInstance() {
@@ -81,9 +132,21 @@ export class FlouService {
             this.pages.push(newPage);
     }
 
+    enableDragging(htmlElRef, options?:any) { 
+        if( options ) {
+            this.jsPlumbInstance.draggable(htmlElRef, options );
+        } else { 
+            this.jsPlumbInstance.draggable(htmlElRef);
+        }
+        
+    }
+
+    disableDragging(htmlElRef) {
+        this.jsPlumbInstance.draggable(htmlElRef, {disabled: true});
+    }
+
     private _getPageTitle() {
-        this.pageCounts++;
-        return `Page ${this.pageCounts}`;
+        return `Page ${this.pages.length + 1}`;
     }
 
     removeItem(page: Page, htmlId ){ 
@@ -94,8 +157,13 @@ export class FlouService {
         });
     }
 
-    drawConnection(source, target) { 
-        this.jsPlumbInstance.connect({source: source, target: target});
+    drawConnection(source, target) {
+        if( _.includes( this.endpoints, source) &&  _.includes( this.endpoints, target)) {
+            this.jsPlumbInstance.connect({source: source, target: target});
+        }
+        // console.log();
+        // debugger;
+        // this.jsPlumbInstance
     }
 
     restorePage(pageToRestore: Page) {
@@ -112,7 +180,13 @@ export class FlouService {
                 connection.source = pageItem.htmlId;
             });
         });
+        
         this.pages.push(pageToRestore);
+    }
+
+
+    private _unregisterEndpoint(source) { 
+        _.remove(this.endpoints,endpoint => endpoint == source);
     }
 
 
@@ -120,26 +194,43 @@ export class FlouService {
         let connectionsToRemove = _.remove( this.jsPlumbConnections, jsPlumbConnection => jsPlumbConnection.sourceId == connection.source && jsPlumbConnection.targetId == connection.target );
            
             connectionsToRemove.forEach((connectionToRemove) => { 
-                this.jsPlumbInstance.deleteConnection(connectionToRemove.connection);
+                try {
+                        this.jsPlumbInstance.deleteConnection(connectionToRemove.connection);
+                } catch ( e ) { 
+                    console.error('can\'t remove connection');
+                }
             });
     }
     
     removePage(page: Page):Promise<Page> {
         let result = new Promise<Page>((resolve,reject)=>{
         try { 
-          
             
             page.inputConnections.forEach((connection:Connection) => { 
                 this.removeConnection(connection);
             });
+            let numberOfUnregisteredEndpoints = 0;
             page.items.forEach((item) => {
                 item.outputConnections.forEach((connection:Connection) => {
                     this.removeConnection(connection);
+                    this._unregisterEndpoint(item.htmlId);
+                    numberOfUnregisteredEndpoints++;
                 });
-            })
+            });
+            let numberOfCleanedConnections = 0;
+            this.pages.forEach((pageToClean)=> { 
+                pageToClean.items.forEach((pageItem:PageItem) => { 
+                  let cleanedConnections = _.remove( pageItem.outputConnections, connection => connection.target == page.htmlId );
+                  numberOfCleanedConnections+=cleanedConnections.length;
+                });
+            });
+            console.log( `Cleaned ${numberOfCleanedConnections} connections`);
+            this._unregisterEndpoint(page.htmlId);
+            numberOfUnregisteredEndpoints++;
             let removedPage:Page = _.first(_.remove(this.pages, (currentPage) => { 
                 return currentPage.htmlId == page.htmlId;
             }));
+            console.log(`Unregistered ${numberOfUnregisteredEndpoints} endpoints after page deletion`)
             resolve(removedPage);
         } catch( e ) { 
             this._errorService.onError.next(e);
@@ -180,8 +271,8 @@ export class FlouService {
      return result;
     }
 
-    saveState( stateName ):Promise<AppState[]> { 
-        return new Promise<AppState[]>((resolve, reject) => {
+    saveState( stateName ):Promise<AppState> { 
+        return new Promise<AppState>((resolve, reject) => {
             try {
             let existingState = _.find( this.states, (state: AppState) => {
                 return  state.name == stateName;
@@ -192,22 +283,28 @@ export class FlouService {
                                             created: currentTime, 
                                             updated: currentTime,
                                             name : stateName,
-                                            data: this.pages};
+                                            data: _.cloneDeep(this.pages)};
                   this.states.push(newAppState);
+                  resolve(newAppState);
               } else { 
-                  existingState.data = this.pages;
+                  existingState.data = _.cloneDeep(this.pages);
                   existingState.updated = Date.now();
+                  resolve(existingState);
               }
               localStorage.setItem("flou", JSON.stringify(this.states));
-              resolve(this.states);
             } catch( e ) { 
+                console.error(e);
                 reject(e);
             }
         });
         
     }
     
-    loadState( stateUid ) { 
-
+    loadState( state: AppState ) { 
+        this.jsPlumbConnections = [];
+        this.endpoints = [];
+        this.initJsPlumb();
+        this.pages = _.cloneDeep(state.data);
+        this.stateLoaded.next(this.pages);
     }
 }

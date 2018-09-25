@@ -1,21 +1,24 @@
-import { Component, OnInit, OnChanges } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FlouService } from '../../services/flou.service';
 import { AppState } from '../models/app-state';
+import * as _ from 'lodash';
+import { NgSelectComponent } from '@ng-select/ng-select';
+import { ItemsList } from '@ng-select/ng-select/ng-select/items-list';
 
 @Component({
   selector: 'app-states',
   templateUrl: './app-states.component.html',
   styleUrls: ['./app-states.component.css']
 })
-export class AppStatesComponent implements OnChanges {
+export class AppStatesComponent implements OnInit {
+  @ViewChild(NgSelectComponent) select:NgSelectComponent;
   appStates: AppState[];
   openSaveStateDialog: boolean = false;
   selectedState: AppState;
   constructor(private _flouService: FlouService) { }
 
 
-  ngOnChanges() {
-    console.log('lal');
+  ngOnInit() {
     this._flouService.loadApp().then((appStates:AppState[]) => {
       this.appStates = appStates;
     }).catch((e) => { 
@@ -25,21 +28,30 @@ export class AppStatesComponent implements OnChanges {
 
 
   save() {
-    this._flouService.saveState(this.selectedState.name).then((states:AppState[]) => {
-      this.appStates = states;
-      console.log('and new states');
-      console.log(this.appStates);
-    }).catch((e)=> {
-      alert("can't save app state!");
-    });
+    
+    if( this.selectedState ) { 
+      this.selectedState.name = this.selectedState.name.trim();
+      this._flouService.saveState(this.selectedState.name).then((savedState:AppState) => {
+        let foundItem = _.find( this.select.itemsList.items, (item) => {
+          return item.value.name == savedState.name;
+        });
+        this.selectedState = savedState;
+        foundItem.value = savedState;
+      }).catch((e)=> {
+        alert("can't save app state!");
+      });
+    }
   }
-
+  
   selectState(state: AppState) {
-    console.log(state);
+    _.remove( this.select.itemsList.items, ( item:any ) => {
+       return !item.selected && !item.value.uid;
+    });
     this.selectedState = state;
   }
 
-  load(stateName) {
-    this._flouService.loadState("");
+  load() {
+    // console.log(this.selectedState);
+    this._flouService.loadState(this.selectedState);
   }
 }
