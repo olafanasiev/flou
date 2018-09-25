@@ -26,6 +26,9 @@ export class AppStatesComponent implements OnInit {
     });
   }
 
+  remove() {
+    console.log("Remove action");
+  }
 
   save() {
     

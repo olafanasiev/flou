@@ -1,6 +1,6 @@
 
 <div class="app-state-container">
-    <button  (click)="openDialog = !openDialog; action='save'" class="round-button very-big-round-button">
+    <button  (click)="openSaveStateDialog = !openSaveStateDialog;" class="round-button very-big-round-button">
       <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 507.289 507.289" style="enable-background:new 0 0 507.289 507.289;fill: white;" xml:space="preserve">
         <path d="M153.712,375.691l-24,21.248c7.642,8.598,15.944,16.585,24.832,23.888l20.288-24.8     C167.265,389.818,160.203,383.018,153.712,375.691z"/>
         <path d="M122.176,326.187l-29.408,12.624c4.547,10.596,9.946,20.805,16.144,30.528l26.992-17.152     C130.64,343.901,126.049,335.207,122.176,326.187z"/>
@@ -11,7 +11,7 @@
 </div>
   
 
-<app-dialog [(visible)]="openDialog">
+<app-dialog [(visible)]="openSaveStateDialog">
   <div class="save-dialog">
     <ng-select [addTagText]="'Add state'" [items]="appStates" [bindLabel]="'name'" (change)="selectState($event)" (remove)="remove()" [addTag]="true"></ng-select>
     <span *ngIf="selectedState && selectedState.name.trim().length == 0 
@@ -19,9 +19,9 @@
        (*) Selected state is not saved! Save it first.
     </span>
     <div class="state-dialog-control-buttons">    
-      <button [disabled]="!selectedState || (selectedState && selectedState.name.trim().length == 0)" (click)="save(); openDialog=false;" class="mat-button">Save</button>
-      <button [disabled]="!selectedState || (selectedState && !selectedState.uid)" (click)="load(); openDialog=false;" class="mat-button">Load</button>
-      <button (click)="openDialog=false;" class="mat-button mat-button--gray">Cancel</button>
+      <button [disabled]="!selectedState || (selectedState && selectedState.name.trim().length == 0)" (click)="save(); openSaveStateDialog=false;" class="mat-button">Save</button>
+      <button [disabled]="!selectedState || (selectedState && !selectedState.uid)" (click)="load(); openSaveStateDialog=false;" class="mat-button">Load</button>
+      <button (click)="openSaveStateDialog=false;" class="mat-button mat-button--gray">Cancel</button>
     </div>
   </div>
  </app-dialog>
