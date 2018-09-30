@@ -118,7 +118,7 @@ export class FlouService {
         this.pages.forEach((page) => {
             page.isActive = false;
         });
-        const pageWidth = 200;
+        const pageWidth = 230;
         const defaultPageHeight = 268;
         const halfPageHeight = defaultPageHeight / 2;
         const halfPageWidth = pageWidth / 2;
@@ -158,21 +158,22 @@ export class FlouService {
         return `Page ${this.pages.length + 1}`;
     }
 
-    removeItem(page: Page, htmlId ){ 
-        _.remove( 
-                _.first( 
-                    _.filter( this.pages, {htmlId: page.htmlId })).items, (item: PageItem ) => {
-                        return item.htmlId == htmlId;
-        });
+    removeItem(item: PageItem){ 
+                let removedItems = _.remove(item.page.items, (pageItem: PageItem) => {
+                    return item.htmlId == pageItem.htmlId;
+                });
+                removedItems.forEach((item: PageItem) => {
+                    item.outputConnections.forEach( connection => this.removeConnection(connection));
+                });
+                setTimeout(() =>{ 
+                    this.jsPlumbInstance.repaintEverything();
+                },0);
     }
 
     drawConnection(source, target) {
         if( _.includes( this.endpoints, source) &&  _.includes( this.endpoints, target)) {
             this.jsPlumbInstance.connect({source: source, target: target});
         }
-        // console.log();
-        // debugger;
-        // this.jsPlumbInstance
     }
 
     restorePage(pageToRestore: Page) {
@@ -255,9 +256,9 @@ export class FlouService {
         const htmlId = UUID.UUID();
         if ( !type ) {
             item = {position: 0, type: 'input', title: `Item ${page.items.length + 1}`,
-                 htmlId: htmlId, outputConnections: []};
+                 htmlId: htmlId, page: page, outputConnections: []};
         } else {
-            item = {position: 0, type: type, title: `Item ${page.items.length + 1}`, htmlId: htmlId, outputConnections: []};
+            item = {position: 0, page: page, type: type, title: `Item ${page.items.length + 1}`, htmlId: htmlId, outputConnections: []};
         }
         page.items.push(item);
     }

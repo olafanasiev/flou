@@ -32,6 +32,10 @@ export class InputItemComponent implements OnInit, AfterViewInit {
     this.item.type = 'input';
   }
 
+  removeItem(item: PageItem) {
+    this._flouService.removeItem(item);
+  }
+
   ngAfterViewInit() {
     this.textAreaElRef.nativeElement.focus();
     $(this.textAreaElRef.nativeElement).select();

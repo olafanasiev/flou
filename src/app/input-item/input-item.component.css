@@ -14,9 +14,16 @@
     z-index: 9999;
     display: block;
     cursor: pointer;
-    right: 15px;
+    right: 40px;
     transition: width 0.2s, height 0.2s, border-radius 0.2s, right 0.2s;
     transition-timing-function: ease-in-out;
+    position: absolute;
+}
+
+.item-remove{ 
+    cursor: pointer;
+    z-index: 9999;
+    right: 15px;
     position: absolute;
 }
 
@@ -34,7 +41,7 @@
     width: 15px;
     border-radius: 15px;
     height: 15px;
-    right: 13px;
+    right: 37px;
     transition: width 0.2s, height 0.2s, border-radius 0.2s, right 0.2s;
     transition-timing-function: ease-in-out;
 }

@@ -51,5 +51,8 @@
     margin-left: 4px;
     font-style: italic;
     outline: none;
+    width: 191px;
+    overflow:ellipsis;
+    white-space: nowrap;
     background: transparent;
 }
