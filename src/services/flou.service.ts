@@ -56,6 +56,7 @@ export class FlouService {
         this.jsPlumbInstance.makeTarget(pageId,
            {anchor: 'Continuous', 
             endpoint: ['Rectangle', { width: 1, height: 1}], 
+            
         });
         this._registerEndpoint(pageId);
     }
@@ -70,7 +71,15 @@ export class FlouService {
         } else { 
             this.jsPlumbInstance = jsPlumb.getInstance({Container: document.getElementById('pages')});
         }
-        this.jsPlumbInstance.importDefaults({Connector: ['Bezier', { curviness: 50 }]});
+        this.jsPlumbInstance.importDefaults({Connector: ['Bezier', { curviness: 50 }], Overlays: [
+            [ "Arrow", { 
+                location:1,
+                id:"arrow",
+                length:8,
+                foldback:0.9
+            } ]
+        ]});
+            
         this.jsPlumbInstance.bind('connection', (newConnectionInfo, mouseEvent) => {
             if( mouseEvent ) { 
                 let targetPage = this.pages.find( page => page.htmlId == newConnectionInfo.targetId );
