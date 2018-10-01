@@ -13,10 +13,7 @@
 }
 
 .app-state-container{ 
-    position: fixed;
-    right: 31px;
     display: flex;
-    bottom: 110px;
     flex-direction: column;
 }
 

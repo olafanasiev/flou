@@ -1,10 +1,18 @@
 <div class="main-canvas">
-    <app-states></app-states>
     <app-item-context-menu></app-item-context-menu>
-    <div (dblclick)="addPage($event)" id="pages" class="pages">
+    <div (dblclick)="addPage($event)" [style.transform]="'scale('+ zoom + ')'" id="pages" class="pages">
         <app-page (pageDeleted)="onPageDelete($event)" [style.top.px]="page.y" [style.left.px]="page.x" [page]="page" *ngFor="let page of pages">
         </app-page>
     </div>
     <ngx-snackbar [position]="'top-center'" [max]="3"></ngx-snackbar>
-    <button (click)="addPage(null)" class="add-page-button round-button very-big-round-button">+</button>
+    <div class="right-bottom-main-panel">
+        <button (click)="zoomIn()" [disabled]="zoom > 1.9" class="zoom-in-button round-button very-big-round-button mat-button">
+            <img width="30" height="30" src="/assets/zoom-in.svg"/>
+        </button>
+        <button (click)="zoomOut()" [disabled]="zoom < 0.2" class="zoom-out-button round-button very-big-round-button mat-button">
+            <img width="30" height="30" src="/assets/zoom-out.svg"/>
+        </button>
+        <app-states></app-states>
+        <button (click)="addPage(null)" class="add-page-button round-button very-big-round-button">+</button>
+    </div>
 </div>

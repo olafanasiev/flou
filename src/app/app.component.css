@@ -6,11 +6,25 @@
 
 
 .add-page-button{
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
     font-size: 60px;
     color: #FFF;
+}
+
+.right-bottom-main-panel {
+    position:fixed;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+}
+
+.right-bottom-main-panel > *{ 
+    margin-top: 10px;
+}
+
+.zoom-in-button, .zoom-out-button { 
+    display: flex;
+    justify-content: center;
 }
 
 #pages {
@@ -18,6 +32,7 @@
     height: 100%;
     display: flex;
     flex-direction:row;
+    transition: transform 0.3s;
 }
 
 app-page{ 

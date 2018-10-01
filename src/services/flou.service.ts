@@ -43,6 +43,9 @@ export class FlouService {
           });            
     }
 
+    exportStates() { 
+
+    }
   
 
     makeSource(inputItemId) { 
@@ -78,7 +81,27 @@ export class FlouService {
                 length:8,
                 foldback:0.9
             } ]
-        ]});
+        ], PaintStyle: { strokeWidth: 5, stroke: '#456'}});
+
+        this.jsPlumbInstance.bind('dblclick', (connection) => { 
+            alert(connection);
+        });
+        this.jsPlumbInstance.bind('click', (connection) => {
+          let flouConnection = new Connection(connection.sourceId, connection.targetId);
+          let page = this.pages.find( page => page.htmlId == connection.targetId);
+          
+          _.remove(page.inputConnections, (connectionToRemove:Connection) => { 
+                return connectionToRemove.target == connection.targetId;
+          });
+
+          this.pages.forEach((page ) => { 
+              page.items.forEach((item: PageItem) => {
+                _.remove( item.outputConnections, connection => connection.source == connection.sourceId);
+              });
+          });
+          
+          this.removeConnection(flouConnection);
+        })
             
         this.jsPlumbInstance.bind('connection', (newConnectionInfo, mouseEvent) => {
             if( mouseEvent ) { 
@@ -205,7 +228,7 @@ export class FlouService {
            
             connectionsToRemove.forEach((connectionToRemove) => { 
                 try {
-                        this.jsPlumbInstance.deleteConnection(connectionToRemove.connection);
+                    this.jsPlumbInstance.deleteConnection(connectionToRemove.connection);
                 } catch ( e ) { 
                     console.error('can\'t remove connection');
                 }

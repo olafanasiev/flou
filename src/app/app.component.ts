@@ -11,6 +11,7 @@ import {SnackbarService} from 'ngx-snackbar';
 export class AppComponent implements AfterViewInit, OnInit {
   title = 'app';
   pages: Page[] = [];
+  zoom: number = 1;
   constructor(private _flouService: FlouService,
     private _snackBarRef: SnackbarService, private _ref: ChangeDetectorRef) {}
 
@@ -46,6 +47,24 @@ export class AppComponent implements AfterViewInit, OnInit {
           console.log('removed: ' + snack.id);
         }
       });
+  }
+  
+
+  zoomIn() {
+    if( this.zoom > 1.9) { 
+      return;
+    }
+    
+    this.zoom+=0.1;
+    this._flouService.getJsPlumbInstance().setZoom(this.zoom);
+  }
+
+  zoomOut() {
+    if( this.zoom < 0.2 ) { 
+      return;
+    }
+    this.zoom-=0.1;
+    this._flouService.getJsPlumbInstance().setZoom(this.zoom);
   }
 
   addPage(e) {
