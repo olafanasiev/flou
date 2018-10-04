@@ -18,10 +18,13 @@
               || selectedState &&!selectedState.uid" class="validation-error">
        (*) Selected state is not saved! Save it first.
     </span>
-    <div class="state-dialog-control-buttons">    
+    <div class="state-dialog-control-buttons">
+      <a (click)="export()" #exportLink class="mat-button">Export</a>
+      <button (click)="uploadStates.click()" class="mat-button">Import</button>    
       <button [disabled]="!selectedState || (selectedState && selectedState.name.trim().length == 0)" (click)="save(); openSaveStateDialog=false;" class="mat-button">Save</button>
       <button [disabled]="!selectedState || (selectedState && !selectedState.uid)" (click)="load(); openSaveStateDialog=false;" class="mat-button">Load</button>
       <button (click)="openSaveStateDialog=false;" class="mat-button mat-button--gray">Cancel</button>
     </div>
   </div>
+  <input (change)="import($event)" accept="application/json" class="upload-states--hidden" #uploadStates name="file" type="file"/>
  </app-dialog>

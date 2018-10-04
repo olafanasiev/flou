@@ -5,7 +5,7 @@
             <div (click)="deletePage()" class="page__delete-button">X</div> 
         </div>
         <div #itemsContainer class="page__items">
-            <app-input-item *ngFor="let item of page.items" (enterPressed)="addItem()" (onEmptyField)="removeEmptyItem(item.htmlId)" [item]="item"></app-input-item>
+            <app-input-item (sortStarted)="disableDragging()" (sortStopped)="enableDragging()" *ngFor="let item of page.items" (enterPressed)="addItem()" (onEmptyField)="removeEmptyItem(item.htmlId)" [item]="item"></app-input-item>
         </div>
     </div>
     <div class="can-add-item add-item-panel">

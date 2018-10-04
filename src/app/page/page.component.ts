@@ -7,9 +7,7 @@ import { InputItemComponent } from '../input-item/input-item.component';
 import { PageService } from '../../services/page.service';
 import * as _ from 'lodash';
 import { PageItem } from '../models/page-item';
-import { Connection } from '../models/connection';
 import { Subscription } from 'rxjs';
-import { UUID } from 'angular2-uuid';
 declare var $: any;
 @Component({
   selector: 'app-page',
@@ -61,13 +59,10 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
     
     let $itemsContainer = $(this.itemsContainer.nativeElement);
       $itemsContainer.sortable({ handle: '.item-sortable-icon' , update: () => {
+
     }, start: () => {
       this._inputItemService.emitPanelHideEvent();
-      console.log("DISABLE DRAGGING");
-      this.disableDragging();
     }, stop: () => { 
-      console.log("ENABLE DRAGGING");
-      this.enableDragging();
     }});
     this.enableDragging();
    
@@ -75,13 +70,16 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
     this._flouService.pageLoaded.next(this.page);
   }
 
+
   enableDragging() {
     this._flouService.enableDragging(this._viewRef.element.nativeElement, {
       stop: (info) => { 
         this.page.x = info.pos[0];
         this.page.y = info.pos[1];
-      }
+      },
+      force: true
     });
+    this._flouService.getJsPlumbInstance().setDraggable(this._viewRef.element.nativeElement, true);
   }
 
   disableDragging() {

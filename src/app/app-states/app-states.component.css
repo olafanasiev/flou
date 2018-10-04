@@ -52,3 +52,7 @@
     height: 150px;
     flex-direction: column;
 }
+
+.upload-states--hidden{ 
+    visibility: hidden;  
+}

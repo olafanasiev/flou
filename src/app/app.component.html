@@ -1,11 +1,16 @@
 <div class="main-canvas">
     <app-item-context-menu></app-item-context-menu>
-    <div (dblclick)="addPage($event)" [style.transform]="'scale('+ zoom + ')'" id="pages" class="pages">
-        <app-page (pageDeleted)="onPageDelete($event)" [style.top.px]="page.y" [style.left.px]="page.x" [page]="page" *ngFor="let page of pages">
-        </app-page>
+    <div (dblclick)="addPage($event)" id="pages-wrapper">
+        <div [style.transform]="'scale('+ zoom + ')'" id="pages" class="pages">
+            <app-page (pageDeleted)="onPageDelete($event)" [style.top.px]="page.y" [style.left.px]="page.x" [page]="page" *ngFor="let page of pages">
+            </app-page>
+        </div>
     </div>
     <ngx-snackbar [position]="'top-center'" [max]="3"></ngx-snackbar>
     <div class="right-bottom-main-panel">
+        <button (click)="resetZoom()" [disabled]="zoom == 1" class="zoom-reset-button round-button very-big-round-button mat-button">
+            1:1
+        </button>
         <button (click)="zoomIn()" [disabled]="zoom > 1.9" class="zoom-in-button round-button very-big-round-button mat-button">
             <img width="30" height="30" src="/assets/zoom-in.svg"/>
         </button>

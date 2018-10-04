@@ -1,10 +1,12 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { FlouService } from '../../services/flou.service';
 import { AppState } from '../models/app-state';
 import * as _ from 'lodash';
 import { NgSelectComponent } from '@ng-select/ng-select';
 import { ItemsList } from '@ng-select/ng-select/ng-select/items-list';
-
+import { SafeUrl, DomSanitizer } from '@angular/platform-browser';
+import { HttpClient } from '@angular/common/http';
+import { ErrorService } from '../../services/error.service';
 @Component({
   selector: 'app-states',
   templateUrl: './app-states.component.html',
@@ -15,7 +17,9 @@ export class AppStatesComponent implements OnInit {
   appStates: AppState[];
   openSaveStateDialog: boolean = false;
   selectedState: AppState;
-  constructor(private _flouService: FlouService) { }
+  @ViewChild("exportLink") exportLink: ElementRef;
+  constructor(private _flouService: FlouService,
+              private _errorService: ErrorService) { }
 
 
   ngOnInit() {
@@ -30,6 +34,44 @@ export class AppStatesComponent implements OnInit {
     console.log("Remove action");
   }
 
+  export() {
+    let statesAsStr = JSON.stringify(this.appStates);
+    let blob = new Blob([statesAsStr], { type: 'text/json' });
+    let url= window.URL.createObjectURL(blob);
+    this.exportLink.nativeElement.href= url;
+    this.exportLink.nativeElement.download = "flou-states.json";
+  }
+
+  validateStates( states:any ):boolean {
+    let isValid = true;
+    states.forEach((state) => {
+        if( !state.uid || !state.name || !state.data ) {
+          this._errorService.onError.next({code:"1001", message: `State ${state} is not valid!`});
+          isValid = false;
+        }
+    });
+    return isValid;
+  }
+  import(e) {
+    let fileReader = new FileReader();
+    fileReader.onload = (e) => {
+      try { 
+        let states:AppState[] = JSON.parse(fileReader.result.toString());
+        if ( !this.validateStates(states) ) { 
+          return;
+        }
+        this._flouService.mergeStates(states).then((newStates) => { 
+          this.appStates = newStates;
+        });
+      } catch( e ) { 
+        this._errorService.onError.next({code:"1003", message: "Can't merge states with existing"});
+      }
+    }
+    if( e.target.files && !_.isEmpty(e.target.files)){ 
+      fileReader.readAsText(e.target.files[0]);
+    }
+  }
+
   save() {
     
     if( this.selectedState ) { 
@@ -41,7 +83,8 @@ export class AppStatesComponent implements OnInit {
         this.selectedState = savedState;
         foundItem.value = savedState;
       }).catch((e)=> {
-        alert("can't save app state!");
+        this._errorService.onError.next({code:"1002", message: "Can't save the state"});
+        console.error(e);
       });
     }
   }
@@ -54,7 +97,6 @@ export class AppStatesComponent implements OnInit {
   }
 
   load() {
-    // console.log(this.selectedState);
     this._flouService.loadState(this.selectedState);
   }
 }

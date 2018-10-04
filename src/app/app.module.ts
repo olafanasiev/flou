@@ -17,6 +17,7 @@ import { FormsModule } from '@angular/forms';
 import { AppStatesComponent } from './app-states/app-states.component';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { AppDialogComponent } from './app-dialog/app-dialog.component';
+import { HttpClientModule } from '@angular/common/http';
 @NgModule({
   declarations: [
     AppComponent,
@@ -28,7 +29,7 @@ import { AppDialogComponent } from './app-dialog/app-dialog.component';
     AppDialogComponent
   ],
   imports: [
-    BrowserAnimationsModule, ClickOutsideModule, FormsModule, NgSelectModule, SnackbarModule.forRoot(), BrowserModule, SharedModule
+    BrowserAnimationsModule, ClickOutsideModule,HttpClientModule, FormsModule, NgSelectModule, SnackbarModule.forRoot(), BrowserModule, SharedModule
   ],
   providers: [FlouService, InputItemService, PageService, ErrorService],
   bootstrap: [AppComponent]

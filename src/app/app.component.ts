@@ -13,7 +13,7 @@ export class AppComponent implements AfterViewInit, OnInit {
   pages: Page[] = [];
   zoom: number = 1;
   constructor(private _flouService: FlouService,
-    private _snackBarRef: SnackbarService, private _ref: ChangeDetectorRef) {}
+    private _snackBarRef: SnackbarService) {}
 
   ngAfterViewInit() {
     this.pages =  this._flouService.getPages();
@@ -21,7 +21,17 @@ export class AppComponent implements AfterViewInit, OnInit {
 
 
   ngOnInit() {
+    this._flouService.stateImported$.subscribe((states) => { 
+      this._snackBarRef.add({
+        msg: `New ${states.length} states was successfully imported!`,
+        action: {
+          text:''
+        },
+        timeout: 4000
+      });
     
+    });
+
     this._flouService.stateLoaded$.subscribe((pages) => {
       this.pages = this._flouService.getPages();
       });
@@ -40,12 +50,6 @@ export class AppComponent implements AfterViewInit, OnInit {
             this._snackBarRef.clear();
           },
         },
-        onAdd: (snack) => {
-          console.log('added: ' + snack.id);
-        },
-        onRemove: (snack) => {
-          console.log('removed: ' + snack.id);
-        }
       });
   }
   
@@ -59,6 +63,10 @@ export class AppComponent implements AfterViewInit, OnInit {
     this._flouService.getJsPlumbInstance().setZoom(this.zoom);
   }
 
+  resetZoom() { 
+    this.zoom = 1;
+  }
+
   zoomOut() {
     if( this.zoom < 0.2 ) { 
       return;
@@ -69,7 +77,7 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   addPage(e) {
     if( e && e.target ) {
-      if( e.target.id == 'pages') {
+      if( e.target.id == 'pages-wrapper' || e.target.id == 'pages') {
         this._flouService.addPage();
       }
     } else { 

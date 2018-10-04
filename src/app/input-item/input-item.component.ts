@@ -21,6 +21,10 @@ export class InputItemComponent implements OnInit, AfterViewInit {
   enterPressed = new EventEmitter<any>();
   @Output()
   onEmptyField = new EventEmitter<any>();
+  @Output()
+  sortStarted = new EventEmitter<any>();
+  @Output()
+  sortStopped = new EventEmitter<any>();
   // isJsPlumbed = false;
   subscriptions: Subscription[] = [];
   constructor(public _viewRef: ViewContainerRef, 
@@ -34,6 +38,14 @@ export class InputItemComponent implements OnInit, AfterViewInit {
 
   removeItem(item: PageItem) {
     this._flouService.removeItem(item);
+  }
+
+  stopSort() {
+    this.sortStopped.emit();
+  }
+
+  startSort() { 
+    this.sortStarted.emit();
   }
 
   ngAfterViewInit() {

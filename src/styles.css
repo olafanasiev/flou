@@ -18,6 +18,8 @@ html, body {
     font-style: normal;
 }
 
+
+
 .mat-button{ 
     border: none;
     background-color: #ffaf38;
@@ -25,6 +27,7 @@ html, body {
     user-select: none;
     padding: 10px 15px;
     margin: 0;
+    text-decoration: none;
     outline: none;
     cursor: pointer;
 }

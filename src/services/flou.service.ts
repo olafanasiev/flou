@@ -7,8 +7,6 @@ import { Connection } from '../app/models/connection';
 import { ErrorService } from './error.service';
 import { AppState } from '../app/models/app-state';
 import { Subject, Observable } from 'rxjs';
-import { PageComponent } from '../app/page/page.component';
-declare var $: any;
 declare var jsPlumb,jsPlumbInstance: any;
 
 @Injectable()
@@ -20,6 +18,8 @@ export class FlouService {
     states:AppState[] =  [];
     stateLoaded: Subject<any>;
     stateLoaded$: Observable<any>;
+    stateImported: Subject<any>;
+    stateImported$: Observable<any>;
     pageLoaded: Subject<any>;
     pageLoaded$: Observable<any>;
     endpoints  = [];
@@ -28,6 +28,8 @@ export class FlouService {
         this.stateLoaded$ = this.stateLoaded.asObservable();
         this.pageLoaded = new Subject<any>();
         this.pageLoaded$ = this.pageLoaded.asObservable();
+        this.stateImported = new Subject<any>();
+        this.stateImported$ = this.stateImported.asObservable();
         this.pages = [];
 
         this.pageLoaded$.subscribe((page:Page) => {
@@ -41,10 +43,6 @@ export class FlouService {
                  });
                
           });            
-    }
-
-    exportStates() { 
-
     }
   
 
@@ -173,8 +171,8 @@ export class FlouService {
         
     }
 
-    disableDragging(htmlElRef) {
-        this.jsPlumbInstance.draggable(htmlElRef, {disabled: true});
+    disableDragging(htmlElRef) { 
+        this.jsPlumbInstance.setDraggable(htmlElRef, false);
     }
 
     private _getPageTitle() {
@@ -233,6 +231,21 @@ export class FlouService {
                     console.error('can\'t remove connection');
                 }
             });
+    }
+
+
+    mergeStates(states: AppState[]): Promise<AppState[]> {
+        let result: Promise< AppState[] > = new Promise<AppState[]>((resolve, reject)=>{
+            if( _.isEmpty(this.states ) ) {
+                this.states = states; 
+            } else { 
+                this.states = _.unionBy(states, this.states, 'name');
+            }
+            localStorage.setItem("flou", JSON.stringify(this.states));
+            resolve(this.states);
+            this.stateImported.next(states);
+        });
+        return result;
     }
     
     removePage(page: Page):Promise<Page> {
