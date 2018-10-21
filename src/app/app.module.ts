@@ -14,7 +14,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ItemPanelComponent } from './item-panel/item-panel.component';
 import { ErrorService } from '../services/error.service';
 import { FormsModule } from '@angular/forms';
-import { AppStatesComponent } from './app-states/app-states.component';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { AppDialogComponent } from './app-dialog/app-dialog.component';
 import { HttpClientModule } from '@angular/common/http';
@@ -25,7 +24,6 @@ import { HttpClientModule } from '@angular/common/http';
     InputItemComponent,
     ItemContextMenuComponent,
     ItemPanelComponent,
-    AppStatesComponent,
     AppDialogComponent
   ],
   imports: [

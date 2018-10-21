@@ -2,7 +2,7 @@
 
 <div class="input-item">
   <span (click)="showItemTypes()" class="{{'input-icon--' + item.type}}"></span> 
-  <textarea [ngClass]="['input-item__textarea']" (keyup)="onKeyUp($event)" [style.height.px]="textAreaHeight" (focusout)="removeIfEmpty(textArea.value)" #textArea type="text"  [value]="item.title"></textarea>
+  <textarea [ngClass]="['input-item__textarea']" (keyup)="onKeyUp($event)" [style.height.px]="textAreaHeight" (focusout)="removeIfEmpty(textArea.value)" #textArea type="text" [value]="item.title" (ngModelChange)="onTitleChange($event)" [ngModel]="item.title"></textarea>
   <div (mouseup)="stopSort()" (mousedown)="startSort()" class="item-sortable-icon">
     <div class="line"></div>
     <div class="line"></div>

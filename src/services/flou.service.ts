@@ -5,31 +5,29 @@ import { PageItem } from '../app/models/page-item';
 import * as _ from 'lodash';
 import { Connection } from '../app/models/connection';
 import { ErrorService } from './error.service';
-import { AppState } from '../app/models/app-state';
 import { Subject, Observable } from 'rxjs';
-declare var jsPlumb,jsPlumbInstance: any;
-
+import { Action, steps } from '../app/models/action';
+declare var jsPlumb: any;
+export namespace LastAction { 
+    export const undo = 'undo';
+    export const redo = 'redo';
+    export const action = 'action';
+}
 @Injectable()
 export class FlouService {
     jsPlumbInstance;
     pages: Page[];
     pageCounts = 0;
     jsPlumbConnections = [];
-    states:AppState[] =  [];
-    stateLoaded: Subject<any>;
-    stateLoaded$: Observable<any>;
-    stateImported: Subject<any>;
-    stateImported$: Observable<any>;
     pageLoaded: Subject<any>;
     pageLoaded$: Observable<any>;
     endpoints  = [];
+    currentAction:Action;
+    lastOperation = '';
+    // actions = [];
     constructor(private _errorService: ErrorService) {
-        this.stateLoaded = new Subject<any>();
-        this.stateLoaded$ = this.stateLoaded.asObservable();
         this.pageLoaded = new Subject<any>();
         this.pageLoaded$ = this.pageLoaded.asObservable();
-        this.stateImported = new Subject<any>();
-        this.stateImported$ = this.stateImported.asObservable();
         this.pages = [];
 
         this.pageLoaded$.subscribe((page:Page) => {
@@ -42,7 +40,7 @@ export class FlouService {
                     });
                  });
                
-          });            
+        });
     }
   
 
@@ -81,9 +79,6 @@ export class FlouService {
             } ]
         ], PaintStyle: { strokeWidth: 5, stroke: '#456'}});
 
-        this.jsPlumbInstance.bind('dblclick', (connection) => { 
-            alert(connection);
-        });
         this.jsPlumbInstance.bind('click', (connection) => {
           let flouConnection = new Connection(connection.sourceId, connection.targetId);
           let page = this.pages.find( page => page.htmlId == connection.targetId);
@@ -100,7 +95,7 @@ export class FlouService {
           
           this.removeConnection(flouConnection);
         })
-            
+        
         this.jsPlumbInstance.bind('connection', (newConnectionInfo, mouseEvent) => {
             if( mouseEvent ) { 
                 let targetPage = this.pages.find( page => page.htmlId == newConnectionInfo.targetId );
@@ -117,6 +112,7 @@ export class FlouService {
                         }
                     });
                 }
+                this.saveAction();
             }
             this.jsPlumbConnections.push(newConnectionInfo);
             this.jsPlumbInstance.repaintEverything();
@@ -135,7 +131,7 @@ export class FlouService {
       return  _.find(this.pages, {x:x, y:y}) != null;
     }
 
-    addPage() {
+    addPage(doSaveAction?:boolean) {
         this.pages.forEach((page) => {
             page.isActive = false;
         });
@@ -160,6 +156,10 @@ export class FlouService {
             isActive: true,
             inputConnections: []};
             this.pages.push(newPage);
+            if( doSaveAction ) {
+                this.saveAction();
+            }
+        
     }
 
     enableDragging(htmlElRef, options?:any) { 
@@ -179,16 +179,26 @@ export class FlouService {
         return `Page ${this.pages.length + 1}`;
     }
 
-    removeItem(item: PageItem){ 
-                let removedItems = _.remove(item.page.items, (pageItem: PageItem) => {
+    removeItem(item: PageItem, doSaveAction?:boolean){
+
+                let page = this.pages.find((page) => { 
+                    return _.find(page.items, {'htmlId':item.htmlId})!=null;
+                }); 
+                let removedItems = _.remove(page.items, (pageItem: PageItem) => {
                     return item.htmlId == pageItem.htmlId;
                 });
                 removedItems.forEach((item: PageItem) => {
                     item.outputConnections.forEach( connection => this.removeConnection(connection));
                 });
+                this._unregisterEndpoint(item.htmlId);
                 setTimeout(() =>{ 
                     this.jsPlumbInstance.repaintEverything();
                 },0);
+
+                if( doSaveAction ) { 
+                    this.saveAction();
+                }
+            
     }
 
     drawConnection(source, target) {
@@ -197,31 +207,73 @@ export class FlouService {
         }
     }
 
-    restorePage(pageToRestore: Page) {
+    restorePage(pageToRestore: Page, doSaveAction?: boolean) {
         //FIXME:: Hack . if I will not change ID then it will be an issue 
         //after trying reconnect connections - pages connections will break;
-        pageToRestore.htmlId = UUID.UUID();
-        pageToRestore.inputConnections.forEach((connection) => {
-            connection.target = pageToRestore.htmlId;
+        this._fixHtmlIds(pageToRestore);
+        this.pages.push(pageToRestore);
+        if( doSaveAction ) { 
+            this.saveAction();
+        }
+    }
+
+    private _fixHtmlIds(page: Page) {
+        page.htmlId = UUID.UUID();
+        page.inputConnections.forEach((connection) => {
+            connection.target = page.htmlId;
         });
 
-        pageToRestore.items.forEach((pageItem: PageItem) => {
+        page.items.forEach((pageItem: PageItem) => {
             pageItem.htmlId = UUID.UUID();
             pageItem.outputConnections.forEach((connection:Connection) => {
                 connection.source = pageItem.htmlId;
             });
         });
-        
-        this.pages.push(pageToRestore);
+        return page;
     }
 
+    private _rebuildPages() {
+        this.removeAllPages();
+        this.initJsPlumb();
+        let parsedPages = JSON.parse(this.currentAction.pages);
+        this.pages.push(...parsedPages);
+    }
+    
+    ctrlZ(){
+        // console.log(this.currentAction); 
+        if( this.currentAction && this.currentAction.prev ) { 
+            this.currentAction = this.currentAction.prev;
+            this.lastOperation = LastAction.undo;
+            this._rebuildPages();
+        }
+    }
+
+    ctrlY(){ 
+        if( this.currentAction && this.currentAction.next ) { 
+            this.currentAction = this.currentAction.next;
+            this.lastOperation = LastAction.redo;
+            this._rebuildPages();
+        }
+    }
 
     private _unregisterEndpoint(source) { 
-        _.remove(this.endpoints,endpoint => endpoint == source);
+        _.remove(this.endpoints, (endpoint)  => {
+             return endpoint == source;
+        });
     }
 
+    export() { 
+        return JSON.stringify( this.pages );
+    }
 
-    removeConnection(connection: Connection) {
+    import(json) { 
+        this.jsPlumbConnections = [];
+        this.endpoints = [];
+        this.initJsPlumb();
+        this.pages = json;
+    }
+
+    removeConnection(connection: Connection, doSaveAction?:boolean) {
         let connectionsToRemove = _.remove( this.jsPlumbConnections, jsPlumbConnection => jsPlumbConnection.sourceId == connection.source && jsPlumbConnection.targetId == connection.target );
            
             connectionsToRemove.forEach((connectionToRemove) => { 
@@ -231,52 +283,52 @@ export class FlouService {
                     console.error('can\'t remove connection');
                 }
             });
-    }
-
-
-    mergeStates(states: AppState[]): Promise<AppState[]> {
-        let result: Promise< AppState[] > = new Promise<AppState[]>((resolve, reject)=>{
-            if( _.isEmpty(this.states ) ) {
-                this.states = states; 
-            } else { 
-                this.states = _.unionBy(states, this.states, 'name');
+            if( doSaveAction ) { 
+                this.saveAction();
             }
-            localStorage.setItem("flou", JSON.stringify(this.states));
-            resolve(this.states);
-            this.stateImported.next(states);
-        });
-        return result;
     }
     
-    removePage(page: Page):Promise<Page> {
+
+    private _clearPageFromConnections(page: Page) { 
+        page.inputConnections.forEach((connection:Connection) => { 
+            this.removeConnection(connection);
+        });
+        let numberOfUnregisteredEndpoints = 0;
+        page.items.forEach((item) => {
+            item.outputConnections.forEach((connection:Connection) => {
+                this.removeConnection(connection);
+                numberOfUnregisteredEndpoints++;
+            });
+            this._unregisterEndpoint(item.htmlId);
+        });
+        let numberOfCleanedConnections = 0;
+        this.pages.forEach((pageToClean)=> { 
+            pageToClean.items.forEach((pageItem:PageItem) => { 
+              let cleanedConnections = _.remove( pageItem.outputConnections, connection => connection.target == page.htmlId );
+              numberOfCleanedConnections+=cleanedConnections.length;
+            });
+        });
+        console.log( `Cleaned ${numberOfCleanedConnections} connections`);
+        this._unregisterEndpoint(page.htmlId);
+        numberOfUnregisteredEndpoints++;
+        console.log(`Unregistered ${numberOfUnregisteredEndpoints} endpoints after page deletion`);
+    }
+
+    removeAllPages() { 
+        this.pages.forEach((page: Page) => { 
+            this._clearPageFromConnections(page);
+        });
+        this.pages.length = 0;
+    }
+
+    removePage(page: Page, doSaveAction?:boolean):Promise<Page> {
         let result = new Promise<Page>((resolve,reject)=>{
         try { 
             
-            page.inputConnections.forEach((connection:Connection) => { 
-                this.removeConnection(connection);
-            });
-            let numberOfUnregisteredEndpoints = 0;
-            page.items.forEach((item) => {
-                item.outputConnections.forEach((connection:Connection) => {
-                    this.removeConnection(connection);
-                    this._unregisterEndpoint(item.htmlId);
-                    numberOfUnregisteredEndpoints++;
-                });
-            });
-            let numberOfCleanedConnections = 0;
-            this.pages.forEach((pageToClean)=> { 
-                pageToClean.items.forEach((pageItem:PageItem) => { 
-                  let cleanedConnections = _.remove( pageItem.outputConnections, connection => connection.target == page.htmlId );
-                  numberOfCleanedConnections+=cleanedConnections.length;
-                });
-            });
-            console.log( `Cleaned ${numberOfCleanedConnections} connections`);
-            this._unregisterEndpoint(page.htmlId);
-            numberOfUnregisteredEndpoints++;
+            this._clearPageFromConnections(page);
             let removedPage:Page = _.first(_.remove(this.pages, (currentPage) => { 
                 return currentPage.htmlId == page.htmlId;
             }));
-            console.log(`Unregistered ${numberOfUnregisteredEndpoints} endpoints after page deletion`)
             resolve(removedPage);
         } catch( e ) { 
             this._errorService.onError.next(e);
@@ -284,73 +336,47 @@ export class FlouService {
         }
         
         });
+        if(doSaveAction) { 
+            this.saveAction();
+        }
       return result;
     }
 
-    addItem(page: Page, type?: string) {
+    saveAction() {
+        if( this.lastOperation == LastAction.redo || this.lastOperation == LastAction.undo ) {
+            this.currentAction = null;
+        }
+
+        if( !this.currentAction ) {
+            steps.actionsCount = 0;
+            this.currentAction = new Action(JSON.stringify(this.pages));
+            steps.actionsCount++;
+            console.log("new action ");
+        } else {
+            console.log("add action ");
+            steps.actionsCount++;
+            this.currentAction = this.currentAction.addAction(JSON.stringify(this.pages));
+        }
+
+        this.lastOperation = LastAction.action;
+
+    }
+
+    addItem(page: Page, type?: string, doSaveAction?: boolean) {
         let item: PageItem = null;
         const htmlId = UUID.UUID();
         if ( !type ) {
             item = {position: 0, type: 'input', title: `Item ${page.items.length + 1}`,
-                 htmlId: htmlId, page: page, outputConnections: []};
+                 htmlId: htmlId, outputConnections: []};
         } else {
-            item = {position: 0, page: page, type: type, title: `Item ${page.items.length + 1}`, htmlId: htmlId, outputConnections: []};
+            item = {position: 0, type: type, title: `Item ${page.items.length + 1}`, htmlId: htmlId, outputConnections: []};
         }
         page.items.push(item);
-    }
-    
-    loadApp():Promise<AppState[]> {
-        let result = new Promise<AppState[]>((resolve, reject ) => {
-            try { 
-                let appAsStr = localStorage.getItem("flou");
-                if( appAsStr ) { 
-                    this.states = JSON.parse(appAsStr); 
-                } else {
-                    this.states = [];
-                }
-                resolve(this.states);
-            } catch( e ) { 
-                this._errorService.onError.next(e);
-                reject(e);
-            }
-        });
-     return result;
+        if( doSaveAction ) { 
+            this.saveAction();
+        }
     }
 
-    saveState( stateName ):Promise<AppState> { 
-        return new Promise<AppState>((resolve, reject) => {
-            try {
-            let existingState = _.find( this.states, (state: AppState) => {
-                return  state.name == stateName;
-              });
-              if( !existingState ) { 
-                  let currentTime = Date.now();
-                  let newAppState:AppState = { uid: UUID.UUID(), 
-                                            created: currentTime, 
-                                            updated: currentTime,
-                                            name : stateName,
-                                            data: _.cloneDeep(this.pages)};
-                  this.states.push(newAppState);
-                  resolve(newAppState);
-              } else { 
-                  existingState.data = _.cloneDeep(this.pages);
-                  existingState.updated = Date.now();
-                  resolve(existingState);
-              }
-              localStorage.setItem("flou", JSON.stringify(this.states));
-            } catch( e ) { 
-                console.error(e);
-                reject(e);
-            }
-        });
-        
-    }
     
-    loadState( state: AppState ) { 
-        this.jsPlumbConnections = [];
-        this.endpoints = [];
-        this.initJsPlumb();
-        this.pages = _.cloneDeep(state.data);
-        this.stateLoaded.next(this.pages);
-    }
+
 }

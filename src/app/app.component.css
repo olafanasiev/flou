@@ -44,6 +44,14 @@
     transition: transform 0.3s;
 }
 
+.export-state-link{ 
+    visibility: hidden;
+}
+
+.import--hidden { 
+    visibility: hidden;
+}
+
 app-page{ 
     position: absolute;
 }

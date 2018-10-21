@@ -1,5 +1,4 @@
 import { Connection } from "./connection";
-import { Page } from "./page";
 
 export interface PageItem {
     type: string;
@@ -7,5 +6,4 @@ export interface PageItem {
     position: number;
     htmlId: string;
     outputConnections: Connection[];
-    page: Page;
 }

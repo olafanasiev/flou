@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewEncapsulation,
+import { Component, OnInit, Input, ViewEncapsulation, ChangeDetectorRef,
   AfterViewInit, ViewContainerRef, ViewChildren, QueryList, ElementRef, ViewChild, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { FlouService } from '../../services/flou.service';
 import { Page } from '../models/page';
@@ -30,7 +30,8 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(private _flouService: FlouService,
               private _viewRef: ViewContainerRef,
               private _inputItemService: InputItemService,
-              private _pageService: PageService) { }
+              private _pageService: PageService,
+              private _cd: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.subscriptions.push(this._pageService.pageActiveEvent.subscribe((htmlId) => {
@@ -62,7 +63,9 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
 
     }, start: () => {
       this._inputItemService.emitPanelHideEvent();
+      this._flouService.saveAction();
     }, stop: () => { 
+      this._flouService.saveAction();
     }});
     this.enableDragging();
    
@@ -73,9 +76,13 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   enableDragging() {
     this._flouService.enableDragging(this._viewRef.element.nativeElement, {
+      start: () => {
+        this._flouService.saveAction();
+      },
       stop: (info) => { 
         this.page.x = info.pos[0];
         this.page.y = info.pos[1];
+        this._flouService.saveAction();
       },
       force: true
     });
@@ -103,19 +110,22 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   deletePage(){
-    this._flouService.removePage(this.page).then((removedPage) => {
+    let doSaveAction = true;
+    this._flouService.removePage(this.page, doSaveAction).then((removedPage) => {
       this.pageDeleted.next(removedPage);
     });
   }
 
   addItem(e) {
+    let doSaveAction = true;
     if( e ) { 
       if( e.target && e.target.classList && e.target.classList.contains('can-add-item')) {
-        this._flouService.addItem(this.page);
+        this._flouService.addItem(this.page, null, doSaveAction );
       }
     } else { 
-     this._flouService.addItem(this.page);
+       this._flouService.addItem(this.page, null, doSaveAction);
     }
+    this._cd.detectChanges();
   }
 
 }

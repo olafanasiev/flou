@@ -1,6 +1,6 @@
-import { Component, Input, OnInit, ViewContainerRef, Output, EventEmitter, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, Input, OnInit, ViewContainerRef, ChangeDetectorRef,
+         Output, EventEmitter, ViewChild, ChangeDetectionStrategy, ElementRef, AfterViewInit } from '@angular/core';
 import { InputItemService } from '../../services/input-item.service';
-import { Connection } from '../models/connection';
 import { FlouService } from '../../services/flou.service';
 import { Subscription } from 'rxjs';
 import * as _ from 'lodash';
@@ -10,7 +10,9 @@ declare var $;
 @Component({
   selector: 'app-input-item',
   templateUrl: './input-item.component.html',
-  styleUrls: ['./input-item.component.css']
+  styleUrls: ['./input-item.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
+
 })
 export class InputItemComponent implements OnInit, AfterViewInit {
   @Input()
@@ -29,15 +31,22 @@ export class InputItemComponent implements OnInit, AfterViewInit {
   subscriptions: Subscription[] = [];
   constructor(public _viewRef: ViewContainerRef, 
               private _inputItemService: InputItemService,
-              private _flouService: FlouService) {
+              private _flouService: FlouService ) { 
+  }
+
+  onTitleChange(newTitle) { 
+    this.item.title = newTitle;
+    this._flouService.saveAction();
   }
 
   ngOnInit() {
     this.item.type = 'input';
   }
 
+
   removeItem(item: PageItem) {
-    this._flouService.removeItem(item);
+    let doSaveAction = true;
+    this._flouService.removeItem(item, doSaveAction);
   }
 
   stopSort() {

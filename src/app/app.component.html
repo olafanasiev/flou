@@ -8,6 +8,13 @@
     </div>
     <ngx-snackbar [position]="'top-center'" [max]="3"></ngx-snackbar>
     <div class="right-bottom-main-panel">
+        <button (click)="export()" class="round-button very-big-round-button">
+            <img width="60" height="60" src="/assets/export.svg"/>
+            <a class="export-state-link" #downloadLink href="#"></a>
+        </button>  
+        <button (click)="importApp.click()"  class="round-button very-big-round-button">
+            <img width="60" height="60" src="/assets/import.svg"/>
+        </button>
         <button (click)="resetZoom()" [disabled]="zoom == 1" class="zoom-reset-button round-button very-big-round-button mat-button">
             1:1
         </button>
@@ -17,7 +24,7 @@
         <button (click)="zoomOut()" [disabled]="zoom < 0.2" class="zoom-out-button round-button very-big-round-button mat-button">
             <img width="30" height="30" src="/assets/zoom-out.svg"/>
         </button>
-        <app-states></app-states>
         <button (click)="addPage(null)" class="add-page-button round-button very-big-round-button">+</button>
+        <input (change)="import($event)" accept="application/json" class="import--hidden" #importApp name="file" type="file"/>
     </div>
 </div>
