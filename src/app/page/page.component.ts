@@ -55,20 +55,25 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this._viewRef.element.nativeElement.id = this.page.htmlId;
-    this._flouService.makeTarget(this.page.htmlId);
-    
-    let $itemsContainer = $(this.itemsContainer.nativeElement);
-      $itemsContainer.sortable({ handle: '.item-sortable-icon' , update: () => {
+    //TODO:: there is an issue on production, this.page - is null
+    //makeTarget will cause an exception. We should implement ready lifecycle for FLOUJS
+    setTimeout(() => {
+      this._flouService.makeTarget(this.page.htmlId);
 
-    }, start: () => {
-      this._inputItemService.emitPanelHideEvent();
-      this._flouService.saveAction();
-    }, stop: () => { 
-      this._flouService.saveAction();
-    }});
-    this.enableDragging();
-   
-    this._flouService.pageLoaded.next(this.page);
+      let $itemsContainer = $(this.itemsContainer.nativeElement);
+        $itemsContainer.sortable({ handle: '.item-sortable-icon' , update: () => {
+
+      }, start: () => {
+        this._inputItemService.emitPanelHideEvent();
+        this._flouService.saveAction();
+      }, stop: () => {
+        this._flouService.saveAction();
+      }});
+      this.enableDragging();
+
+      this._flouService.pageLoaded.next(this.page);
+    }, 0);
+
   }
 
 
