@@ -6,6 +6,7 @@ import * as _ from 'lodash';
 import { Connection } from '../app/models/connection';
 import { ErrorService } from './error.service';
 import { Subject, Observable } from 'rxjs';
+import { interval } from 'rxjs';
 import { Action, steps } from '../app/models/action';
 declare var jsPlumb: any;
 export namespace LastAction { 
@@ -17,32 +18,64 @@ export namespace LastAction {
 export class FlouService {
     jsPlumbInstance;
     pages: Page[];
-    pageCounts = 0;
     jsPlumbConnections = [];
     pageLoaded: Subject<any>;
     pageLoaded$: Observable<any>;
     endpoints  = [];
     currentAction:Action;
     lastOperation = '';
-    // actions = [];
-    constructor(private _errorService: ErrorService) {
-        this.pageLoaded = new Subject<any>();
-        this.pageLoaded$ = this.pageLoaded.asObservable();
-        this.pages = [];
+    DEFAULT_STATE_KEY = 'default_state';
 
-        this.pageLoaded$.subscribe((page:Page) => {
-                page.inputConnections.forEach((connection: Connection) => { 
-                    this.drawConnection(connection.source, connection.target);
-                  });
-                    page.items.forEach((pageItem: PageItem) => {
-                        pageItem.outputConnections.forEach((connection:Connection) => {
-                            this.drawConnection(connection.source, connection.target);
-                    });
-                 });
-               
+    constructor(private _errorService: ErrorService) {
+
+
+
+      this.pageLoaded = new Subject<any>();
+      this.pageLoaded$ = this.pageLoaded.asObservable();
+
+      this.pageLoaded$.subscribe((page:Page) => {
+        page.inputConnections.forEach((connection: Connection) => {
+          this.drawConnection(connection.source, connection.target);
         });
+        page.items.forEach((pageItem: PageItem) => {
+          pageItem.outputConnections.forEach((connection:Connection) => {
+            this.drawConnection(connection.source, connection.target);
+          });
+        });
+
+      });
+
+
+
+      const autoSaveState = interval(10000);
+      autoSaveState.subscribe( () => {
+        localStorage.setItem( this.DEFAULT_STATE_KEY, JSON.stringify( this.pages ));
+      });
     }
-  
+
+    loadLastAppState() {
+      const loadedState = localStorage.getItem( this.DEFAULT_STATE_KEY );
+
+      if( loadedState ) {
+        try {
+          this.pages = JSON.parse(loadedState);
+        } catch ( e ) {
+          this.pages = [];
+
+        }
+      } else {
+          this.pages = [];
+      }
+
+      if( !_.isEmpty(this.pages) ) {
+        this.import(this.pages);
+      }
+    }
+
+
+    getPages() {
+      return this.pages;
+    }
 
     makeSource(inputItemId) { 
         this.jsPlumbInstance.makeSource( inputItemId, {anchor: ['RightMiddle'],
@@ -77,7 +110,9 @@ export class FlouService {
                 length:8,
                 foldback:0.9
             } ]
-        ], PaintStyle: { strokeWidth: 5, stroke: '#456'}});
+        ], PaintStyle: { strokeWidth: 5, stroke: '#456'},
+           DragOptions : { cursor: "move" },
+        });
 
         this.jsPlumbInstance.bind('click', (connection) => {
           let flouConnection = new Connection(connection.sourceId, connection.targetId);
@@ -121,10 +156,6 @@ export class FlouService {
 
     getJsPlumbInstance() {
         return this.jsPlumbInstance;
-    }
-
-    getPages() {
-        return this.pages;
     }
 
     doesPageIsOverlayingAnotherPage(x,y) {
@@ -266,11 +297,11 @@ export class FlouService {
         return JSON.stringify( this.pages );
     }
 
-    import(json) { 
+    import(importedPages: Page[]) {
         this.jsPlumbConnections = [];
         this.endpoints = [];
         this.initJsPlumb();
-        this.pages = json;
+        this.pages = importedPages;
     }
 
     removeConnection(connection: Connection, doSaveAction?:boolean) {
@@ -351,9 +382,7 @@ export class FlouService {
             steps.actionsCount = 0;
             this.currentAction = new Action(JSON.stringify(this.pages));
             steps.actionsCount++;
-            console.log("new action ");
         } else {
-            console.log("add action ");
             steps.actionsCount++;
             this.currentAction = this.currentAction.addAction(JSON.stringify(this.pages));
         }
@@ -367,9 +396,10 @@ export class FlouService {
         const htmlId = UUID.UUID();
         if ( !type ) {
             item = {position: 0, type: 'input', title: `Item ${page.items.length + 1}`,
-                 htmlId: htmlId, outputConnections: []};
+                 htmlId: htmlId, outputConnections: [], created: Date.now()};
         } else {
-            item = {position: 0, type: type, title: `Item ${page.items.length + 1}`, htmlId: htmlId, outputConnections: []};
+            item = {position: 0, type: type, title: `Item ${page.items.length + 1}`,
+                 htmlId: htmlId, outputConnections: [], created: Date.now()};
         }
         page.items.push(item);
         if( doSaveAction ) { 

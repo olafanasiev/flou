@@ -33,6 +33,9 @@
     flex-direction: column;
 }
 
+.jtk-drag {
+  cursor: move;
+}
 
 .page__delete-button {
     width: 30px;

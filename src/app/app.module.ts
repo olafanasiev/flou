@@ -11,7 +11,6 @@ import { ItemContextMenuComponent } from './item-context-menu/item-context-menu.
 import { ClickOutsideModule } from 'ng-click-outside';
 import { PageService } from '../services/page.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { ItemPanelComponent } from './item-panel/item-panel.component';
 import { ErrorService } from '../services/error.service';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
@@ -23,7 +22,6 @@ import { HttpClientModule } from '@angular/common/http';
     PageComponent,
     InputItemComponent,
     ItemContextMenuComponent,
-    ItemPanelComponent,
     AppDialogComponent
   ],
   imports: [

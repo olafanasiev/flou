@@ -1,7 +1,7 @@
 <div [style.width.px]="page.width" [style.minHeight.px]="268" (dblclick)="addItem($event)" (clickOutside)="makeNotActive($event)" (mousedown)="makeActive()" [ngClass]="{'page':true, '--active':page.isActive, 'can-add-item': true}">
     <div>
         <div class="page__title">
-            <input #pageTitle type="text" class="title-item" [value]="page.title"/>
+            <input #pageTitle type="text" class="title-item" [(ngModel)]="page.title"/>
             <div (click)="deletePage()" class="page__delete-button">X</div> 
         </div>
         <div #itemsContainer class="page__items">

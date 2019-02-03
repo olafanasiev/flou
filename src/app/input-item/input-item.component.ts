@@ -1,9 +1,7 @@
-import { Component, Input, OnInit, ViewContainerRef, ChangeDetectorRef,
+import { Component, Input, ViewContainerRef, ChangeDetectorRef,
          Output, EventEmitter, ViewChild, ChangeDetectionStrategy, ElementRef, AfterViewInit } from '@angular/core';
 import { InputItemService } from '../../services/input-item.service';
 import { FlouService } from '../../services/flou.service';
-import { Subscription } from 'rxjs';
-import * as _ from 'lodash';
 import { PageItem } from '../models/page-item';
 
 declare var $;
@@ -14,10 +12,9 @@ declare var $;
   changeDetection: ChangeDetectionStrategy.OnPush
 
 })
-export class InputItemComponent implements OnInit, AfterViewInit {
+export class InputItemComponent implements AfterViewInit {
   @Input()
   item: PageItem;
-  textAreaHeight = 20;
   @ViewChild('textArea') textAreaElRef: ElementRef;
   @Output()
   enterPressed = new EventEmitter<any>();
@@ -27,9 +24,9 @@ export class InputItemComponent implements OnInit, AfterViewInit {
   sortStarted = new EventEmitter<any>();
   @Output()
   sortStopped = new EventEmitter<any>();
-  // isJsPlumbed = false;
-  subscriptions: Subscription[] = [];
-  constructor(public _viewRef: ViewContainerRef, 
+  textAreaHeight = 20;
+  constructor(public _viewRef: ViewContainerRef,
+              public cd: ChangeDetectorRef,
               private _inputItemService: InputItemService,
               private _flouService: FlouService ) { 
   }
@@ -38,11 +35,6 @@ export class InputItemComponent implements OnInit, AfterViewInit {
     this.item.title = newTitle;
     this._flouService.saveAction();
   }
-
-  ngOnInit() {
-    this.item.type = 'input';
-  }
-
 
   removeItem(item: PageItem) {
     let doSaveAction = true;
@@ -58,8 +50,10 @@ export class InputItemComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.textAreaElRef.nativeElement.focus();
-    $(this.textAreaElRef.nativeElement).select();
+    if (new Date( this.item.created).toString() == new Date().toString()){
+        this.textAreaElRef.nativeElement.focus();
+        $(this.textAreaElRef.nativeElement).select();
+    }
     this._flouService.makeSource(this.item.htmlId);
   }
 
@@ -72,6 +66,7 @@ export class InputItemComponent implements OnInit, AfterViewInit {
   onKeyUp(e) {
     //enter press
     if( e.keyCode == 13 && e.target.value.trim() != "" && !e.shiftKey) {
+      e.target.value = e.target.value.trim();
       this.enterPressed.next(e);
     } 
 

@@ -12,14 +12,15 @@ const Z_LETTER_CODE = 90;
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements AfterViewInit, OnInit {
+export class AppComponent implements AfterViewInit {
   title = 'app';
   pages: Page[] = [];
-  zoom: number = 1;
   @ViewChild('downloadLink')
   downloadLink:ElementRef;
+  @ViewChild('importApp')
+  importApp: ElementRef;
   constructor(private _flouService: FlouService,
-    private _snackBarRef: SnackbarService, 
+    private _snackBarRef: SnackbarService,
     private _cd: ChangeDetectorRef,
     private _errorService: ErrorService) {}
 
@@ -39,17 +40,12 @@ export class AppComponent implements AfterViewInit, OnInit {
       }
   }
 
-  ngAfterViewInit() {
-    this.pages =  this._flouService.getPages();
-    setInterval( this.autosave.bind(this), 10000);
-  }
 
-  autosave() {
-    localStorage.setItem("flou_autosave", JSON.stringify(this.pages) );
-  }
-  
-  ngOnInit() {
-      this._flouService.initJsPlumb();
+  ngAfterViewInit() {
+    this._flouService.loadLastAppState();
+    setTimeout(() => {
+      this.pages = this._flouService.getPages();
+    }, 0)
   }
 
   onPageDelete( removedPage: Page ) {
@@ -66,16 +62,6 @@ export class AppComponent implements AfterViewInit, OnInit {
         },
       });
   }
-  
-
-  zoomIn() {
-    if( this.zoom > 1.9) { 
-      return;
-    }
-    
-    this.zoom+=0.1;
-    this._flouService.getJsPlumbInstance().setZoom(this.zoom);
-  }
 
   export(){ 
     let state = this._flouService.export();
@@ -88,6 +74,7 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   import(e) {
     let fileReader = new FileReader();
+
     fileReader.onload = (e) => {
       try { 
         this._flouService.import(JSON.parse(fileReader.result.toString()));
@@ -95,21 +82,11 @@ export class AppComponent implements AfterViewInit, OnInit {
       } catch( e ) { 
         this._errorService.onError.next({code:"1003", message: "Can't import app"});
       }
+        this.importApp.nativeElement.value = '';
     }
     if( e.target.files && !_.isEmpty(e.target.files)){ 
-      fileReader.readAsText(e.target.files[0]);
+      fileReader.readAsText(_.first(e.target.files));
     }
-  }
-  resetZoom() { 
-    this.zoom = 1;
-  }
-
-  zoomOut() {
-    if( this.zoom < 0.2 ) { 
-      return;
-    }
-    this.zoom-=0.1;
-    this._flouService.getJsPlumbInstance().setZoom(this.zoom);
   }
 
   addPage(e) {

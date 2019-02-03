@@ -1,5 +1,5 @@
 <div (mouseleave)="closePanel()" #itemTypePanel [style.left.px]="leftPosition" [style.top.px]="topPosition" [ngClass]="{'item-type-panel':true, '--show':isPanelShowed}">
-    <div (click)="changeType('input')" class="context-menu-item input-icon input-icon--input"></div>
+      <div (click)="changeType('input')" class="context-menu-item input-icon input-icon--input"></div>
     <div (click)="changeType('choice')" class="context-menu-item input-icon input-icon--choice"></div>
     <div (click)="changeType('text')" class="context-menu-item input-icon input-icon--text"></div>
     <div (click)="changeType('button')" class="context-menu-item input-icon input-icon--button"></div>

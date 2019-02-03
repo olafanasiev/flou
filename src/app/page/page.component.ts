@@ -24,7 +24,6 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
   pageDeleted: EventEmitter<Page> = new EventEmitter();
   @Input()
   page: Page;
-  @ViewChild('pageTitle') titleElRef: ElementRef;
   @ViewChildren(InputItemComponent) items: QueryList<InputItemComponent>;
   subscriptions: Subscription[] = [];
   constructor(private _flouService: FlouService,
@@ -69,7 +68,6 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
     }});
     this.enableDragging();
    
-    $(this.titleElRef.nativeElement).select();
     this._flouService.pageLoaded.next(this.page);
   }
 

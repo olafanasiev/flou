@@ -5,5 +5,6 @@ export interface PageItem {
     title: string;
     position: number;
     htmlId: string;
+    created: number;
     outputConnections: Connection[];
 }

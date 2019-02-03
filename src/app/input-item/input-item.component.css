@@ -6,6 +6,10 @@
     align-items:center;
 }
 
+.input-icon {
+  cursor: pointer;
+}
+
 .item-anchor {
     width: 10px;
     height: 10px;

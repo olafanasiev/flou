@@ -16,6 +16,7 @@ export class ItemContextMenuComponent implements OnInit {
 
   changeType(type) {
     this.itemComponent.item.type = type;
+    this.itemComponent.cd.detectChanges();
     this.isPanelShowed = false;
   }
 

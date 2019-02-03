@@ -50,6 +50,7 @@
 
 .import--hidden { 
     visibility: hidden;
+    width:1px;
 }
 
 app-page{ 

@@ -1,7 +1,7 @@
 <div class="main-canvas">
     <app-item-context-menu></app-item-context-menu>
     <div (dblclick)="addPage($event)" id="pages-wrapper">
-        <div [style.transform]="'scale('+ zoom + ')'" id="pages" class="pages">
+        <div *ngIf="pages" id="pages" class="pages">
             <app-page (pageDeleted)="onPageDelete($event)" [style.top.px]="page.y" [style.left.px]="page.x" [page]="page" *ngFor="let page of pages">
             </app-page>
         </div>
@@ -15,16 +15,7 @@
         <button (click)="importApp.click()"  class="round-button very-big-round-button">
             <img width="60" height="60" src="/assets/import.svg"/>
         </button>
-        <button (click)="resetZoom()" [disabled]="zoom == 1" class="zoom-reset-button round-button very-big-round-button mat-button">
-            1:1
-        </button>
-        <button (click)="zoomIn()" [disabled]="zoom > 1.9" class="zoom-in-button round-button very-big-round-button mat-button">
-            <img width="30" height="30" src="/assets/zoom-in.svg"/>
-        </button>
-        <button (click)="zoomOut()" [disabled]="zoom < 0.2" class="zoom-out-button round-button very-big-round-button mat-button">
-            <img width="30" height="30" src="/assets/zoom-out.svg"/>
-        </button>
         <button (click)="addPage(null)" class="add-page-button round-button very-big-round-button">+</button>
-        <input (change)="import($event)" accept="application/json" class="import--hidden" #importApp name="file" type="file"/>
+        <input (change)="import($event)" value="" accept="application/json" class="import--hidden" #importApp name="file" type="file"/>
     </div>
 </div>
