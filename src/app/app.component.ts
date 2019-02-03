@@ -89,14 +89,14 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
-  addPage(e) {
+  addPage(e:MouseEvent) {
     let doSaveAction = true;
     if( e && e.target ) {
-      if( e.target.id == 'pages-wrapper' || e.target.id == 'pages') {
-        this._flouService.addPage(doSaveAction);
+      if( (<any> e.target).id == 'pages-wrapper' || (<any> e.target).id == 'pages') {
+        this._flouService.addPage(e.screenX, e.screenY, doSaveAction);
       }
     } else { 
-      this._flouService.addPage(doSaveAction);
+      this._flouService.addPage(null, null, doSaveAction);
     }
 
   

@@ -162,7 +162,7 @@ export class FlouService {
       return  _.find(this.pages, {x:x, y:y}) != null;
     }
 
-    addPage(doSaveAction?:boolean) {
+    addPage(cx?: number, cy?: number, doSaveAction?:boolean) {
         this.pages.forEach((page) => {
             page.isActive = false;
         });
@@ -172,14 +172,18 @@ export class FlouService {
         const halfPageWidth = pageWidth / 2;
         let y = (window.innerHeight / 2 + window.scrollY) - halfPageHeight;
         let x = (window.innerWidth / 2 + window.scrollX) - halfPageWidth;
-
-        while( this.doesPageIsOverlayingAnotherPage(x,y) ){ 
+        if( !cx && !cy ) {
+          while (this.doesPageIsOverlayingAnotherPage(x, y)) {
             //we are doing shifting page
-            x=x+15;
-            y=y+15;
+            x = x + 15;
+            y = y + 15;
+          }
+        } else {
+          cx = cx - halfPageHeight;
+          cy = cy - halfPageWidth;
         }
-        const newPage:Page = {  x: x,
-            y: y,
+        const newPage:Page = {  x: cx||x,
+            y: cy||y,
             width: pageWidth,
             htmlId: UUID.UUID(),
             title: this._getPageTitle(),
