@@ -21,15 +21,20 @@ export class FlouService {
     jsPlumbConnections = [];
     pageLoaded: Subject<any>;
     pageLoaded$: Observable<any>;
+    pageDragStop$: Observable<any>;
+    pageDragStop: Subject<any>;
     endpoints  = [];
     currentAction:Action;
     lastOperation = '';
     DEFAULT_STATE_KEY = 'default_state';
+    LAST_HEIGHT = "last_height";
+    emitDragStopped() {
+      this.pageDragStop.next();
+    }
 
     constructor(private _errorService: ErrorService) {
-
-
-
+      this.pageDragStop = new Subject();
+      this.pageDragStop$ = this.pageDragStop.asObservable();
       this.pageLoaded = new Subject<any>();
       this.pageLoaded$ = this.pageLoaded.asObservable();
 
@@ -51,6 +56,18 @@ export class FlouService {
       autoSaveState.subscribe( () => {
         localStorage.setItem( this.DEFAULT_STATE_KEY, JSON.stringify( this.pages ));
       });
+    }
+
+    saveAppHeight(newHeight) {
+      localStorage.setItem(this.LAST_HEIGHT, newHeight);
+    }
+
+    getLastAppHeight() {
+      const lastHeight = localStorage.getItem(this.LAST_HEIGHT);
+      if( lastHeight ) {
+        return parseInt(lastHeight);
+      }
+      return null;
     }
 
     loadLastAppState() {
@@ -110,7 +127,7 @@ export class FlouService {
                 length:8,
                 foldback:0.9
             } ]
-        ], PaintStyle: { strokeWidth: 5, stroke: '#456'},
+        ], PaintStyle: { strokeWidth: 2, stroke: '#456'},
            DragOptions : { cursor: "move" },
         });
 

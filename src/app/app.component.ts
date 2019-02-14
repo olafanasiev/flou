@@ -12,8 +12,9 @@ const Z_LETTER_CODE = 90;
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent implements AfterViewInit, OnInit {
   title = 'app';
+  appHeight = 0;
   pages: Page[] = [];
   @ViewChild('downloadLink')
   downloadLink:ElementRef;
@@ -22,8 +23,21 @@ export class AppComponent implements AfterViewInit {
   constructor(private _flouService: FlouService,
     private _snackBarRef: SnackbarService,
     private _cd: ChangeDetectorRef,
-    private _errorService: ErrorService) {}
+    private _errorService: ErrorService) {
+    this._flouService.pageDragStop$.subscribe(() => {
+        this.appHeight = this.getNewWindowSize();
+        this._flouService.saveAppHeight(this.appHeight);
+    });
+  }
 
+  getNewWindowSize() {
+    let scrollHeight = Math.max(
+      document.body.scrollHeight, document.documentElement.scrollHeight,
+      document.body.offsetHeight, document.documentElement.offsetHeight,
+      document.body.clientHeight, document.documentElement.clientHeight
+    );
+    return scrollHeight;
+  }
 
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent) {
@@ -40,12 +54,17 @@ export class AppComponent implements AfterViewInit {
       }
   }
 
+  ngOnInit(): void {
+    this.appHeight = this._flouService.getLastAppHeight() || window.innerHeight;
+    this._flouService.initJsPlumb();
+  }
 
   ngAfterViewInit() {
     this._flouService.loadLastAppState();
     setTimeout(() => {
       this.pages = this._flouService.getPages();
-    }, 0)
+    }, 0);
+
   }
 
   onPageDelete( removedPage: Page ) {

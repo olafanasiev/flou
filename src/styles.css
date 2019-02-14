@@ -1,11 +1,22 @@
 /* You can add global styles to this file, and also import other style files */
-@import "~@ng-select/ng-select/themes/material.theme.css";
+/*@import "~@ng-select/ng-select/themes/material.theme.css";*/
+
+@font-face {
+  font-family: Flux-Architect;
+  src: url(/assets/architect.ttf);
+}
+
 html, body {
-    width: 100%;
-    height: 100%;
     margin: 0;
     padding: 0;
-    font-family: sans-serif;
+    font-family: Flux-Architect;
+    height: 100%;
+}
+
+* {
+  font-family: Flux-Architect;
+  color: white;
+  stroke: #FFF;
 }
 
 .input-item .title-item { 
@@ -30,13 +41,11 @@ html, body {
     text-decoration: none;
     outline: none;
     cursor: pointer;
+
 }
 
 .mat-button--gray { 
     background-color: #5d5d5d;
-}
-.round-button:hover, .mat-button:hover { 
-    box-shadow: 0px 0px 9px 0px rgba(125,125,125,1);
 }
 
 .mat-button:disabled{ 
@@ -49,28 +58,26 @@ html, body {
     background-color:#3e3d3d;
 }
 
-.round-button:active, .mat-button:active {
-    background-color: #c57d12;
-    box-shadow: none;
-}
+
 
 .round-button { 
-    background-color: #ffaf38;
     padding: 0;
     margin: 0;
     border-radius: 50%;
-    border: none;
+    border: 2px solid white;
     outline:none;
     user-select: none;
     cursor: pointer;
     color: white;
+    background-color: transparent;
     box-shadow: none;
 }
 
 .big-button {
     width: 45px;
     height: 45px;
-    font-size: 45px;
+    font-size: 22px;
+    padding-left: 4px;
     line-height: 45px;
 }
 
@@ -88,6 +95,8 @@ html, body {
     margin-right: 4px;
     margin-left: 4px;
     background: url('./assets/input-text.svg') no-repeat 0 0 transparent;
+    fill: white;
+    stroke: white;
 }
 
 .input-icon--choice{ 
@@ -124,5 +133,5 @@ html, body {
 
 .input-icon:hover{ 
     cursor: pointer;
-    background-color: #f8f8f8;
+    background-color:transparent;
 }

@@ -77,6 +77,7 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
+
   enableDragging() {
     this._flouService.enableDragging(this._viewRef.element.nativeElement, {
       start: () => {
@@ -86,7 +87,9 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
         this.page.x = info.pos[0];
         this.page.y = info.pos[1];
         this._flouService.saveAction();
-      },
+        // this.updateWindowSize();
+        this._flouService.emitDragStopped();
+        },
       force: true
     });
     this._flouService.getJsPlumbInstance().setDraggable(this._viewRef.element.nativeElement, true);
