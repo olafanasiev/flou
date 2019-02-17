@@ -1,5 +1,5 @@
 import { PageItem } from './page-item';
-import { Connection } from './connection';
+import { ConnectionMeta } from './connectionMeta';
 
 export interface Page {
     htmlId: string;
@@ -9,5 +9,5 @@ export interface Page {
     title: string;
     items: PageItem[];
     isActive: boolean;
-    inputConnections: Connection[];
+    inputConnections: ConnectionMeta[];
 }

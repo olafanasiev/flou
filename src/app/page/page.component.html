@@ -5,10 +5,16 @@
             <div (click)="deletePage()" class="page__delete-button">X</div> 
         </div>
         <div #itemsContainer class="page__items">
-            <app-input-item (sortStarted)="disableDragging()" (sortStopped)="enableDragging()" *ngFor="let item of page.items" (enterPressed)="addItem()" (onEmptyField)="removeEmptyItem(item.htmlId)" [item]="item"></app-input-item>
+          <sortable [listStyle]="ngxSortableModuleSettings" [items]="page.items" [name]="'List'" (dragStarted)="disableDragging()" (listSorted)="enableDragging()">
+            <ng-template let-item>
+              <app-input-item (enterPressed)="addItem()" (onEmptyField)="removeEmptyItem(item.htmlId)" [item]="item"></app-input-item>
+            </ng-template>
+          </sortable>
         </div>
     </div>
     <div class="can-add-item add-item-panel">
         <button class="page__add-item round-button big-button" (click)="addItem(null)">+</button>
     </div>
 </div>
+
+<!--//(sortStarted)="disableDragging()" (sortStopped)="enableDragging()"-->

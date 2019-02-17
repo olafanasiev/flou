@@ -1,7 +1,7 @@
 <div [style.height.px]="appHeight" class="main-canvas">
     <app-item-context-menu></app-item-context-menu>
     <div (dblclick)="addPage($event)" id="pages-wrapper">
-        <div *ngIf="pages" id="pages" class="pages">
+        <div id="pages" class="pages">
             <app-page (pageDeleted)="onPageDelete($event)" [style.top.px]="page.y" [style.left.px]="page.x" [page]="page" *ngFor="let page of pages">
             </app-page>
         </div>
@@ -15,7 +15,9 @@
         <button (click)="importApp.click()"  class="button">
             <img width="45" height="45" src="/assets/open.svg"/>
         </button>
-        <button (click)="addPage(null)" class="button add-page-button">+</button>
+        <button (click)="addPage(null)" class="button">
+            <img width="50#254B7F" height="45" src="/assets/add-page-icon.svg"/>
+        </button>
         <input (change)="import($event)" value="" accept="application/json" class="import--hidden" #importApp name="file" type="file"/>
     </div>
 </div>

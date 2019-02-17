@@ -60,11 +60,9 @@ export class AppComponent implements AfterViewInit, OnInit {
   }
 
   ngAfterViewInit() {
-    this._flouService.loadLastAppState();
-    setTimeout(() => {
+    this._flouService.loadLastAppState().then(() => {
       this.pages = this._flouService.getPages();
-    }, 0);
-
+    });
   }
 
   onPageDelete( removedPage: Page ) {

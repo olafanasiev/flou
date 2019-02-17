@@ -9,11 +9,6 @@
             [value]="item.title"
             (ngModelChange)="onTitleChange($event)"
             [ngModel]="item.title"></textarea>
-  <div (mouseup)="stopSort()" (mousedown)="startSort()" class="item-sortable-icon">
-    <div class="line"></div>
-    <div class="line"></div>
-    <div class="line"></div>
-  </div>
   <!--<span (click)="removeItem(item)" class="item-remove">X</span>-->
   <span class="item-anchor" [id]="item.htmlId"></span>
 </div>

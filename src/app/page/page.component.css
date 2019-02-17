@@ -27,7 +27,11 @@
     z-index: 2;
 }
 
-.page__items{ 
+.page__items .sortable-header {
+  display:none;
+}
+
+.page__items{
     display: flex;
     flex-direction: column;
 }

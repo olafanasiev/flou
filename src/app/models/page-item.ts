@@ -1,4 +1,4 @@
-import { Connection } from "./connection";
+import { ConnectionMeta } from "./connectionMeta";
 
 export interface PageItem {
     type: string;
@@ -6,5 +6,5 @@ export interface PageItem {
     position: number;
     htmlId: string;
     created: number;
-    outputConnections: Connection[];
+    outputConnections: ConnectionMeta[];
 }

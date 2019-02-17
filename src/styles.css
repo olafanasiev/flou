@@ -29,6 +29,14 @@ html, body {
     font-style: normal;
 }
 
+.input-item__label-edit{
+  background-color: transparent;
+  border: none;
+  padding-bottom: 20px;
+  outline: none;
+  font-family: Arial;
+  font-size: 20px;
+}
 
 
 .mat-button{ 

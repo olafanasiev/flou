@@ -20,10 +20,6 @@ export class InputItemComponent implements AfterViewInit {
   enterPressed = new EventEmitter<any>();
   @Output()
   onEmptyField = new EventEmitter<any>();
-  @Output()
-  sortStarted = new EventEmitter<any>();
-  @Output()
-  sortStopped = new EventEmitter<any>();
   textAreaHeight = 20;
   constructor(public _viewRef: ViewContainerRef,
               public cd: ChangeDetectorRef,
@@ -41,18 +37,9 @@ export class InputItemComponent implements AfterViewInit {
     this._flouService.removeItem(item, doSaveAction);
   }
 
-  stopSort() {
-    this.sortStopped.emit();
-  }
-
-  startSort() { 
-    this.sortStarted.emit();
-  }
-
   ngAfterViewInit() {
     if (new Date( this.item.created).toString() == new Date().toString()){
         this.textAreaElRef.nativeElement.focus();
-        $(this.textAreaElRef.nativeElement).select();
     }
     this._flouService.makeSource(this.item.htmlId);
   }

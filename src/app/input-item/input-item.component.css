@@ -6,10 +6,6 @@
     align-items:center;
 }
 
-.input-item:hover .line {
-  display: block;
-}
-
 
 .input-icon {
   cursor: pointer;
@@ -33,36 +29,25 @@
     position: absolute;
 }
 
+.input-item__textarea:hover {
+  background: url("/assets/menu.png") no-repeat center right transparent;
+
+}
 
 .input-item__textarea {
     outline: none;
     border: none;
     overflow: hidden;
     height: auto;
-    width: 150px;
+    width: 180px;
     resize: none;
     background: transparent;
+    line-height: 20px;
 }
 
 app-input-item{
     display: flex;
 }
 
-.item-sortable-icon{ 
-    width: 15px;
-    height: 18px;
-    cursor: pointer;
-    margin-right: 3px;
-    display: flex;
-    margin-left: 8px;
-    flex-direction:column;
-    justify-content: space-around;
-}
 
-.line {
-    background-color: #FFF;
-    height: 2px;
-    width: 20px;
-    display: none;
-}
 

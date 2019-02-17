@@ -3,22 +3,25 @@ import { Page } from '../app/models/page';
 import { UUID } from 'angular2-uuid';
 import { PageItem } from '../app/models/page-item';
 import * as _ from 'lodash';
-import { Connection } from '../app/models/connection';
+import { ConnectionMeta } from '../app/models/connectionMeta';
 import { ErrorService } from './error.service';
-import { Subject, Observable } from 'rxjs';
+import {Subject, Observable, EMPTY} from 'rxjs';
 import { interval } from 'rxjs';
+import {ConnectionMadeEventInfo, jsPlumb, jsPlumbInstance, OverlaySpec} from 'jsplumb';
 import { Action, steps } from '../app/models/action';
-declare var jsPlumb: any;
-export namespace LastAction { 
+import {ConnectorType, EventListenerType, OverlayType, Strings} from "../app/shared/app.const";
+import {EventListener} from "@angular/core/src/debug/debug_node";
+
+export namespace LastAction {
     export const undo = 'undo';
     export const redo = 'redo';
     export const action = 'action';
 }
 @Injectable()
 export class FlouService {
-    jsPlumbInstance;
+    jsPlumbInstance: jsPlumbInstance;
     pages: Page[];
-    jsPlumbConnections = [];
+    jsPlumbConnections: ConnectionMadeEventInfo[] = [];
     pageLoaded: Subject<any>;
     pageLoaded$: Observable<any>;
     pageDragStop$: Observable<any>;
@@ -28,6 +31,8 @@ export class FlouService {
     lastOperation = '';
     DEFAULT_STATE_KEY = 'default_state';
     LAST_HEIGHT = "last_height";
+    static readonly OVERLAY_ARROW_ID = "arrow";
+    static readonly OVERLAY_CUSTOM_ID = "editableText";
     emitDragStopped() {
       this.pageDragStop.next();
     }
@@ -37,16 +42,18 @@ export class FlouService {
       this.pageDragStop$ = this.pageDragStop.asObservable();
       this.pageLoaded = new Subject<any>();
       this.pageLoaded$ = this.pageLoaded.asObservable();
-
       this.pageLoaded$.subscribe((page:Page) => {
-        page.inputConnections.forEach((connection: Connection) => {
-          this.drawConnection(connection.source, connection.target);
-        });
-        page.items.forEach((pageItem: PageItem) => {
-          pageItem.outputConnections.forEach((connection:Connection) => {
-            this.drawConnection(connection.source, connection.target);
+        // setTimeout(() => {
+          page.inputConnections.forEach((connection: ConnectionMeta) => {
+            this.drawConnection(connection.source, connection.target, connection.label);
           });
-        });
+          page.items.forEach((pageItem: PageItem) => {
+            pageItem.outputConnections.forEach((connection:ConnectionMeta) => {
+              this.drawConnection(connection.source, connection.target, connection.label);
+            });
+          });
+        // }, 3000);
+
 
       });
 
@@ -70,23 +77,27 @@ export class FlouService {
       return null;
     }
 
-    loadLastAppState() {
-      const loadedState = localStorage.getItem( this.DEFAULT_STATE_KEY );
+    loadLastAppState(): Promise<any> {
+      const resultPromise = new Promise<any>((resolve, reject)=>{
+        const loadedState = localStorage.getItem( this.DEFAULT_STATE_KEY );
 
-      if( loadedState ) {
-        try {
-          this.pages = JSON.parse(loadedState);
-        } catch ( e ) {
+        if( loadedState ) {
+          try {
+            this.pages = JSON.parse(loadedState);
+          } catch ( e ) {
+            this.pages = [];
+
+          }
+        } else {
           this.pages = [];
-
         }
-      } else {
-          this.pages = [];
-      }
-
-      if( !_.isEmpty(this.pages) ) {
-        this.import(this.pages);
-      }
+        if( !_.isEmpty(this.pages) ) {
+          this.import(this.pages).then(() => {
+            resolve();
+          });
+        }
+      });
+    return resultPromise;
     }
 
 
@@ -114,61 +125,84 @@ export class FlouService {
         this.endpoints.push(targetId);
     } 
 
-    initJsPlumb() { 
-        if( this.jsPlumbInstance ) { 
+    initJsPlumb():Promise<any> {
+      const promise = new Promise<any>((resolve, reject)=>{
+        try {
+          if (this.jsPlumbInstance) {
             this.jsPlumbInstance.reset();
-        } else { 
+
+          } else {
             this.jsPlumbInstance = jsPlumb.getInstance({Container: document.getElementById('pages')});
-        }
-        this.jsPlumbInstance.importDefaults({Connector: ['Bezier', { curviness: 50 }], Overlays: [
-            [ "Arrow", { 
-                location:1,
-                id:"arrow",
-                length:8,
-                foldback:0.9
-            } ]
-        ], PaintStyle: { strokeWidth: 2, stroke: '#456'},
-           DragOptions : { cursor: "move" },
-        });
+          }
 
-        this.jsPlumbInstance.bind('click', (connection) => {
-          let flouConnection = new Connection(connection.sourceId, connection.targetId);
-          let page = this.pages.find( page => page.htmlId == connection.targetId);
-          
-          _.remove(page.inputConnections, (connectionToRemove:Connection) => { 
-                return connectionToRemove.target == connection.targetId;
+          this.jsPlumbInstance.importDefaults({
+            Connector: [ConnectorType.BEZIER, {curviness: 50}], Overlays: [
+            [  OverlayType.ARROW, {
+                location: 1,
+                id: FlouService.OVERLAY_ARROW_ID,
+                length: 8,
+                foldback: 0.9
+              }
+            ],
+
+              // []
+            ], PaintStyle: {strokeWidth: 2, stroke: '#456'},
+            DragOptions: {cursor: "move"},
           });
 
-          this.pages.forEach((page ) => { 
-              page.items.forEach((item: PageItem) => {
-                _.remove( item.outputConnections, connection => connection.source == connection.sourceId);
-              });
-          });
-          
-          this.removeConnection(flouConnection);
-        })
-        
-        this.jsPlumbInstance.bind('connection', (newConnectionInfo, mouseEvent) => {
-            if( mouseEvent ) { 
-                let targetPage = this.pages.find( page => page.htmlId == newConnectionInfo.targetId );
-                let flouConnection =  new Connection(newConnectionInfo.sourceId, newConnectionInfo.targetId)
-                let connection = _.find( targetPage.inputConnections, (connection) => {
-                return connection.source == newConnectionInfo.sourceId && connection.target == newConnectionInfo.targetId;
-                });    
-                if(!connection) {
-                    targetPage.inputConnections.push(flouConnection);
-                    this.pages.forEach((page) => {
-                        let sourceItem = page.items.find( item => item.htmlId == newConnectionInfo.sourceId );
-                        if( sourceItem ) { 
-                            sourceItem.outputConnections.push(flouConnection);
-                        }
-                    });
+          this.jsPlumbInstance.ready(() => {
+            this.jsPlumbInstance.bind(EventListenerType.CLICK, (connection) => {
+              // let flouConnection = new ConnectionMeta(connection.sourceId, connection.targetId);
+              // let page = this.pages.find(page => page.htmlId == connection.targetId);
+
+              // _.remove(page.inputConnections, (connectionToRemove: ConnectionMeta) => {
+              //   return connectionToRemove.target == connection.targetId;
+              // });
+
+              // this.pages.forEach((page) => {
+              //   page.items.forEach((item: PageItem) => {
+              //     _.remove(item.outputConnections, connection => connection.source == connection.sourceId);
+              //   });
+              // });
+
+              // this.removeConnection(flouConnection);
+            });
+
+            this.jsPlumbInstance.bind('connection', (newConnectionInfo:ConnectionMadeEventInfo, mouseEvent: Event) => {
+              if (mouseEvent) {
+                let targetPage = this.pages.find(page => page.htmlId == newConnectionInfo.targetId);
+                const flouConnection = new ConnectionMeta(newConnectionInfo.sourceId, newConnectionInfo.targetId);
+                let connection = _.find(targetPage.inputConnections, (connection) => {
+                  return connection.source == newConnectionInfo.sourceId && connection.target == newConnectionInfo.targetId;
+                });
+                if (!connection) {
+                  targetPage.inputConnections.push(flouConnection);
+                  this.pages.forEach((page) => {
+                    let sourceItem = page.items.find(item => item.htmlId == newConnectionInfo.sourceId);
+                    if (sourceItem) {
+                      sourceItem.outputConnections.push(flouConnection);
+                    }
+                  });
                 }
+
+                this.addConnectionLabel(newConnectionInfo, Strings.EMPTY);
                 this.saveAction();
-            }
-            this.jsPlumbConnections.push(newConnectionInfo);
-            this.jsPlumbInstance.repaintEverything();
-        });  
+              }
+              this.jsPlumbConnections.push(newConnectionInfo);
+              this.jsPlumbInstance.repaintEverything();
+
+              // Focus on newly created  item
+              const editableInputElRef = (<any>newConnectionInfo.connection.getOverlay(FlouService.OVERLAY_CUSTOM_ID)).canvas;
+              editableInputElRef.focus();
+            });
+            resolve();
+          })
+        } catch(e) {
+          reject(e);
+        }
+      });
+
+    return promise;
     }
 
     getJsPlumbInstance() {
@@ -253,9 +287,37 @@ export class FlouService {
             
     }
 
-    drawConnection(source, target) {
-        if( _.includes( this.endpoints, source) &&  _.includes( this.endpoints, target)) {
-            this.jsPlumbInstance.connect({source: source, target: target});
+
+
+    _editableTextOverlay(defaultValue: string = ""): OverlaySpec {
+     return [OverlayType.CUSTOM, {
+        create:(component)=>{
+          const input = document.createElement('input');
+          input.type = Strings.INPUT_TYPE_TEXT;
+          input.value = defaultValue;
+          input.classList.add("input-item__label-edit");
+          input.addEventListener(EventListenerType.FOCUS_OUT, (ev: Event) => {
+            const updatedLabel = (<any>ev.target).value;
+            let connectionInfo: ConnectionMeta = this.findConnectionMeta(component.sourceId, component.targetId);
+            connectionInfo.label = updatedLabel;
+             this.saveAction();
+          });
+          return input;
+        },
+        location:[0.5],
+        id: FlouService.OVERLAY_CUSTOM_ID
+      }];
+    }
+
+    addConnectionLabel(jsPlumbConnection: ConnectionMadeEventInfo, label: string) {
+      (<any>jsPlumbConnection.connection).addOverlay(this._editableTextOverlay(label))
+    }
+
+    drawConnection(sourceHtmlId: string, targetHtmlId: string, label: string) {
+        if( _.includes( this.endpoints, sourceHtmlId) &&  _.includes( this.endpoints, targetHtmlId)) {
+            this.jsPlumbInstance.connect({source: sourceHtmlId, target: targetHtmlId, overlays:[
+                this._editableTextOverlay(label)
+              ]});
         }
     }
 
@@ -269,6 +331,20 @@ export class FlouService {
         }
     }
 
+
+    findConnectionMeta(sourceId, targetId): ConnectionMeta {
+      for( let pageIndex = 0; pageIndex < this.pages.length; pageIndex++) {
+        let searchResult = _.find(this.pages[pageIndex].inputConnections, (inputConnection) => {
+         return inputConnection.target ==targetId && inputConnection.source == sourceId;
+        });
+
+        if( searchResult ) {
+          return searchResult;
+        }
+      }
+      return null;
+    }
+
     private _fixHtmlIds(page: Page) {
         page.htmlId = UUID.UUID();
         page.inputConnections.forEach((connection) => {
@@ -277,7 +353,7 @@ export class FlouService {
 
         page.items.forEach((pageItem: PageItem) => {
             pageItem.htmlId = UUID.UUID();
-            pageItem.outputConnections.forEach((connection:Connection) => {
+            pageItem.outputConnections.forEach((connection:ConnectionMeta) => {
                 connection.source = pageItem.htmlId;
             });
         });
@@ -286,9 +362,10 @@ export class FlouService {
 
     private _rebuildPages() {
         this.removeAllPages();
-        this.initJsPlumb();
-        let parsedPages = JSON.parse(this.currentAction.pages);
-        this.pages.push(...parsedPages);
+        this.initJsPlumb().then(() => {
+          let parsedPages = JSON.parse(this.currentAction.pages);
+          this.pages.push(...parsedPages);
+        });
     }
     
     ctrlZ(){
@@ -318,14 +395,19 @@ export class FlouService {
         return JSON.stringify( this.pages );
     }
 
-    import(importedPages: Page[]) {
+    import(importedPages: Page[]): Promise<any> {
+      const result = new Promise<any>((resolve, reject) => {
         this.jsPlumbConnections = [];
         this.endpoints = [];
-        this.initJsPlumb();
-        this.pages = importedPages;
+        this.initJsPlumb().then(() => {
+          this.pages = importedPages;
+          resolve()
+        });
+      });
+      return result
     }
 
-    removeConnection(connection: Connection, doSaveAction?:boolean) {
+    removeConnection(connection: ConnectionMeta, doSaveAction?:boolean) {
         let connectionsToRemove = _.remove( this.jsPlumbConnections, jsPlumbConnection => jsPlumbConnection.sourceId == connection.source && jsPlumbConnection.targetId == connection.target );
            
             connectionsToRemove.forEach((connectionToRemove) => { 
@@ -342,12 +424,12 @@ export class FlouService {
     
 
     private _clearPageFromConnections(page: Page) { 
-        page.inputConnections.forEach((connection:Connection) => { 
+        page.inputConnections.forEach((connection:ConnectionMeta) => {
             this.removeConnection(connection);
         });
         let numberOfUnregisteredEndpoints = 0;
         page.items.forEach((item) => {
-            item.outputConnections.forEach((connection:Connection) => {
+            item.outputConnections.forEach((connection:ConnectionMeta) => {
                 this.removeConnection(connection);
                 numberOfUnregisteredEndpoints++;
             });

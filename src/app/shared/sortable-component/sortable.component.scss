@@ -1,0 +1,17 @@
+.sortable-container {
+  width: 100%;
+  border-radius: 3px;
+
+  .sortable-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0px;
+    overflow: visible;
+    .drop-zone{
+      height: 30px;
+      background: rgba(225, 219, 250, 0.5);
+      opacity: 0.5px;
+      border: 2px dotted rgb(225, 219, 250);
+    }
+  }
+}

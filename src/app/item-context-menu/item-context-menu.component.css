@@ -6,6 +6,8 @@
 .item-type-panel{ 
     display: none;
     position: absolute;
+    padding: 10px;
+    border:1px solid white;
     z-index: 9999;
-    background: white;
+    background: #254B7F;
 }
