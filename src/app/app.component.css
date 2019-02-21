@@ -1,6 +1,5 @@
 
 .main-canvas {
-    background-color: #254B7F;
     height: 100%;
 }
 
@@ -19,6 +18,13 @@
     flex-direction: column;
 }
 
+#flou-theme {
+  position: fixed;
+  top: 30px;
+  left: 30px;
+  cursor: pointer;
+}
+
 .right-bottom-main-panel > *{ 
     margin-top: 10px;
 }
@@ -29,7 +35,6 @@
 }
 
 #pages-wrapper { 
-    background: url("/assets/white-dots.png") repeat 0 0 transparent;
     height: 100%;
 }
 .zoom-reset-button {

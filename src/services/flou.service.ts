@@ -7,10 +7,9 @@ import { ConnectionMeta } from '../app/models/connectionMeta';
 import { ErrorService } from './error.service';
 import {Subject, Observable, EMPTY} from 'rxjs';
 import { interval } from 'rxjs';
-import {ConnectionMadeEventInfo, jsPlumb, jsPlumbInstance, OverlaySpec} from 'jsplumb';
+import {Connection, ConnectionMadeEventInfo, jsPlumb, jsPlumbInstance, OverlaySpec} from 'jsplumb';
 import { Action, steps } from '../app/models/action';
-import {ConnectorType, EventListenerType, OverlayType, Strings} from "../app/shared/app.const";
-import {EventListener} from "@angular/core/src/debug/debug_node";
+import {ConnectorType, EventListenerType, KeyboardKey, OverlayType, Strings} from "../app/shared/app.const";
 
 export namespace LastAction {
     export const undo = 'undo';
@@ -33,6 +32,8 @@ export class FlouService {
     LAST_HEIGHT = "last_height";
     static readonly OVERLAY_ARROW_ID = "arrow";
     static readonly OVERLAY_CUSTOM_ID = "editableText";
+    static readonly OVERLAY_EDIT_CLASS = "overlay-label--edit";
+    static readonly OVERLAY_VIEW_CLASS = "overlay-label--view";
     emitDragStopped() {
       this.pageDragStop.next();
     }
@@ -136,7 +137,7 @@ export class FlouService {
           }
 
           this.jsPlumbInstance.importDefaults({
-            Connector: [ConnectorType.BEZIER, {curviness: 50}], Overlays: [
+            Connector: [ConnectorType.FLOWCHART ], Overlays: [
             [  OverlayType.ARROW, {
                 location: 1,
                 id: FlouService.OVERLAY_ARROW_ID,
@@ -146,7 +147,7 @@ export class FlouService {
             ],
 
               // []
-            ], PaintStyle: {strokeWidth: 2, stroke: '#456'},
+            ], PaintStyle: {strokeWidth: 4, stroke: '#456'},
             DragOptions: {cursor: "move"},
           });
 
@@ -175,25 +176,25 @@ export class FlouService {
                 let connection = _.find(targetPage.inputConnections, (connection) => {
                   return connection.source == newConnectionInfo.sourceId && connection.target == newConnectionInfo.targetId;
                 });
-                if (!connection) {
-                  targetPage.inputConnections.push(flouConnection);
-                  this.pages.forEach((page) => {
-                    let sourceItem = page.items.find(item => item.htmlId == newConnectionInfo.sourceId);
-                    if (sourceItem) {
-                      sourceItem.outputConnections.push(flouConnection);
-                    }
-                  });
-                }
+                  if (!connection) {
+                    targetPage.inputConnections.push(flouConnection);
+                    this.pages.forEach((page) => {
+                      let sourceItem = page.items.find(item => item.htmlId == newConnectionInfo.sourceId);
+                      if (sourceItem) {
+                        sourceItem.outputConnections.push(flouConnection);
+                      }
+                    });
+                  }
+                  this.addConnectionLabel(newConnectionInfo, Strings.EMPTY);
+                  this.saveAction();
+                this.jsPlumbConnections.push(newConnectionInfo);
+                this.jsPlumbInstance.repaintEverything();
 
-                this.addConnectionLabel(newConnectionInfo, Strings.EMPTY);
-                this.saveAction();
+                // Focus on newly created  item
+                const editableInputElRef = (<any>newConnectionInfo.connection.getOverlay(FlouService.OVERLAY_CUSTOM_ID)).canvas;
+                (<any> document.querySelector(`#${editableInputElRef.id} .${FlouService.OVERLAY_EDIT_CLASS}`)).focus();
               }
-              this.jsPlumbConnections.push(newConnectionInfo);
-              this.jsPlumbInstance.repaintEverything();
 
-              // Focus on newly created  item
-              const editableInputElRef = (<any>newConnectionInfo.connection.getOverlay(FlouService.OVERLAY_CUSTOM_ID)).canvas;
-              editableInputElRef.focus();
             });
             resolve();
           })
@@ -287,22 +288,95 @@ export class FlouService {
             
     }
 
+    _changeViewOverlayOnEditOverlay(div: HTMLElement, sourceId:string, targetId: string ) {
+        const label = div.innerText;
+        let editTemplate = this._generateEditTemplate(label, sourceId, targetId,)
+        let parentNode = div.parentNode;
+        this._clearContainer(div);
+        div.append(editTemplate);
+    }
 
+    // _buildEditTemplate() {}
+
+    _changeEditOverlayOnViewOverlay(div: HTMLElement, sourceId: string, targetId: string) {
+        let label = (<HTMLTextAreaElement>document.querySelector(`#${div.id} textarea`)).value;
+        this._clearContainer(div);
+        let viewTemplate = this._generateViewTemplate(div, label, sourceId, targetId);
+    }
+
+    _clearContainer(container: Element) {
+      container.childNodes.forEach((node) => {
+        container.removeChild(node);
+      })
+    }
+
+    _updateConnectionLabel(sourceId: string, targetId: string, label: string) {
+      let connectionInfo: ConnectionMeta = this.findConnectionMeta(sourceId, targetId);
+      connectionInfo.label = label;
+      this.saveAction();
+    }
+
+    _viewTextOverlay(defaultValue: string = ""): OverlaySpec {
+      return [OverlayType.CUSTOM, {
+
+
+      }]
+    }
+
+    _generateViewTemplate(div: HTMLElement, defaultValue: string, sourceId: string, targetId: string) {
+      div.innerText = defaultValue;
+
+      let controlButtons = document.createElement('div');
+      controlButtons.classList.add('label-control-buttons');
+
+      let editIcon= document.getElementById("flou-templates__label-edit").cloneNode(true);
+      let rotateIcon = document.getElementById("flou-templates__label-rotate").cloneNode(true);
+
+      controlButtons.append(editIcon);
+      div.append(controlButtons);
+
+      controlButtons.append(rotateIcon);
+      editIcon.addEventListener(EventListenerType.CLICK,this._changeViewOverlayOnEditOverlay.bind(this,div, sourceId, targetId));
+      return div;
+    }
+
+    _generateEditTemplate(defaultValue: string, sourceId: string, targetId: string) {
+      const div = document.createElement('div');
+      div.classList.add("input-item__wrapper");
+
+      const input = document.createElement('textarea');
+      input.value = defaultValue;
+      input.classList.add(FlouService.OVERLAY_EDIT_CLASS);
+
+      let focusOutHandler = (ev: Event) => {
+        removeEventListeners();
+        const textArea = (<HTMLTextAreaElement>ev.target);
+        this._updateConnectionLabel(sourceId, targetId, textArea.value);
+        this._changeEditOverlayOnViewOverlay(div, sourceId, targetId);
+      };
+
+      let keyUpHandler = (ev: KeyboardEvent) => {
+        if( ev.key == KeyboardKey.ENTER && !ev.shiftKey ) {
+          focusOutHandler(ev);
+        }
+      };
+
+      let removeEventListeners = () => {
+        input.removeEventListener(EventListenerType.FOCUS_OUT, focusOutHandler);
+        input.removeEventListener(EventListenerType.KEYUP, keyUpHandler);
+      };
+
+      input.addEventListener(EventListenerType.FOCUS_OUT, focusOutHandler );
+      input.addEventListener(EventListenerType.KEYUP, keyUpHandler);
+      div.append(input);
+      return div;
+    }
 
     _editableTextOverlay(defaultValue: string = ""): OverlaySpec {
      return [OverlayType.CUSTOM, {
         create:(component)=>{
-          const input = document.createElement('input');
-          input.type = Strings.INPUT_TYPE_TEXT;
-          input.value = defaultValue;
-          input.classList.add("input-item__label-edit");
-          input.addEventListener(EventListenerType.FOCUS_OUT, (ev: Event) => {
-            const updatedLabel = (<any>ev.target).value;
-            let connectionInfo: ConnectionMeta = this.findConnectionMeta(component.sourceId, component.targetId);
-            connectionInfo.label = updatedLabel;
-             this.saveAction();
-          });
-          return input;
+          const div = this._generateEditTemplate(defaultValue, component.sourceId, component.targetId);
+          return div;
         },
         location:[0.5],
         id: FlouService.OVERLAY_CUSTOM_ID
@@ -313,11 +387,13 @@ export class FlouService {
       (<any>jsPlumbConnection.connection).addOverlay(this._editableTextOverlay(label))
     }
 
-    drawConnection(sourceHtmlId: string, targetHtmlId: string, label: string) {
+    drawConnection(sourceHtmlId: string, targetHtmlId: string, label: string): Connection {
         if( _.includes( this.endpoints, sourceHtmlId) &&  _.includes( this.endpoints, targetHtmlId)) {
-            this.jsPlumbInstance.connect({source: sourceHtmlId, target: targetHtmlId, overlays:[
+            return this.jsPlumbInstance.connect({source: sourceHtmlId, target: targetHtmlId, overlays:[
                 this._editableTextOverlay(label)
               ]});
+        } else {
+          return null;
         }
     }
 

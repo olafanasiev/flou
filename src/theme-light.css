@@ -1,0 +1,61 @@
+.main-canvas[theme="light"] path{
+  stroke: #000;
+  color: #000;
+}
+
+.main-canvas[theme="light"] {
+  color: #000;
+}
+
+.main-canvas[theme="light"] input {
+  color: #000;
+}
+
+.main-canvas[theme="light"] textarea {
+  color: #000;
+}
+
+.main-canvas[theme="light"] .flou-palette.stroke-none {
+  stroke: none;
+}
+
+.main-canvas[theme="light"] .flou-palette.fill-none {
+  fill: none;
+}
+
+.main-canvas[theme="light"] .input-item__textarea:hover {
+  background: url("/assets/menu-light.png") no-repeat center right transparent;
+}
+
+
+.main-canvas[theme="light"] .flou-palette {
+  stroke: #000;
+  fill: #000;
+}
+
+.main-canvas[theme="light"] #pages-wrapper {
+  background-color: #FFF;
+  background: url("/assets/black-dots.png") repeat 0 0 transparent;
+}
+
+.main-canvas[theme="light"] .round-button{
+  color: #000;
+  border: 2px solid #000;
+}
+
+.main-canvas[theme="light"] .item-type-panel {
+  background-color: #FFF;
+  border:1px solid #000;
+}
+
+.main-canvas[theme="light"] .page__title {
+  border-bottom: 2px solid #000;
+}
+
+.main-canvas[theme="light"] .page {
+  border: 2px solid #000;
+}
+
+.main-canvas[theme="light"] .item-anchor {
+  background: #000;
+}

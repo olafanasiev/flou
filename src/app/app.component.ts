@@ -4,6 +4,7 @@ import { Page } from './models/page';
 import * as _ from 'lodash';
 import {SnackbarService} from 'ngx-snackbar';
 import { ErrorService } from '../services/error.service';
+import {Theme} from "./shared/app.const";
 
 const Y_LETTER_CODE = 89;
 const Z_LETTER_CODE = 90;
@@ -14,6 +15,7 @@ const Z_LETTER_CODE = 90;
 })
 export class AppComponent implements AfterViewInit, OnInit {
   title = 'app';
+  theme = 'dark';
   appHeight = 0;
   pages: Page[] = [];
   @ViewChild('downloadLink')
@@ -28,6 +30,11 @@ export class AppComponent implements AfterViewInit, OnInit {
         this.appHeight = this.getNewWindowSize();
         this._flouService.saveAppHeight(this.appHeight);
     });
+  }
+
+
+  changeTheme() {
+    this.theme = this.theme == Theme.DARK ? Theme.LIGHT:Theme.DARK;
   }
 
   getNewWindowSize() {
@@ -110,7 +117,7 @@ export class AppComponent implements AfterViewInit, OnInit {
     let doSaveAction = true;
     if( e && e.target ) {
       if( (<any> e.target).id == 'pages-wrapper' || (<any> e.target).id == 'pages') {
-        this._flouService.addPage(e.screenX, e.screenY, doSaveAction);
+        this._flouService.addPage(e.screenX + window.scrollX, e.screenY + window.scrollY, doSaveAction);
       }
     } else { 
       this._flouService.addPage(null, null, doSaveAction);

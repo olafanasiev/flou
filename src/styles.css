@@ -1,6 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
 /*@import "~@ng-select/ng-select/themes/material.theme.css";*/
 
+@import "flou.css";
+@import "theme-dark.css";
+@import "theme-light.css";
+
 @font-face {
   font-family: Flux-Architect;
   src: url(/assets/architect.ttf);
@@ -15,27 +19,16 @@ html, body {
 
 * {
   font-family: Flux-Architect;
-  color: white;
-  stroke: #FFF;
 }
 
 .input-item .title-item { 
-    width: 100px;
-    border:none;
-    position: relative;
-    z-index: 9999;
-    height: 30px;
-    outline: none;
-    font-style: normal;
-}
-
-.input-item__label-edit{
-  background-color: transparent;
-  border: none;
-  padding-bottom: 20px;
+  width: 100px;
+  border:none;
+  position: relative;
+  z-index: 9999;
+  height: 30px;
   outline: none;
-  font-family: Arial;
-  font-size: 20px;
+  font-style: normal;
 }
 
 
@@ -66,17 +59,18 @@ html, body {
     background-color:#3e3d3d;
 }
 
-
+.input-item__wrapper {
+  padding:10px;
+  z-index:9999;
+}
 
 .round-button { 
     padding: 0;
     margin: 0;
     border-radius: 50%;
-    border: 2px solid white;
     outline:none;
     user-select: none;
     cursor: pointer;
-    color: white;
     background-color: transparent;
     box-shadow: none;
 }
@@ -89,50 +83,7 @@ html, body {
     line-height: 45px;
 }
 
-.very-big-round-button{ 
-    width: 60px;
-    height: 60px;
-    font-size: 60px;
-    line-height: 60px;
-}
 
-.input-icon--input{ 
-    display: block;
-    width: 30px;
-    height: 25px;
-    margin-right: 4px;
-    margin-left: 4px;
-    background: url('./assets/input-text.svg') no-repeat 0 0 transparent;
-    fill: white;
-    stroke: white;
-}
-
-.input-icon--choice{ 
-    display: block;
-    width: 30px;
-    height: 25px;
-    margin-right: 4px;
-    margin-left: 4px;
-    background: url('./assets/multiple.svg') no-repeat 0 0 transparent;
-}
-
-.input-icon--text{ 
-    display: block;
-    width: 30px;
-    height: 25px;
-    margin-right: 4px;
-    margin-left: 4px;
-    background: url('./assets/text-icon.svg') no-repeat 0 0 transparent;
-}
-
-.input-icon--button{ 
-    display: block;
-    width: 30px;
-    height: 25px;
-    margin-right: 4px;
-    margin-left: 4px;
-    background: url('./assets/button.png') no-repeat left bottom transparent;
-}
 
 .input-icon{ 
     margin-top: 10px;

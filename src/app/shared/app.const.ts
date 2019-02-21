@@ -1,5 +1,6 @@
 export namespace ConnectorType {
     export const BEZIER = "Bezier";
+    export const FLOWCHART = "Flowchart";
 }
 
 export namespace OverlayType {
@@ -16,4 +17,14 @@ export namespace  Strings {
 export namespace EventListenerType {
   export const CLICK = "click";
   export const FOCUS_OUT = "focusout";
+  export const KEYUP = "keyup";
+}
+
+export namespace KeyboardKey{
+  export const ENTER = "Enter";
+}
+
+export namespace Theme {
+  export const DARK = "dark";
+  export const LIGHT = "light";
 }

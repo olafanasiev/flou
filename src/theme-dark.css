@@ -1,0 +1,65 @@
+.main-canvas[theme="dark"] path{
+  stroke: #FFF;
+  color: #FFF;
+}
+
+.main-canvas[theme="dark"] {
+  color: #FFF;
+}
+
+.main-canvas[theme="dark"] input {
+  color: #FFF;
+}
+
+.main-canvas[theme="dark"] textarea {
+  color: #FFF;
+}
+
+.main-canvas[theme="dark"] .flou-palette.stroke-none {
+  stroke: none;
+}
+
+.main-canvas[theme="dark"] .flou-palette.fill-none {
+  fill: none;
+}
+
+.main-canvas[theme="dark"] .flou-palette {
+  stroke: #FFF;
+  fill: #FFF;
+}
+
+.main-canvas[theme="dark"] #pages-wrapper {
+  background-color: #254B7F;
+  background-image: url("/assets/white-dots.png");
+  background-position-x: 0;
+  background-position-y: 0;
+  background-repeat: repeat;
+}
+
+.main-canvas[theme="dark"] .page__title {
+  border-bottom: 2px solid white;
+}
+
+.main-canvas[theme="dark"] .round-button{
+  color: white;
+  border: 2px solid white;
+}
+
+.main-canvas[theme="dark"] .input-item__textarea:hover {
+  background: url("/assets/menu-dark.png") no-repeat center right transparent;
+}
+
+
+.main-canvas[theme="dark"] .item-type-panel {
+  background-color: #254B7F;
+  border:1px solid #FFF;
+}
+
+.main-canvas[theme="dark"] .page {
+  border: 2px solid #FFF;
+}
+
+.main-canvas[theme="dark"] .item-anchor {
+  background: #FFF;
+}
+

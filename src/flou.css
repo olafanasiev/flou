@@ -1,0 +1,26 @@
+.overlay-label--edit{
+  background-color: transparent;
+  border: none;
+  padding-bottom: 20px;
+  outline: none;
+  font-family: Arial;
+  font-size: 20px;
+  overflow: hidden;
+}
+
+.jtk-overlay .flou-template svg{
+  width: 20px;
+  height: 20px;
+}
+
+.jtk-overlay:hover .label-control-buttons {
+  display: flex;
+}
+
+.label-control-buttons {
+  display: none;
+  position: absolute;
+  right:-10px;
+  top:-10px;
+  cursor: pointer;
+}

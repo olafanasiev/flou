@@ -5,7 +5,7 @@
             <div (click)="deletePage()" class="page__delete-button">X</div> 
         </div>
         <div #itemsContainer class="page__items">
-          <sortable [listStyle]="ngxSortableModuleSettings" [items]="page.items" [name]="'List'" (dragStarted)="disableDragging()" (listSorted)="enableDragging()">
+          <sortable [listStyle]="sortableSettings" [items]="page.items" [name]="'List'" (dragStarted)="disableDragging()" (listSorted)="enableDragging()">
             <ng-template let-item>
               <app-input-item (enterPressed)="addItem()" (onEmptyField)="removeEmptyItem(item.htmlId)" [item]="item"></app-input-item>
             </ng-template>

@@ -34,9 +34,9 @@ export class ItemContextMenuComponent implements OnInit {
   ngOnInit() {
     this._inputItemService.panelShowEvent.subscribe((component: InputItemComponent) => {
       this.itemComponent = component;
-      // const item$ = $(component._viewRef.element.nativeElement);
-      // this.topPosition = item$.offset().top - 50;
-      // this.leftPosition = item$.offset().left - 50;
+      const item:HTMLElement = component._viewRef.element.nativeElement;
+      this.topPosition = item.getBoundingClientRect().top + window.scrollY - 50;
+      this.leftPosition = item.getBoundingClientRect().left + window.scrollX - 50;
       this.isPanelShowed = true;
       this._cd.detectChanges();
      });

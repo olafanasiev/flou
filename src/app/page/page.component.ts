@@ -16,7 +16,7 @@ import { Subscription } from 'rxjs';
   encapsulation: ViewEncapsulation.None
 })
 export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
-  ngxSortableModuleSettings = {width:'100%', height: 'auto'};
+  sortableSettings = {width:'100%', height: 'auto'};
   @ViewChild('itemsContainer') itemsContainer: ElementRef;
   @Output()
   pageClicked: EventEmitter<Page> = new EventEmitter();
