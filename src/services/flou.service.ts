@@ -46,11 +46,11 @@ export class FlouService {
       this.pageLoaded$.subscribe((page:Page) => {
         // setTimeout(() => {
           page.inputConnections.forEach((connection: ConnectionMeta) => {
-            this.drawConnection(connection.source, connection.target, connection.label);
+            this.drawViewConnection(connection.source, connection.target, connection.label);
           });
           page.items.forEach((pageItem: PageItem) => {
             pageItem.outputConnections.forEach((connection:ConnectionMeta) => {
-              this.drawConnection(connection.source, connection.target, connection.label);
+              this.drawViewConnection(connection.source, connection.target, connection.label);
             });
           });
         // }, 3000);
@@ -290,24 +290,24 @@ export class FlouService {
 
     _changeViewOverlayOnEditOverlay(div: HTMLElement, sourceId:string, targetId: string ) {
         const label = div.innerText;
-        let editTemplate = this._generateEditTemplate(label, sourceId, targetId,)
-        let parentNode = div.parentNode;
-        this._clearContainer(div);
-        div.append(editTemplate);
+        let parentContainer = div.parentElement;
+        this._clearContainer(parentContainer);
+        let editTemplate = this._generateEditTemplate(label, sourceId, targetId);
+        parentContainer.append(editTemplate);
+        parentContainer.querySelector("textarea").focus();
     }
 
     // _buildEditTemplate() {}
 
     _changeEditOverlayOnViewOverlay(div: HTMLElement, sourceId: string, targetId: string) {
-        let label = (<HTMLTextAreaElement>document.querySelector(`#${div.id} textarea`)).value;
+        let label = (<HTMLTextAreaElement>div.querySelector('textarea')).value;
         this._clearContainer(div);
-        let viewTemplate = this._generateViewTemplate(div, label, sourceId, targetId);
+        let viewTemplate = this._generateViewTemplate( label, sourceId, targetId);
+        div.append(viewTemplate);
     }
 
     _clearContainer(container: Element) {
-      container.childNodes.forEach((node) => {
-        container.removeChild(node);
-      })
+      container.innerHTML = "";
     }
 
     _updateConnectionLabel(sourceId: string, targetId: string, label: string) {
@@ -318,12 +318,20 @@ export class FlouService {
 
     _viewTextOverlay(defaultValue: string = ""): OverlaySpec {
       return [OverlayType.CUSTOM, {
+        create:(component)=>{
+          const div = document.createElement('div');
 
-
-      }]
+          div.append(this._generateViewTemplate(defaultValue, component.sourceId, component.targetId));
+          return div;
+        },
+        location:[0.5],
+        id: FlouService.OVERLAY_CUSTOM_ID
+      }];
     }
 
-    _generateViewTemplate(div: HTMLElement, defaultValue: string, sourceId: string, targetId: string) {
+    _generateViewTemplate( defaultValue: string, sourceId: string, targetId: string):HTMLElement {
+      let div = document.createElement('div');
+      div.classList.add('label-container', 'label-view-template');
       div.innerText = defaultValue;
 
       let controlButtons = document.createElement('div');
@@ -335,24 +343,57 @@ export class FlouService {
       controlButtons.append(editIcon);
       div.append(controlButtons);
 
+      let removeEventListeners = () => {
+        editIcon.removeEventListener(EventListenerType.CLICK, editButtonHandler);
+        rotateIcon.removeEventListener(EventListenerType.CLICK, rotateButtonHandler)
+      };
+
+      let editButtonHandler = (ev: Event) => {
+        removeEventListeners();
+        this._changeViewOverlayOnEditOverlay(div, sourceId, targetId);
+      };
+
+      let rotateButtonHandler = (ev: Event ) => {
+       let overlayContainer = div.parentElement;
+       let transformStyle = overlayContainer.style.transform;
+       let currentRotateValue = 0;
+       if( transformStyle.search("rotate") != -1 ) {
+         //
+         currentRotateValue = parseInt(transformStyle.substring(transformStyle.indexOf("rotate(") + 7, transformStyle.indexOf("deg")));
+         // console.log(currentRotateValue);
+         if( currentRotateValue == 270 ) {
+           currentRotateValue = 0;
+         } else {
+           currentRotateValue+=90;
+         }
+           transformStyle = transformStyle.replace(/rotate\(\d+deg\)/, `rotate(${currentRotateValue}deg)`);
+       } else {
+           transformStyle+=" rotate(90deg)";
+       }
+
+
+       div.parentElement.style.transform  = transformStyle;
+      };
+
       controlButtons.append(rotateIcon);
-      editIcon.addEventListener(EventListenerType.CLICK,this._changeViewOverlayOnEditOverlay.bind(this,div, sourceId, targetId));
+      editIcon.addEventListener(EventListenerType.CLICK,editButtonHandler);
+      rotateIcon.addEventListener(EventListenerType.CLICK, rotateButtonHandler);
       return div;
     }
 
+
     _generateEditTemplate(defaultValue: string, sourceId: string, targetId: string) {
       const div = document.createElement('div');
-      div.classList.add("input-item__wrapper");
-
-      const input = document.createElement('textarea');
-      input.value = defaultValue;
-      input.classList.add(FlouService.OVERLAY_EDIT_CLASS);
+      div.classList.add('label-container', 'label-edit-template');
+      const textarea = document.createElement('textarea');
+      textarea.value = defaultValue;
+      textarea.classList.add(FlouService.OVERLAY_EDIT_CLASS);
 
       let focusOutHandler = (ev: Event) => {
         removeEventListeners();
         const textArea = (<HTMLTextAreaElement>ev.target);
         this._updateConnectionLabel(sourceId, targetId, textArea.value);
-        this._changeEditOverlayOnViewOverlay(div, sourceId, targetId);
+        this._changeEditOverlayOnViewOverlay(div.parentElement, sourceId, targetId);
       };
 
       let keyUpHandler = (ev: KeyboardEvent) => {
@@ -362,13 +403,13 @@ export class FlouService {
       };
 
       let removeEventListeners = () => {
-        input.removeEventListener(EventListenerType.FOCUS_OUT, focusOutHandler);
-        input.removeEventListener(EventListenerType.KEYUP, keyUpHandler);
+        textarea.removeEventListener(EventListenerType.FOCUS_OUT, focusOutHandler);
+        textarea.removeEventListener(EventListenerType.KEYUP, keyUpHandler);
       };
 
-      input.addEventListener(EventListenerType.FOCUS_OUT, focusOutHandler );
-      input.addEventListener(EventListenerType.KEYUP, keyUpHandler);
-      div.append(input);
+      textarea.addEventListener(EventListenerType.FOCUS_OUT, focusOutHandler );
+      textarea.addEventListener(EventListenerType.KEYUP, keyUpHandler);
+      div.append(textarea);
       return div;
     }
 
@@ -387,7 +428,17 @@ export class FlouService {
       (<any>jsPlumbConnection.connection).addOverlay(this._editableTextOverlay(label))
     }
 
-    drawConnection(sourceHtmlId: string, targetHtmlId: string, label: string): Connection {
+  drawViewConnection(sourceHtmlId: string, targetHtmlId: string, label: string): Connection {
+    if( _.includes( this.endpoints, sourceHtmlId) &&  _.includes( this.endpoints, targetHtmlId)) {
+      return this.jsPlumbInstance.connect({source: sourceHtmlId, target: targetHtmlId, overlays:[
+          this._viewTextOverlay(label)
+        ]});
+    } else {
+      return null;
+    }
+  }
+
+    drawEditConnection(sourceHtmlId: string, targetHtmlId: string, label: string): Connection {
         if( _.includes( this.endpoints, sourceHtmlId) &&  _.includes( this.endpoints, targetHtmlId)) {
             return this.jsPlumbInstance.connect({source: sourceHtmlId, target: targetHtmlId, overlays:[
                 this._editableTextOverlay(label)

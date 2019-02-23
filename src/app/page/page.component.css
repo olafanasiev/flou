@@ -1,6 +1,5 @@
 .page {
     position: relative;
-    background-color: transparent;
     display: flex;
     flex-direction: column;
     justify-content: space-between;

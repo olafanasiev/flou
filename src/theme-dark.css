@@ -36,6 +36,10 @@
   background-repeat: repeat;
 }
 
+.main-canvas[theme="dark"] .page{
+  background-color: #254b7f;
+}
+
 .main-canvas[theme="dark"] .page__title {
   border-bottom: 2px solid white;
 }

@@ -15,6 +15,11 @@
   color: #000;
 }
 
+.main-canvas[theme="light"] .page{
+  background-color: #FFF;
+}
+
+
 .main-canvas[theme="light"] .flou-palette.stroke-none {
   stroke: none;
 }
