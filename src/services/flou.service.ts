@@ -44,7 +44,6 @@ export class FlouService {
       this.pageLoaded = new Subject<any>();
       this.pageLoaded$ = this.pageLoaded.asObservable();
       this.pageLoaded$.subscribe((page:Page) => {
-        // setTimeout(() => {
           page.inputConnections.forEach((connection: ConnectionMeta) => {
             this.drawViewConnection(connection.source, connection.target, connection.label);
           });
@@ -53,7 +52,6 @@ export class FlouService {
               this.drawViewConnection(connection.source, connection.target, connection.label);
             });
           });
-        // }, 3000);
 
 
       });
@@ -96,6 +94,8 @@ export class FlouService {
           this.import(this.pages).then(() => {
             resolve();
           });
+        } else {
+          resolve();
         }
       });
     return resultPromise;
@@ -151,23 +151,7 @@ export class FlouService {
             DragOptions: {cursor: "move"},
           });
 
-          this.jsPlumbInstance.ready(() => {
-            this.jsPlumbInstance.bind(EventListenerType.CLICK, (connection) => {
-              // let flouConnection = new ConnectionMeta(connection.sourceId, connection.targetId);
-              // let page = this.pages.find(page => page.htmlId == connection.targetId);
-
-              // _.remove(page.inputConnections, (connectionToRemove: ConnectionMeta) => {
-              //   return connectionToRemove.target == connection.targetId;
-              // });
-
-              // this.pages.forEach((page) => {
-              //   page.items.forEach((item: PageItem) => {
-              //     _.remove(item.outputConnections, connection => connection.source == connection.sourceId);
-              //   });
-              // });
-
-              // this.removeConnection(flouConnection);
-            });
+          // this.jsPlumbInstance.ready(() => {
 
             this.jsPlumbInstance.bind('connection', (newConnectionInfo:ConnectionMadeEventInfo, mouseEvent: Event) => {
               if (mouseEvent) {
@@ -187,17 +171,18 @@ export class FlouService {
                   }
                   this.addConnectionLabel(newConnectionInfo, Strings.EMPTY);
                   this.saveAction();
-                this.jsPlumbConnections.push(newConnectionInfo);
-                this.jsPlumbInstance.repaintEverything();
+
 
                 // Focus on newly created  item
                 const editableInputElRef = (<any>newConnectionInfo.connection.getOverlay(FlouService.OVERLAY_CUSTOM_ID)).canvas;
                 (<any> document.querySelector(`#${editableInputElRef.id} .${FlouService.OVERLAY_EDIT_CLASS}`)).focus();
               }
+              this.jsPlumbConnections.push(newConnectionInfo);
+              this.jsPlumbInstance.repaintEverything();
 
             });
             resolve();
-          })
+          // })
         } catch(e) {
           reject(e);
         }
@@ -297,8 +282,6 @@ export class FlouService {
         parentContainer.querySelector("textarea").focus();
     }
 
-    // _buildEditTemplate() {}
-
     _changeEditOverlayOnViewOverlay(div: HTMLElement, sourceId: string, targetId: string) {
         let label = (<HTMLTextAreaElement>div.querySelector('textarea')).value;
         this._clearContainer(div);
@@ -339,13 +322,22 @@ export class FlouService {
 
       let editIcon= document.getElementById("flou-templates__label-edit").cloneNode(true);
       let rotateIcon = document.getElementById("flou-templates__label-rotate").cloneNode(true);
+      let trashIcon = document.getElementById("flou-templates__label-trash").cloneNode(true);
 
+      controlButtons.append(rotateIcon);
       controlButtons.append(editIcon);
+      controlButtons.append(trashIcon);
       div.append(controlButtons);
 
       let removeEventListeners = () => {
         editIcon.removeEventListener(EventListenerType.CLICK, editButtonHandler);
-        rotateIcon.removeEventListener(EventListenerType.CLICK, rotateButtonHandler)
+        rotateIcon.removeEventListener(EventListenerType.CLICK, rotateButtonHandler);
+        trashIcon.removeEventListener(EventListenerType.CLICK, trashButtonHandler);
+      };
+
+      let trashButtonHandler = (ev: Event) => {
+        let doSaveAction = true;
+        this.removeConnection({source: sourceId, target: targetId, label: null}, doSaveAction);
       };
 
       let editButtonHandler = (ev: Event) => {
@@ -375,9 +367,9 @@ export class FlouService {
        div.parentElement.style.transform  = transformStyle;
       };
 
-      controlButtons.append(rotateIcon);
       editIcon.addEventListener(EventListenerType.CLICK,editButtonHandler);
       rotateIcon.addEventListener(EventListenerType.CLICK, rotateButtonHandler);
+      trashIcon.addEventListener(EventListenerType.CLICK, trashButtonHandler);
       return div;
     }
 
@@ -416,7 +408,8 @@ export class FlouService {
     _editableTextOverlay(defaultValue: string = ""): OverlaySpec {
      return [OverlayType.CUSTOM, {
         create:(component)=>{
-          const div = this._generateEditTemplate(defaultValue, component.sourceId, component.targetId);
+          const div = document.createElement('div');
+          div.append(this._generateEditTemplate(defaultValue, component.sourceId, component.targetId));
           return div;
         },
         location:[0.5],
@@ -550,7 +543,7 @@ export class FlouService {
     }
     
 
-    private _clearPageFromConnections(page: Page) { 
+    private _clearPageFromConnections(page: Page) {
         page.inputConnections.forEach((connection:ConnectionMeta) => {
             this.removeConnection(connection);
         });

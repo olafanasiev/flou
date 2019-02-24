@@ -8,7 +8,6 @@ import { PageService } from '../../services/page.service';
 import * as _ from 'lodash';
 import { PageItem } from '../models/page-item';
 import { Subscription } from 'rxjs';
-// import * as $ from 'jquery';
 @Component({
   selector: 'app-page',
   templateUrl: './page.component.html',

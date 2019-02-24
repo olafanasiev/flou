@@ -8,6 +8,11 @@
   overflow: hidden;
 }
 
+.jtk-overlay {
+  min-width: 100px;
+  min-height:100px;
+}
+
 .jtk-overlay .flou-template svg{
   width: 20px;
   height: 20px;

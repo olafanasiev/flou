@@ -12,6 +12,15 @@
   cursor: pointer;
 }
 
+.trash-icon {
+  display: none;
+  cursor: pointer;
+}
+
+.input-item:hover .trash-icon {
+  display: block;
+}
+
 .item-anchor {
     width: 10px;
     height: 5px;
@@ -29,24 +38,20 @@
     position: absolute;
 }
 
-.input-item__textarea:hover {
-  background: url("/assets/menu-dark.png") no-repeat center right transparent;
-
-}
-
 .input-item__textarea {
     outline: none;
     border: none;
     overflow: hidden;
     height: auto;
     width: 180px;
-    padding-right: 40px;
     resize: none;
     margin-right: 10px;
     cursor: pointer;
     background: transparent;
     line-height: 20px;
 }
+
+
 
 app-input-item{
     display: flex;

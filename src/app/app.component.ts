@@ -13,7 +13,7 @@ const Z_LETTER_CODE = 90;
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements AfterViewInit, OnInit {
+export class AppComponent implements OnInit {
   title = 'app';
   theme = 'dark';
   appHeight = 0;
@@ -32,6 +32,12 @@ export class AppComponent implements AfterViewInit, OnInit {
     });
   }
 
+  @HostListener('window:resize',['$event'])
+  onResize(event) {
+    if( event.target.innerHeight > this.appHeight) {
+      this.appHeight = event.target.innerHeight;
+    }
+  }
 
   changeTheme() {
     this.theme = this.theme == Theme.DARK ? Theme.LIGHT:Theme.DARK;
@@ -63,12 +69,10 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   ngOnInit(): void {
     this.appHeight = this._flouService.getLastAppHeight() || window.innerHeight;
-    this._flouService.initJsPlumb();
-  }
-
-  ngAfterViewInit() {
-    this._flouService.loadLastAppState().then(() => {
-      this.pages = this._flouService.getPages();
+    this._flouService.initJsPlumb().then(() => {
+      this._flouService.loadLastAppState().then(() => {
+        this.pages = this._flouService.getPages();
+      });
     });
   }
 

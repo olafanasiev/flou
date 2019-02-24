@@ -49,10 +49,14 @@
   border: 2px solid white;
 }
 
+.main-canvas[theme="dark"] .trash-icon {
+  width: 30px;
+  height: 30px;
+}
+
 .main-canvas[theme="dark"] .input-item__textarea:hover {
   background: url("/assets/menu-dark.png") no-repeat center right transparent;
 }
-
 
 .main-canvas[theme="dark"] .item-type-panel {
   background-color: #254B7F;
