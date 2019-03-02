@@ -72,6 +72,7 @@ ngOnInit() {
 
 
   enableDragging() {
+    this._flouService.getJsPlumbInstance().repaintEverything();
     this._flouService.enableDragging(this._viewRef.element.nativeElement, {
       start: () => {
         this._flouService.saveAction();
