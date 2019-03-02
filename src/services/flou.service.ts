@@ -22,8 +22,6 @@ export namespace LastAction {
 export class FlouService {
     jsPlumbInstance: jsPlumbInstance;
     pages: Page[];
-    connectionRemove: Subject<ConnectionMeta>;
-    connectionRemove$: Observable<ConnectionMeta>;
     pageDragStop$: Observable<any>;
     pageDragStop: Subject<any>;
     endpoints  = [];
@@ -44,8 +42,6 @@ export class FlouService {
     constructor(private _errorService: ErrorService, private _zone: NgZone) {
       this.pageDragStop = new Subject();
       this.pageDragStop$ = this.pageDragStop.asObservable();
-      this.connectionRemove = new Subject<ConnectionMeta>();
-      this.connectionRemove$ = this.connectionRemove.asObservable();
 
       const autoSaveState = interval(10000);
       autoSaveState.subscribe( () => {
@@ -143,6 +139,9 @@ export class FlouService {
                     pageItem.connectionMeta.push({sourceEndpointId: newConnectionInfo.sourceId, targetEndpointId: newConnectionInfo.targetId, label: EMPTY});
                     this.saveAction();
                 }
+
+                this.addConnectionLabel(newConnectionInfo, EMPTY);
+
               }
             });
             resolve();
@@ -328,13 +327,14 @@ export class FlouService {
       let trashButtonHandler = (ev: Event) => {
         let doSaveAction = true;
         const connectionMeta: ConnectionMeta = {sourceEndpointId: component.sourceId, targetEndpointId: component.targetId, label:null};
-        this.connectionRemove.next(connectionMeta)
+        // this.connectionRemove.next(connectionMeta);
+        this.getJsPlumbInstance().deleteConnection(component.connection);
         // this.removeConnection({source: sourceId, target: targetId, label: null}, doSaveAction);
       };
 
       let editButtonHandler = (ev: Event) => {
         removeEventListeners();
-       // this._changeViewOverlayOnEditOverlay(div, sourceId, targetId);
+       this._changeViewOverlayOnEditOverlay(div, component);
       };
 
       let rotateButtonHandler = (ev: Event ) => {
@@ -410,7 +410,10 @@ export class FlouService {
     }
 
     addConnectionLabel(jsPlumbConnection: ConnectionMadeEventInfo, label: string) {
-      (<any>jsPlumbConnection.connection).addOverlay(this._editableTextOverlay(label))
+      let jsplumbConnectionWithOverlay = (<any>jsPlumbConnection.connection).addOverlay(this._editableTextOverlay(label));
+      jsplumbConnectionWithOverlay.component
+                                  .getOverlay(FlouService.OVERLAY_CUSTOM_ID)
+                                  .canvas.querySelector("textarea").focus();
     }
 
   drawViewConnection(sourceHtmlId: string, targetHtmlId: string, label: string): Connection {

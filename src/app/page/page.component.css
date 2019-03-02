@@ -31,7 +31,6 @@
 .page__items{
     display: flex;
     flex-direction: column;
-    min-height:230px;
 }
 
 .jtk-drag {
