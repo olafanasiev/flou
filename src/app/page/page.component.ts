@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, ViewEncapsulation, ChangeDetectorRef,
-  AfterViewInit, ViewContainerRef, ViewChildren, QueryList, ElementRef, ViewChild, Output, EventEmitter, OnDestroy } from '@angular/core';
+AfterViewInit, ViewContainerRef, ViewChildren, QueryList, ElementRef, ViewChild, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { FlouService } from '../../services/flou.service';
 import { Page } from '../models/page';
 import { InputItemService } from '../../services/input-item.service';
@@ -8,32 +8,33 @@ import { PageService } from '../../services/page.service';
 import * as _ from 'lodash';
 import { PageItem } from '../models/page-item';
 import { Subscription } from 'rxjs';
+import { Endpoint } from "jsplumb";
+import {RemovedPageMeta} from "../models/removed-page-meta";
 @Component({
-  selector: 'app-page',
-  templateUrl: './page.component.html',
-  styleUrls: ['./page.component.css'],
-  encapsulation: ViewEncapsulation.None
+selector: 'app-page',
+templateUrl: './page.component.html',
+styleUrls: ['./page.component.css'],
+encapsulation: ViewEncapsulation.None
 })
 export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
-  sortableSettings = {width:'100%', height: 'auto'};
-  @ViewChild('itemsContainer') itemsContainer: ElementRef;
-  @Output()
-  pageClicked: EventEmitter<Page> = new EventEmitter();
-  @Output()
-  pageDeleted: EventEmitter<Page> = new EventEmitter();
-  @Input()
-  page: Page;
-  @ViewChildren(InputItemComponent) items: QueryList<InputItemComponent>;
-  subscriptions: Subscription[] = [];
-  constructor(private _flouService: FlouService,
-              private _viewRef: ViewContainerRef,
-              private _inputItemService: InputItemService,
-              private _pageService: PageService,
-              private _cd: ChangeDetectorRef) { }
+sortableSettings = {width:'100%', height: 'auto'};
+@ViewChild('itemsContainer') itemsContainer: ElementRef;
+@Output()
+pageClicked: EventEmitter<Page> = new EventEmitter();
+@Output()
+pageDeleted: EventEmitter<RemovedPageMeta> = new EventEmitter();
+@Input()
+page: Page;
+subscriptions: Subscription[] = [];
+constructor(private _flouService: FlouService,
+            private _viewRef: ViewContainerRef,
+            private _inputItemService: InputItemService,
+            private _pageService: PageService,
+            private _cd: ChangeDetectorRef) { }
 
-  ngOnInit() {
-    this.subscriptions.push(this._pageService.pageActiveEvent.subscribe((htmlId) => {
-      if ( this.page.htmlId !== htmlId ) {
+ngOnInit() {
+  this.subscriptions.push(this._pageService.pageActiveEvent.subscribe((htmlId) => {
+    if ( this.page.endpointId !== htmlId ) {
         this.page.isActive = false;
       }
     }));
@@ -48,7 +49,7 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   removeEmptyItem( htmlId) { 
     _.remove( this.page.items,( item: PageItem )=> {
-        return item.htmlId == htmlId;
+        return item.endpointId == htmlId;
     });
   }
 
@@ -56,14 +57,15 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   }
 
-  ngAfterViewInit() {
-    this._viewRef.element.nativeElement.id = this.page.htmlId;
-    //TODO:: there is an issue on production, this.page - is null
-    //makeTarget will cause an exception. We should implement ready lifecycle for FLOUJS
-      this._flouService.makeTarget(this.page.htmlId);
-      this.enableDragging();
+  onItemRemove(item: PageItem) {
+    this._cd.detectChanges();
+    this._flouService.getJsPlumbInstance().repaintEverything();
+  }
 
-      this._flouService.pageLoaded.next(this.page);
+  ngAfterViewInit() {
+    this._viewRef.element.nativeElement.id = this.page.endpointId;
+      this._flouService.makeTarget(this.page.endpointId);
+      this.enableDragging();
 
   }
 
@@ -97,7 +99,7 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   makeActive() {
     this.page.isActive = true;
-    this._pageService.emitPageActiveEvent(this.page.htmlId);
+    this._pageService.emitPageActiveEvent(this.page.endpointId);
   }
 
   makeNotActive(e) {
@@ -107,7 +109,7 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   deletePage(){
     let doSaveAction = true;
-    this._flouService.removePage(this.page, doSaveAction).then((removedPage) => {
+    this._flouService.removePage(this.page, doSaveAction).then((removedPage:RemovedPageMeta) => {
       this.pageDeleted.next(removedPage);
     });
   }

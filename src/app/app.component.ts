@@ -5,6 +5,7 @@ import * as _ from 'lodash';
 import {SnackbarService} from 'ngx-snackbar';
 import { ErrorService } from '../services/error.service';
 import {Theme} from "./shared/app.const";
+import {RemovedPageMeta} from "./models/removed-page-meta";
 
 const Y_LETTER_CODE = 89;
 const Z_LETTER_CODE = 90;
@@ -76,15 +77,35 @@ export class AppComponent implements OnInit {
     });
   }
 
-  onPageDelete( removedPage: Page ) {
+  ngAfterViewInit() {
+    //gives 100% confidence that all components are loaded
+    setTimeout(() => {
+      this.pages.forEach((page) => {
+        page.items.forEach(pageItem => {
+          pageItem.connectionMeta.forEach(( connection ) => {
+            this._flouService.drawViewConnection(connection.sourceEndpointId, connection.targetEndpointId, connection.label);
+          });
+        });
+      });
+    });
+  }
+
+  onPageDelete( removedPage: RemovedPageMeta ) {
       let doSaveAction = true;
       this._snackBarRef.add({
-        msg: `Page "${removedPage.title}" was removed`,
+        msg: `Page "${removedPage.page.title}" was removed`,
         timeout: 4000,
         action: {
           text: 'Undo',
           onClick: (snack) => {
-            this._flouService.restorePage(removedPage, doSaveAction);
+            this._flouService.restorePage(removedPage.page, doSaveAction);
+            this._cd.detectChanges();
+            removedPage.inputConnections
+                  .forEach(connectionMeta =>
+                      this._flouService.drawViewConnection(connectionMeta.sourceEndpointId, connectionMeta.targetEndpointId, connectionMeta.label));
+            removedPage.page.items
+                            .forEach( pageItem => pageItem.connectionMeta
+                            .forEach( connectionMeta => this._flouService.drawViewConnection(connectionMeta.sourceEndpointId, connectionMeta.targetEndpointId, connectionMeta.label)))
             this._snackBarRef.clear();
           },
         },

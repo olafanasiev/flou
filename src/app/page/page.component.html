@@ -7,7 +7,7 @@
         <div #itemsContainer class="page__items">
           <sortable [listStyle]="sortableSettings" [items]="page.items" [name]="'List'" (dragStarted)="disableDragging()" (listSorted)="enableDragging()">
             <ng-template let-item>
-              <app-input-item (enterPressed)="addItem()" (onEmptyField)="removeEmptyItem(item.htmlId)" [item]="item"></app-input-item>
+              <app-input-item (onRemove)="onItemRemove($event)" (enterPressed)="addItem()" (onEmptyField)="removeEmptyItem(item.htmlId)" [item]="item"></app-input-item>
             </ng-template>
           </sortable>
         </div>

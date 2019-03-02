@@ -22,7 +22,7 @@ import { HttpClientModule } from '@angular/common/http';
     PageComponent,
     InputItemComponent,
     ItemContextMenuComponent,
-    AppDialogComponent,
+    AppDialogComponent
   ],
   imports: [
     BrowserAnimationsModule, ClickOutsideModule,HttpClientModule, FormsModule, NgSelectModule, SnackbarModule.forRoot(), BrowserModule, SharedModule

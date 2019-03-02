@@ -1,10 +1,13 @@
-import { Component, Input, ViewContainerRef, ChangeDetectorRef,
-         Output, EventEmitter, ViewChild, ChangeDetectionStrategy, ElementRef, AfterViewInit } from '@angular/core';
+import {
+  Component, Input, ViewContainerRef, ChangeDetectorRef,
+  Output, EventEmitter, ViewChild, ChangeDetectionStrategy, ElementRef, AfterViewInit, OnInit, OnDestroy
+} from '@angular/core';
 import { InputItemService } from '../../services/input-item.service';
 import { FlouService } from '../../services/flou.service';
 import { PageItem } from '../models/page-item';
+import {Strings} from "../shared/app.const";
+import EMPTY = Strings.EMPTY;
 
-declare var $;
 @Component({
   selector: 'app-input-item',
   templateUrl: './input-item.component.html',
@@ -20,11 +23,13 @@ export class InputItemComponent implements AfterViewInit {
   enterPressed = new EventEmitter<any>();
   @Output()
   onEmptyField = new EventEmitter<any>();
+  @Output()
+  onRemove = new EventEmitter<PageItem>();
   textAreaHeight = 20;
   constructor(public _viewRef: ViewContainerRef,
               public cd: ChangeDetectorRef,
               private _inputItemService: InputItemService,
-              private _flouService: FlouService ) { 
+              private _flouService: FlouService){
   }
 
   onTitleChange(newTitle) { 
@@ -34,25 +39,28 @@ export class InputItemComponent implements AfterViewInit {
 
   removeItem(item: PageItem) {
     let doSaveAction = true;
-    this._flouService.removeItem(item, doSaveAction);
+    this._flouService.removeItem(item, doSaveAction).then(() => {
+      this.onRemove.emit(item);
+    });
   }
+
+
 
   ngAfterViewInit() {
     if (new Date( this.item.created).toString() == new Date().toString()){
         this.textAreaElRef.nativeElement.focus();
     }
-    this._flouService.makeSource(this.item.htmlId);
+    this._flouService.makeSource(this.item.endpointId);
   }
 
   removeIfEmpty(value){ 
-    if( value == "" ) {
-      this.onEmptyField.next(this.item.htmlId);
+    if( value == EMPTY ) {
+      this.onEmptyField.next(this.item.endpointId);
     }
   }
 
   onKeyUp(e) {
-    //enter press
-    if( e.keyCode == 13 && e.target.value.trim() != "" && !e.shiftKey) {
+    if( e.key == 'Enter' && e.target.value.trim() != "" && !e.shiftKey) {
       e.target.value = e.target.value.trim();
       this.enterPressed.next(e);
     } 

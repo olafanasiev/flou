@@ -1,15 +1,17 @@
-import { Injectable } from '@angular/core';
+import {Injectable, NgZone} from '@angular/core';
 import { Page } from '../app/models/page';
 import { UUID } from 'angular2-uuid';
 import { PageItem } from '../app/models/page-item';
 import * as _ from 'lodash';
-import { ConnectionMeta } from '../app/models/connectionMeta';
+import { ConnectionMeta } from '../app/models/connection-meta';
 import { ErrorService } from './error.service';
-import {Subject, Observable, EMPTY} from 'rxjs';
+import {Subject, Observable, BehaviorSubject, AsyncSubject} from 'rxjs';
 import { interval } from 'rxjs';
-import {Connection, ConnectionMadeEventInfo, jsPlumb, jsPlumbInstance, OverlaySpec} from 'jsplumb';
+import {Connection, ConnectionMadeEventInfo, Endpoint, jsPlumb, jsPlumbInstance, OverlaySpec} from 'jsplumb';
 import { Action, steps } from '../app/models/action';
 import {ConnectorType, EventListenerType, KeyboardKey, OverlayType, Strings} from "../app/shared/app.const";
+import EMPTY = Strings.EMPTY;
+import {RemovedPageMeta} from "../app/models/removed-page-meta";
 
 export namespace LastAction {
     export const undo = 'undo';
@@ -20,9 +22,8 @@ export namespace LastAction {
 export class FlouService {
     jsPlumbInstance: jsPlumbInstance;
     pages: Page[];
-    jsPlumbConnections: ConnectionMadeEventInfo[] = [];
-    pageLoaded: Subject<any>;
-    pageLoaded$: Observable<any>;
+    connectionRemove: Subject<ConnectionMeta>;
+    connectionRemove$: Observable<ConnectionMeta>;
     pageDragStop$: Observable<any>;
     pageDragStop: Subject<any>;
     endpoints  = [];
@@ -34,29 +35,17 @@ export class FlouService {
     static readonly OVERLAY_CUSTOM_ID = "editableText";
     static readonly OVERLAY_EDIT_CLASS = "overlay-label--edit";
     static readonly OVERLAY_VIEW_CLASS = "overlay-label--view";
+    // sourceEndpointCreate
+
     emitDragStopped() {
       this.pageDragStop.next();
     }
 
-    constructor(private _errorService: ErrorService) {
+    constructor(private _errorService: ErrorService, private _zone: NgZone) {
       this.pageDragStop = new Subject();
       this.pageDragStop$ = this.pageDragStop.asObservable();
-      this.pageLoaded = new Subject<any>();
-      this.pageLoaded$ = this.pageLoaded.asObservable();
-      this.pageLoaded$.subscribe((page:Page) => {
-          page.inputConnections.forEach((connection: ConnectionMeta) => {
-            this.drawViewConnection(connection.source, connection.target, connection.label);
-          });
-          page.items.forEach((pageItem: PageItem) => {
-            pageItem.outputConnections.forEach((connection:ConnectionMeta) => {
-              this.drawViewConnection(connection.source, connection.target, connection.label);
-            });
-          });
-
-
-      });
-
-
+      this.connectionRemove = new Subject<ConnectionMeta>();
+      this.connectionRemove$ = this.connectionRemove.asObservable();
 
       const autoSaveState = interval(10000);
       autoSaveState.subscribe( () => {
@@ -109,22 +98,14 @@ export class FlouService {
     makeSource(inputItemId) { 
         this.jsPlumbInstance.makeSource( inputItemId, {anchor: ['RightMiddle'],
                 endpoint: ['Rectangle', { width: 1, height: 1}] });
-        this._registerEndpoint(inputItemId);
-        console.log(`registered ${inputItemId} endpoint`);
     }
 
     makeTarget(pageId) {
         this.jsPlumbInstance.makeTarget(pageId,
-           {anchor: 'Continuous', 
-            endpoint: ['Rectangle', { width: 1, height: 1}], 
-            
+           {anchor: 'Continuous',
+            endpoint: ['Rectangle', { width: 1, height: 1}]
         });
-        this._registerEndpoint(pageId);
     }
-
-    private _registerEndpoint(targetId){ 
-        this.endpoints.push(targetId);
-    } 
 
     initJsPlumb():Promise<any> {
       const promise = new Promise<any>((resolve, reject)=>{
@@ -154,32 +135,15 @@ export class FlouService {
           // this.jsPlumbInstance.ready(() => {
 
             this.jsPlumbInstance.bind('connection', (newConnectionInfo:ConnectionMadeEventInfo, mouseEvent: Event) => {
-              if (mouseEvent) {
-                let targetPage = this.pages.find(page => page.htmlId == newConnectionInfo.targetId);
-                const flouConnection = new ConnectionMeta(newConnectionInfo.sourceId, newConnectionInfo.targetId);
-                let connection = _.find(targetPage.inputConnections, (connection) => {
-                  return connection.source == newConnectionInfo.sourceId && connection.target == newConnectionInfo.targetId;
-                });
-                  if (!connection) {
-                    targetPage.inputConnections.push(flouConnection);
-                    this.pages.forEach((page) => {
-                      let sourceItem = page.items.find(item => item.htmlId == newConnectionInfo.sourceId);
-                      if (sourceItem) {
-                        sourceItem.outputConnections.push(flouConnection);
-                      }
-                    });
-                  }
-                  this.addConnectionLabel(newConnectionInfo, Strings.EMPTY);
-                  this.saveAction();
+              if(mouseEvent){
+                // this.connectionMade.next(newConnectionInfo);
+                let pageItem: PageItem = this.findPageItemByEndpointId(newConnectionInfo.sourceId);
 
-
-                // Focus on newly created  item
-                const editableInputElRef = (<any>newConnectionInfo.connection.getOverlay(FlouService.OVERLAY_CUSTOM_ID)).canvas;
-                (<any> document.querySelector(`#${editableInputElRef.id} .${FlouService.OVERLAY_EDIT_CLASS}`)).focus();
+                if( pageItem != null ) {
+                    pageItem.connectionMeta.push({sourceEndpointId: newConnectionInfo.sourceId, targetEndpointId: newConnectionInfo.targetId, label: EMPTY});
+                    this.saveAction();
+                }
               }
-              this.jsPlumbConnections.push(newConnectionInfo);
-              this.jsPlumbInstance.repaintEverything();
-
             });
             resolve();
           // })
@@ -189,6 +153,23 @@ export class FlouService {
       });
 
     return promise;
+    }
+
+    findPageItemByEndpointId( endpointId: string ):PageItem {
+      let pageItem: PageItem = null;
+      for( let pageIndex = 0; pageIndex < this.pages.length; pageIndex++ ){
+        if( pageItem != null ){
+          break;
+        }
+
+        for( let itemIndex = 0; itemIndex < this.pages[pageIndex].items.length; itemIndex++ ) {
+           if( this.pages[pageIndex].items[itemIndex].endpointId == endpointId ){
+                  pageItem = this.pages[pageIndex].items[itemIndex];
+            break;
+           }
+        }
+      }
+      return pageItem;
     }
 
     getJsPlumbInstance() {
@@ -219,14 +200,15 @@ export class FlouService {
           cx = cx - halfPageHeight;
           cy = cy - halfPageWidth;
         }
-        const newPage:Page = {  x: cx||x,
-            y: cy||y,
-            width: pageWidth,
-            htmlId: UUID.UUID(),
-            title: this._getPageTitle(),
-            items: [],
-            isActive: true,
-            inputConnections: []};
+        const newPage:Page = {
+          x: cx || x,
+          y: cy || y,
+          width: pageWidth,
+          endpointId: this.generateId(),
+          title: this._getPageTitle(),
+          items: [],
+          isActive: true
+        };
             this.pages.push(newPage);
             if( doSaveAction ) {
                 this.saveAction();
@@ -251,41 +233,50 @@ export class FlouService {
         return `Page ${this.pages.length + 1}`;
     }
 
-    removeItem(item: PageItem, doSaveAction?:boolean){
+    removeItem(item: PageItem, doSaveAction?:boolean): Promise<any>{
+      const result = new Promise((resolve, reject) => {
+        let page = this.pages.find((page) => {
+          return _.find(page.items, {endpointId:item.endpointId})!=null;
+        });
 
-                let page = this.pages.find((page) => { 
-                    return _.find(page.items, {'htmlId':item.htmlId})!=null;
-                }); 
-                let removedItems = _.remove(page.items, (pageItem: PageItem) => {
-                    return item.htmlId == pageItem.htmlId;
-                });
-                removedItems.forEach((item: PageItem) => {
-                    item.outputConnections.forEach( connection => this.removeConnection(connection));
-                });
-                this._unregisterEndpoint(item.htmlId);
-                setTimeout(() =>{ 
-                    this.jsPlumbInstance.repaintEverything();
-                },0);
+        if( page != null ){
+          let jsplumbEndpoint = _.first( this.jsPlumbInstance.getEndpoints(item.endpointId));
 
-                if( doSaveAction ) { 
-                    this.saveAction();
-                }
+          if( jsplumbEndpoint ) {
+            jsplumbEndpoint.connections.forEach(connection => this.jsPlumbInstance.deleteConnection(connection));
+            this.jsPlumbInstance.deleteEndpoint(jsplumbEndpoint);
+          }
+
+          _.remove(page.items, (pageItem: PageItem) => {
+            return item.endpointId == pageItem.endpointId;
+          });
+
+
+          if( doSaveAction ) {
+            this.saveAction();
+          }
+          resolve();
+        }
+
+      });
+    return result;
+
             
     }
 
-    _changeViewOverlayOnEditOverlay(div: HTMLElement, sourceId:string, targetId: string ) {
+    _changeViewOverlayOnEditOverlay(div: HTMLElement, component) {
         const label = div.innerText;
         let parentContainer = div.parentElement;
         this._clearContainer(parentContainer);
-        let editTemplate = this._generateEditTemplate(label, sourceId, targetId);
+        let editTemplate = this._generateEditTemplate(label, component);
         parentContainer.append(editTemplate);
         parentContainer.querySelector("textarea").focus();
     }
 
-    _changeEditOverlayOnViewOverlay(div: HTMLElement, sourceId: string, targetId: string) {
+    _changeEditOverlayOnViewOverlay(div: HTMLElement, component: any) {
         let label = (<HTMLTextAreaElement>div.querySelector('textarea')).value;
         this._clearContainer(div);
-        let viewTemplate = this._generateViewTemplate( label, sourceId, targetId);
+        let viewTemplate = this._generateViewTemplate( label, component);
         div.append(viewTemplate);
     }
 
@@ -294,17 +285,16 @@ export class FlouService {
     }
 
     _updateConnectionLabel(sourceId: string, targetId: string, label: string) {
-      let connectionInfo: ConnectionMeta = this.findConnectionMeta(sourceId, targetId);
-      connectionInfo.label = label;
-      this.saveAction();
+      // let connectionInfo: ConnectionMeta = this.findConnectionMeta(sourceId, targetId);
+      // connectionInfo.label = label;
+      // this.saveAction();
     }
 
     _viewTextOverlay(defaultValue: string = ""): OverlaySpec {
       return [OverlayType.CUSTOM, {
         create:(component)=>{
           const div = document.createElement('div');
-
-          div.append(this._generateViewTemplate(defaultValue, component.sourceId, component.targetId));
+          div.append(this._generateViewTemplate(defaultValue, component));
           return div;
         },
         location:[0.5],
@@ -312,7 +302,7 @@ export class FlouService {
       }];
     }
 
-    _generateViewTemplate( defaultValue: string, sourceId: string, targetId: string):HTMLElement {
+    _generateViewTemplate( defaultValue: string, component: any):HTMLElement {
       let div = document.createElement('div');
       div.classList.add('label-container', 'label-view-template');
       div.innerText = defaultValue;
@@ -337,12 +327,14 @@ export class FlouService {
 
       let trashButtonHandler = (ev: Event) => {
         let doSaveAction = true;
-        this.removeConnection({source: sourceId, target: targetId, label: null}, doSaveAction);
+        const connectionMeta: ConnectionMeta = {sourceEndpointId: component.sourceId, targetEndpointId: component.targetId, label:null};
+        this.connectionRemove.next(connectionMeta)
+        // this.removeConnection({source: sourceId, target: targetId, label: null}, doSaveAction);
       };
 
       let editButtonHandler = (ev: Event) => {
         removeEventListeners();
-        this._changeViewOverlayOnEditOverlay(div, sourceId, targetId);
+       // this._changeViewOverlayOnEditOverlay(div, sourceId, targetId);
       };
 
       let rotateButtonHandler = (ev: Event ) => {
@@ -374,7 +366,7 @@ export class FlouService {
     }
 
 
-    _generateEditTemplate(defaultValue: string, sourceId: string, targetId: string) {
+    _generateEditTemplate(defaultValue: string, component: any) {
       const div = document.createElement('div');
       div.classList.add('label-container', 'label-edit-template');
       const textarea = document.createElement('textarea');
@@ -384,8 +376,8 @@ export class FlouService {
       let focusOutHandler = (ev: Event) => {
         removeEventListeners();
         const textArea = (<HTMLTextAreaElement>ev.target);
-        this._updateConnectionLabel(sourceId, targetId, textArea.value);
-        this._changeEditOverlayOnViewOverlay(div.parentElement, sourceId, targetId);
+        this._updateConnectionLabel(component.sourceId, component.targetId, textArea.value);
+        this._changeEditOverlayOnViewOverlay(div.parentElement, component);
       };
 
       let keyUpHandler = (ev: KeyboardEvent) => {
@@ -409,7 +401,7 @@ export class FlouService {
      return [OverlayType.CUSTOM, {
         create:(component)=>{
           const div = document.createElement('div');
-          div.append(this._generateEditTemplate(defaultValue, component.sourceId, component.targetId));
+          div.append(this._generateEditTemplate(defaultValue, component));
           return div;
         },
         location:[0.5],
@@ -422,13 +414,9 @@ export class FlouService {
     }
 
   drawViewConnection(sourceHtmlId: string, targetHtmlId: string, label: string): Connection {
-    if( _.includes( this.endpoints, sourceHtmlId) &&  _.includes( this.endpoints, targetHtmlId)) {
       return this.jsPlumbInstance.connect({source: sourceHtmlId, target: targetHtmlId, overlays:[
           this._viewTextOverlay(label)
         ]});
-    } else {
-      return null;
-    }
   }
 
     drawEditConnection(sourceHtmlId: string, targetHtmlId: string, label: string): Connection {
@@ -441,44 +429,11 @@ export class FlouService {
         }
     }
 
-    restorePage(pageToRestore: Page, doSaveAction?: boolean) {
-        //FIXME:: Hack . if I will not change ID then it will be an issue 
-        //after trying reconnect connections - pages connections will break;
-        this._fixHtmlIds(pageToRestore);
-        this.pages.push(pageToRestore);
-        if( doSaveAction ) { 
-            this.saveAction();
-        }
+    restorePage(page:Page, doSaveAction?: boolean) {
+        this.pages.push(page);
+
     }
 
-
-    findConnectionMeta(sourceId, targetId): ConnectionMeta {
-      for( let pageIndex = 0; pageIndex < this.pages.length; pageIndex++) {
-        let searchResult = _.find(this.pages[pageIndex].inputConnections, (inputConnection) => {
-         return inputConnection.target ==targetId && inputConnection.source == sourceId;
-        });
-
-        if( searchResult ) {
-          return searchResult;
-        }
-      }
-      return null;
-    }
-
-    private _fixHtmlIds(page: Page) {
-        page.htmlId = UUID.UUID();
-        page.inputConnections.forEach((connection) => {
-            connection.target = page.htmlId;
-        });
-
-        page.items.forEach((pageItem: PageItem) => {
-            pageItem.htmlId = UUID.UUID();
-            pageItem.outputConnections.forEach((connection:ConnectionMeta) => {
-                connection.source = pageItem.htmlId;
-            });
-        });
-        return page;
-    }
 
     private _rebuildPages() {
         this.removeAllPages();
@@ -505,19 +460,12 @@ export class FlouService {
         }
     }
 
-    private _unregisterEndpoint(source) { 
-        _.remove(this.endpoints, (endpoint)  => {
-             return endpoint == source;
-        });
-    }
-
     export() { 
         return JSON.stringify( this.pages );
     }
 
     import(importedPages: Page[]): Promise<any> {
       const result = new Promise<any>((resolve, reject) => {
-        this.jsPlumbConnections = [];
         this.endpoints = [];
         this.initJsPlumb().then(() => {
           this.pages = importedPages;
@@ -527,63 +475,36 @@ export class FlouService {
       return result
     }
 
-    removeConnection(connection: ConnectionMeta, doSaveAction?:boolean) {
-        let connectionsToRemove = _.remove( this.jsPlumbConnections, jsPlumbConnection => jsPlumbConnection.sourceId == connection.source && jsPlumbConnection.targetId == connection.target );
-           
-            connectionsToRemove.forEach((connectionToRemove) => { 
-                try {
-                    this.jsPlumbInstance.deleteConnection(connectionToRemove.connection);
-                } catch ( e ) { 
-                    console.error('can\'t remove connection');
-                }
-            });
-            if( doSaveAction ) { 
-                this.saveAction();
-            }
-    }
-    
-
-    private _clearPageFromConnections(page: Page) {
-        page.inputConnections.forEach((connection:ConnectionMeta) => {
-            this.removeConnection(connection);
-        });
-        let numberOfUnregisteredEndpoints = 0;
-        page.items.forEach((item) => {
-            item.outputConnections.forEach((connection:ConnectionMeta) => {
-                this.removeConnection(connection);
-                numberOfUnregisteredEndpoints++;
-            });
-            this._unregisterEndpoint(item.htmlId);
-        });
-        let numberOfCleanedConnections = 0;
-        this.pages.forEach((pageToClean)=> { 
-            pageToClean.items.forEach((pageItem:PageItem) => { 
-              let cleanedConnections = _.remove( pageItem.outputConnections, connection => connection.target == page.htmlId );
-              numberOfCleanedConnections+=cleanedConnections.length;
-            });
-        });
-        console.log( `Cleaned ${numberOfCleanedConnections} connections`);
-        this._unregisterEndpoint(page.htmlId);
-        numberOfUnregisteredEndpoints++;
-        console.log(`Unregistered ${numberOfUnregisteredEndpoints} endpoints after page deletion`);
-    }
-
     removeAllPages() { 
         this.pages.forEach((page: Page) => { 
-            this._clearPageFromConnections(page);
+            // this._clearPageFromConnections(page);
         });
         this.pages.length = 0;
     }
 
-    removePage(page: Page, doSaveAction?:boolean):Promise<Page> {
-        let result = new Promise<Page>((resolve,reject)=>{
-        try { 
-            
-            this._clearPageFromConnections(page);
-            let removedPage:Page = _.first(_.remove(this.pages, (currentPage) => { 
-                return currentPage.htmlId == page.htmlId;
+    removePage(page: Page, doSaveAction?:boolean):Promise<RemovedPageMeta> {
+        let result = new Promise<RemovedPageMeta>((resolve,reject)=>{
+        try {
+            let removedPage:Page = _.first(_.remove(this.pages, (currentPage) => {
+                return currentPage.endpointId == page.endpointId;
             }));
-            resolve(removedPage);
+
+
+            // We should clean meta information from all pages that was connected to our page
+            let targetMetaInfoToClean = removedPage.endpointId;
+            let removedConnections: ConnectionMeta[] = [];
+            this.pages.forEach((page) => {
+               let connections: ConnectionMeta[] = [];
+                page.items.forEach(pageItem => {
+                   connections = _.remove(pageItem.connectionMeta, meta => meta.targetEndpointId == targetMetaInfoToClean);
+                });
+              removedConnections.push(...connections);
+
+            });
+          // metaInfoToCleremovedPage.endpointId;
+            this.getJsPlumbInstance().remove(removedPage.endpointId);
+            let removedPageMeta: RemovedPageMeta = {page: removedPage, inputConnections: removedConnections}
+            resolve(removedPageMeta);
         } catch( e ) { 
             this._errorService.onError.next(e);
             reject(e);
@@ -614,15 +535,18 @@ export class FlouService {
 
     }
 
+    generateId(): string {
+      return '_' + Math.random().toString(36).substr(2, 9);
+    }
+
     addItem(page: Page, type?: string, doSaveAction?: boolean) {
         let item: PageItem = null;
-        const htmlId = UUID.UUID();
         if ( !type ) {
-            item = {position: 0, type: 'input', title: `Item ${page.items.length + 1}`,
-                 htmlId: htmlId, outputConnections: [], created: Date.now()};
+            item = { type: 'input', title: `Item ${page.items.length + 1}`,
+                 endpointId: this.generateId(), created: Date.now(), connectionMeta: []};
         } else {
-            item = {position: 0, type: type, title: `Item ${page.items.length + 1}`,
-                 htmlId: htmlId, outputConnections: [], created: Date.now()};
+            item = { type: type, title: `Item ${page.items.length + 1}`,
+                 endpointId: this.generateId(), created: Date.now(), connectionMeta: []};
         }
         page.items.push(item);
         if( doSaveAction ) { 
