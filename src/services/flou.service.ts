@@ -327,9 +327,8 @@ export class FlouService {
       let trashButtonHandler = (ev: Event) => {
         let doSaveAction = true;
         const connectionMeta: ConnectionMeta = {sourceEndpointId: component.sourceId, targetEndpointId: component.targetId, label:null};
-        // this.connectionRemove.next(connectionMeta);
-        this.getJsPlumbInstance().deleteConnection(component.connection);
-        // this.removeConnection({source: sourceId, target: targetId, label: null}, doSaveAction);
+        let connectionsToRemove = (<any>this.getJsPlumbInstance()).getConnections({source: component.sourceId, target: component.targetId});
+        connectionsToRemove.forEach(c=>this.jsPlumbInstance.deleteConnection(c));
       };
 
       let editButtonHandler = (ev: Event) => {
