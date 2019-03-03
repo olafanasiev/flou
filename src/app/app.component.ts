@@ -55,8 +55,10 @@ export class AppComponent implements OnInit {
 
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent) {
+
       if( event.ctrlKey && event.keyCode == Z_LETTER_CODE ) {
         this._flouService.ctrlZ().then(() => {
+          this.pages = this._flouService.getPages();
           this._cd.detectChanges();
           this.redrawConnections();
         });
@@ -65,6 +67,7 @@ export class AppComponent implements OnInit {
 
       if( event.ctrlKey && event.keyCode == Y_LETTER_CODE ) {
         this._flouService.ctrlY().then(() => {
+          this.pages = this._flouService.getPages();
           this._cd.detectChanges();
           this.redrawConnections();
         });
@@ -96,6 +99,7 @@ export class AppComponent implements OnInit {
 
   ngAfterViewInit() {
     this.redrawConnections();
+    this._flouService.saveAction();
   }
 
   onPageDelete( removedPage: RemovedPageMeta ) {

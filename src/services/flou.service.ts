@@ -40,7 +40,6 @@ export class FlouService {
     pageDragStop$: Observable<any>;
     pageDragStop: Subject<any>;
     currentAction:Action;
-    lastOperation = '';
     DEFAULT_STATE_KEY = 'default_state';
     LAST_HEIGHT = "last_height";
     static readonly OVERLAY_ARROW_ID = "arrow";
@@ -464,9 +463,11 @@ export class FlouService {
       const promise = new Promise((resolve, reject) => {
         if( this.currentAction && this.currentAction.prev ) {
           this.currentAction = this.currentAction.prev;
-          this.lastOperation = LastAction.undo;
           this.initJsPlumb().then(() => {
-            this.pages = JSON.parse(this.currentAction.pages);
+            this.pages = this.currentAction.pages;
+            if( !this.pages ) {
+              this.pages = [];
+            }
             resolve();
           });
         }
@@ -478,9 +479,11 @@ export class FlouService {
       const promise = new Promise((resolve, reject) => {
         if( this.currentAction && this.currentAction.next ) {
             this.currentAction = this.currentAction.next;
-            this.lastOperation = LastAction.redo;
           this.initJsPlumb().then(() => {
-            this.pages = JSON.parse(this.currentAction.pages);
+            this.pages = this.currentAction.pages;
+            if( !this.pages ) {
+              this.pages = [];
+            }
             resolve();
           });
         }
@@ -542,20 +545,14 @@ export class FlouService {
     }
 
     saveAction() {
-        if( this.lastOperation == LastAction.redo || this.lastOperation == LastAction.undo ) {
-            this.currentAction = null;
-        }
-
         if( !this.currentAction ) {
             steps.actionsCount = 0;
-            this.currentAction = new Action(JSON.stringify(this.pages));
+            this.currentAction = new Action(_.cloneDeep(this.pages));
             steps.actionsCount++;
         } else {
             steps.actionsCount++;
-            this.currentAction = this.currentAction.addAction(JSON.stringify(this.pages));
+            this.currentAction = this.currentAction.addAction(_.cloneDeep(this.pages));
         }
-
-        this.lastOperation = LastAction.action;
 
     }
 
