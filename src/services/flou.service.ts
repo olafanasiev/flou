@@ -7,11 +7,27 @@ import { ConnectionMeta } from '../app/models/connection-meta';
 import { ErrorService } from './error.service';
 import {Subject, Observable, BehaviorSubject, AsyncSubject} from 'rxjs';
 import { interval } from 'rxjs';
-import {Connection, ConnectionMadeEventInfo, Endpoint, jsPlumb, jsPlumbInstance, OverlaySpec} from 'jsplumb';
+import {
+  Connection,
+  ConnectionMadeEventInfo,
+  Endpoint,
+  jsPlumb,
+  jsPlumbInstance,
+  OnConnectionBindInfo,
+  OverlaySpec
+} from 'jsplumb';
 import { Action, steps } from '../app/models/action';
-import {ConnectorType, EventListenerType, KeyboardKey, OverlayType, Strings} from "../app/shared/app.const";
+import {
+  ConnectorType,
+  EventListenerType,
+  JSPlumbEventType,
+  KeyboardKey,
+  OverlayType,
+  Strings
+} from "../app/shared/app.const";
 import EMPTY = Strings.EMPTY;
 import {RemovedPageMeta} from "../app/models/removed-page-meta";
+import {LabelMeta} from "../app/models/label-meta";
 
 export namespace LastAction {
     export const undo = 'undo';
@@ -33,6 +49,7 @@ export class FlouService {
     static readonly OVERLAY_CUSTOM_ID = "editableText";
     static readonly OVERLAY_EDIT_CLASS = "overlay-label--edit";
     static readonly OVERLAY_VIEW_CLASS = "overlay-label--view";
+    emptyLabel: LabelMeta = {label: EMPTY, rotation: 0};
     // sourceEndpointCreate
 
     emitDragStopped() {
@@ -129,18 +146,22 @@ export class FlouService {
           });
 
           // this.jsPlumbInstance.ready(() => {
+            this.jsPlumbInstance.bind(JSPlumbEventType.CONNECTION_DETACHED, (info: OnConnectionBindInfo, event: Event) => {
+              // debugger;
 
-            this.jsPlumbInstance.bind('connection', (newConnectionInfo:ConnectionMadeEventInfo, mouseEvent: Event) => {
+              // this.save
+            });
+            this.jsPlumbInstance.bind(JSPlumbEventType.CONNECTION, (newConnectionInfo:ConnectionMadeEventInfo, mouseEvent: Event) => {
               if(mouseEvent){
                 // this.connectionMade.next(newConnectionInfo);
                 let pageItem: PageItem = this.findPageItemByEndpointId(newConnectionInfo.sourceId);
-
+                let emptyLabl
                 if( pageItem != null ) {
-                    pageItem.connectionMeta.push({sourceEndpointId: newConnectionInfo.sourceId, targetEndpointId: newConnectionInfo.targetId, label: EMPTY});
+                    pageItem.connectionMeta.push({sourceEndpointId: newConnectionInfo.sourceId, targetEndpointId: newConnectionInfo.targetId, label: this.emptyLabel});
                     this.saveAction();
                 }
 
-                this.addConnectionLabel(newConnectionInfo, EMPTY);
+                this.addConnectionLabel(newConnectionInfo, this.emptyLabel);
 
               }
             });
@@ -265,17 +286,19 @@ export class FlouService {
 
     _changeViewOverlayOnEditOverlay(div: HTMLElement, component) {
         const label = div.innerText;
-        let parentContainer = div.parentElement;
-        this._clearContainer(parentContainer);
-        let editTemplate = this._generateEditTemplate(label, component);
-        parentContainer.append(editTemplate);
-        parentContainer.querySelector("textarea").focus();
+        let overlayContainer = div.parentElement;
+        let rotation = this._getRotationValueFromHTMLEl(overlayContainer);
+        this._clearContainer(overlayContainer);
+        let editTemplate = this._generateEditTemplate({label: label, rotation: rotation}, component);
+        overlayContainer.append(editTemplate);
+        overlayContainer.querySelector("textarea").focus();
     }
 
     _changeEditOverlayOnViewOverlay(div: HTMLElement, component: any) {
         let label = (<HTMLTextAreaElement>div.querySelector('textarea')).value;
+        let labelMeta = {label: label, rotation: this._getRotationValueFromHTMLEl(div)};
         this._clearContainer(div);
-        let viewTemplate = this._generateViewTemplate( label, component);
+        let viewTemplate = this._generateViewTemplate( labelMeta, component);
         div.append(viewTemplate);
     }
 
@@ -283,17 +306,25 @@ export class FlouService {
       container.innerHTML = "";
     }
 
+    // _findConnectionMeta(sourceId, targetId): ConnectionMeta[]{
+    //   for( let i = 0; i++ ; i < this.pages.length)
+    // }
+
     _updateConnectionLabel(sourceId: string, targetId: string, label: string) {
       // let connectionInfo: ConnectionMeta = this.findConnectionMeta(sourceId, targetId);
       // connectionInfo.label = label;
       // this.saveAction();
     }
 
-    _viewTextOverlay(defaultValue: string = ""): OverlaySpec {
+    _viewTextOverlay(label?: LabelMeta): OverlaySpec {
       return [OverlayType.CUSTOM, {
         create:(component)=>{
+          if( !label ) {
+            label = {label: EMPTY, rotation:0};
+          }
           const div = document.createElement('div');
-          div.append(this._generateViewTemplate(defaultValue, component));
+          div.style.transform +=  " rotate(" + label.rotation + "deg)";
+          div.append(this._generateViewTemplate(label, component));
           return div;
         },
         location:[0.5],
@@ -301,10 +332,26 @@ export class FlouService {
       }];
     }
 
-    _generateViewTemplate( defaultValue: string, component: any):HTMLElement {
+
+    _getRotationValueFromHTMLEl(elRef: HTMLElement) {
+      let result = 0;
+      let transformStyle = elRef.style.transform;
+      if( transformStyle.search("rotate") != -1 ) {
+        result = parseInt(transformStyle.substring(transformStyle.indexOf("rotate(") + 7, transformStyle.indexOf("deg")));
+      }
+      return result;
+    }
+
+    _deleteConnectionMeta(sourceId, targetId) {
+        this.pages.forEach((page) => {
+
+        });
+    }
+
+    _generateViewTemplate( label: LabelMeta, component: any):HTMLElement {
       let div = document.createElement('div');
       div.classList.add('label-container', 'label-view-template');
-      div.innerText = defaultValue;
+      div.innerText = label.label;
 
       let controlButtons = document.createElement('div');
       controlButtons.classList.add('label-control-buttons');
@@ -325,7 +372,6 @@ export class FlouService {
       };
 
       let trashButtonHandler = (ev: Event) => {
-        let doSaveAction = true;
         const connectionMeta: ConnectionMeta = {sourceEndpointId: component.sourceId, targetEndpointId: component.targetId, label:null};
         let connectionsToRemove = (<any>this.getJsPlumbInstance()).getConnections({source: component.sourceId, target: component.targetId});
         connectionsToRemove.forEach(c=>this.jsPlumbInstance.deleteConnection(c));
@@ -339,22 +385,15 @@ export class FlouService {
       let rotateButtonHandler = (ev: Event ) => {
        let overlayContainer = div.parentElement;
        let transformStyle = overlayContainer.style.transform;
-       let currentRotateValue = 0;
-       if( transformStyle.search("rotate") != -1 ) {
-         //
-         currentRotateValue = parseInt(transformStyle.substring(transformStyle.indexOf("rotate(") + 7, transformStyle.indexOf("deg")));
-         // console.log(currentRotateValue);
+       let currentRotateValue;
+
+         currentRotateValue = this._getRotationValueFromHTMLEl(overlayContainer);
          if( currentRotateValue == 270 ) {
            currentRotateValue = 0;
          } else {
            currentRotateValue+=90;
          }
            transformStyle = transformStyle.replace(/rotate\(\d+deg\)/, `rotate(${currentRotateValue}deg)`);
-       } else {
-           transformStyle+=" rotate(90deg)";
-       }
-
-
        div.parentElement.style.transform  = transformStyle;
       };
 
@@ -365,11 +404,11 @@ export class FlouService {
     }
 
 
-    _generateEditTemplate(defaultValue: string, component: any) {
+    _generateEditTemplate(labelMeta: LabelMeta, component: any) {
       const div = document.createElement('div');
       div.classList.add('label-container', 'label-edit-template');
       const textarea = document.createElement('textarea');
-      textarea.value = defaultValue;
+      textarea.value = labelMeta.label;
       textarea.classList.add(FlouService.OVERLAY_EDIT_CLASS);
 
       let focusOutHandler = (ev: Event) => {
@@ -396,11 +435,14 @@ export class FlouService {
       return div;
     }
 
-    _editableTextOverlay(defaultValue: string = ""): OverlaySpec {
+    _editableTextOverlay(label?: LabelMeta): OverlaySpec {
      return [OverlayType.CUSTOM, {
         create:(component)=>{
           const div = document.createElement('div');
-          div.append(this._generateEditTemplate(defaultValue, component));
+          if( !label) {
+            label = {label: "", rotation:0};
+          }
+          div.append(this._generateEditTemplate(label, component));
           return div;
         },
         location:[0.5],
@@ -408,20 +450,20 @@ export class FlouService {
       }];
     }
 
-    addConnectionLabel(jsPlumbConnection: ConnectionMadeEventInfo, label: string) {
+    addConnectionLabel(jsPlumbConnection: ConnectionMadeEventInfo, label: LabelMeta) {
       let jsplumbConnectionWithOverlay = (<any>jsPlumbConnection.connection).addOverlay(this._editableTextOverlay(label));
       jsplumbConnectionWithOverlay.component
                                   .getOverlay(FlouService.OVERLAY_CUSTOM_ID)
                                   .canvas.querySelector("textarea").focus();
     }
 
-  drawViewConnection(sourceHtmlId: string, targetHtmlId: string, label: string): Connection {
+  drawViewConnection(sourceHtmlId: string, targetHtmlId: string, label: LabelMeta): Connection {
       return this.jsPlumbInstance.connect({source: sourceHtmlId, target: targetHtmlId, overlays:[
           this._viewTextOverlay(label)
         ]});
   }
 
-    drawEditConnection(sourceHtmlId: string, targetHtmlId: string, label: string): Connection {
+    drawEditConnection(sourceHtmlId: string, targetHtmlId: string, label: LabelMeta): Connection {
         if( _.includes( this.endpoints, sourceHtmlId) &&  _.includes( this.endpoints, targetHtmlId)) {
             return this.jsPlumbInstance.connect({source: sourceHtmlId, target: targetHtmlId, overlays:[
                 this._editableTextOverlay(label)
@@ -433,7 +475,6 @@ export class FlouService {
 
     restorePage(page:Page, doSaveAction?: boolean) {
         this.pages.push(page);
-
     }
 
 
@@ -499,8 +540,8 @@ export class FlouService {
                let connections: ConnectionMeta[] = [];
                 page.items.forEach(pageItem => {
                    connections = _.remove(pageItem.connectionMeta, meta => meta.targetEndpointId == targetMetaInfoToClean);
+                   removedConnections.push(...connections);
                 });
-              removedConnections.push(...connections);
 
             });
           // metaInfoToCleremovedPage.endpointId;

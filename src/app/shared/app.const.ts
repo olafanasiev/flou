@@ -20,6 +20,11 @@ export namespace EventListenerType {
   export const KEYUP = "keyup";
 }
 
+export namespace JSPlumbEventType {
+  export const CONNECTION = "connection";
+  export const CONNECTION_DETACHED = "connectionDetached";
+}
+
 export namespace KeyboardKey{
   export const ENTER = "Enter";
 }
