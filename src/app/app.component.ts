@@ -56,14 +56,18 @@ export class AppComponent implements OnInit {
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent) {
       if( event.ctrlKey && event.keyCode == Z_LETTER_CODE ) {
-        this._flouService.ctrlZ();
-        this._cd.detectChanges();
+        this._flouService.ctrlZ().then(() => {
+          this._cd.detectChanges();
+          this.redrawConnections();
+        });
         return;
       }
 
       if( event.ctrlKey && event.keyCode == Y_LETTER_CODE ) {
-        this._flouService.ctrlY();
-        this._cd.detectChanges();
+        this._flouService.ctrlY().then(() => {
+          this._cd.detectChanges();
+          this.redrawConnections();
+        });
         return;
       }
   }
@@ -77,8 +81,8 @@ export class AppComponent implements OnInit {
     });
   }
 
-  ngAfterViewInit() {
-    //gives 100% confidence that all components are loaded
+  redrawConnections() {
+    //setting timeout gives 100% confidence that all components are loaded
     setTimeout(() => {
       this.pages.forEach((page) => {
         page.items.forEach(pageItem => {
@@ -88,6 +92,10 @@ export class AppComponent implements OnInit {
         });
       });
     });
+  }
+
+  ngAfterViewInit() {
+    this.redrawConnections();
   }
 
   onPageDelete( removedPage: RemovedPageMeta ) {
@@ -126,13 +134,17 @@ export class AppComponent implements OnInit {
 
     fileReader.onload = (e) => {
       try { 
-        this._flouService.import(JSON.parse(fileReader.result.toString()));
-        this.pages = this._flouService.getPages();
-      } catch( e ) { 
+        this._flouService.import(JSON.parse(fileReader.result.toString())).then(() => {
+            this.pages = this._flouService.getPages();
+            this._cd.detectChanges();
+            this.redrawConnections();
+        });
+
+      } catch( e ) {
         this._errorService.onError.next({code:"1003", message: "Can't import app"});
       }
         this.importApp.nativeElement.value = '';
-    }
+    };
     if( e.target.files && !_.isEmpty(e.target.files)){ 
       fileReader.readAsText(_.first(e.target.files));
     }

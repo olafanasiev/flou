@@ -10,7 +10,6 @@ import { interval } from 'rxjs';
 import {
   Connection,
   ConnectionMadeEventInfo,
-  Endpoint,
   jsPlumb,
   jsPlumbInstance,
   OnConnectionBindInfo,
@@ -40,7 +39,6 @@ export class FlouService {
     pages: Page[];
     pageDragStop$: Observable<any>;
     pageDragStop: Subject<any>;
-    endpoints  = [];
     currentAction:Action;
     lastOperation = '';
     DEFAULT_STATE_KEY = 'default_state';
@@ -48,9 +46,6 @@ export class FlouService {
     static readonly OVERLAY_ARROW_ID = "arrow";
     static readonly OVERLAY_CUSTOM_ID = "editableText";
     static readonly OVERLAY_EDIT_CLASS = "overlay-label--edit";
-    static readonly OVERLAY_VIEW_CLASS = "overlay-label--view";
-    emptyLabel: LabelMeta = {label: EMPTY, rotation: 0};
-    // sourceEndpointCreate
 
     emitDragStopped() {
       this.pageDragStop.next();
@@ -124,47 +119,47 @@ export class FlouService {
       const promise = new Promise<any>((resolve, reject)=>{
         try {
           if (this.jsPlumbInstance) {
-            this.jsPlumbInstance.reset();
-
+            this.jsPlumbInstance.deleteEveryEndpoint();
           } else {
             this.jsPlumbInstance = jsPlumb.getInstance({Container: document.getElementById('pages')});
-          }
 
-          this.jsPlumbInstance.importDefaults({
-            Connector: [ConnectorType.FLOWCHART ], Overlays: [
-            [  OverlayType.ARROW, {
-                location: 1,
-                id: FlouService.OVERLAY_ARROW_ID,
-                length: 8,
-                foldback: 0.9
-              }
-            ],
+
+              this.jsPlumbInstance.importDefaults({
+                Connector: [ConnectorType.FLOWCHART ], Overlays: [
+                [  OverlayType.ARROW, {
+                    location: 1,
+                    id: FlouService.OVERLAY_ARROW_ID,
+                    length: 8,
+                    foldback: 0.9
+                  }
+                ],
 
               // []
             ], PaintStyle: {strokeWidth: 4, stroke: '#456'},
             DragOptions: {cursor: "move"},
           });
 
-          // this.jsPlumbInstance.ready(() => {
-            this.jsPlumbInstance.bind(JSPlumbEventType.CONNECTION_DETACHED, (info: OnConnectionBindInfo, event: Event) => {
-              // debugger;
-
-              // this.save
-            });
             this.jsPlumbInstance.bind(JSPlumbEventType.CONNECTION, (newConnectionInfo:ConnectionMadeEventInfo, mouseEvent: Event) => {
+              // If we add connection by hand then we should also add metainfo
               if(mouseEvent){
                 // this.connectionMade.next(newConnectionInfo);
-                let pageItem: PageItem = this.findPageItemByEndpointId(newConnectionInfo.sourceId);
-                let emptyLabl
+                let pageItem: PageItem = this.findPageItem(newConnectionInfo.sourceId);
+                let newLabel = {
+                  id: this.generateId(),
+                  label: EMPTY,
+                  rotation: 0
+                };
+
                 if( pageItem != null ) {
-                    pageItem.connectionMeta.push({sourceEndpointId: newConnectionInfo.sourceId, targetEndpointId: newConnectionInfo.targetId, label: this.emptyLabel});
+                    pageItem.connectionMeta.push({sourceEndpointId: newConnectionInfo.sourceId, targetEndpointId: newConnectionInfo.targetId, label: newLabel});
                     this.saveAction();
                 }
 
-                this.addConnectionLabel(newConnectionInfo, this.emptyLabel);
+                this.addConnectionLabel(newConnectionInfo, newLabel);
 
               }
             });
+          }
             resolve();
           // })
         } catch(e) {
@@ -175,22 +170,6 @@ export class FlouService {
     return promise;
     }
 
-    findPageItemByEndpointId( endpointId: string ):PageItem {
-      let pageItem: PageItem = null;
-      for( let pageIndex = 0; pageIndex < this.pages.length; pageIndex++ ){
-        if( pageItem != null ){
-          break;
-        }
-
-        for( let itemIndex = 0; itemIndex < this.pages[pageIndex].items.length; itemIndex++ ) {
-           if( this.pages[pageIndex].items[itemIndex].endpointId == endpointId ){
-                  pageItem = this.pages[pageIndex].items[itemIndex];
-            break;
-           }
-        }
-      }
-      return pageItem;
-    }
 
     getJsPlumbInstance() {
         return this.jsPlumbInstance;
@@ -284,19 +263,16 @@ export class FlouService {
             
     }
 
-    _changeViewOverlayOnEditOverlay(div: HTMLElement, component) {
+    _changeViewOverlayOnEditOverlay(div: HTMLElement, labelMeta: LabelMeta, component) {
         const label = div.innerText;
         let overlayContainer = div.parentElement;
-        let rotation = this._getRotationValueFromHTMLEl(overlayContainer);
         this._clearContainer(overlayContainer);
-        let editTemplate = this._generateEditTemplate({label: label, rotation: rotation}, component);
+        let editTemplate = this._generateEditTemplate(labelMeta, component);
         overlayContainer.append(editTemplate);
         overlayContainer.querySelector("textarea").focus();
     }
 
-    _changeEditOverlayOnViewOverlay(div: HTMLElement, component: any) {
-        let label = (<HTMLTextAreaElement>div.querySelector('textarea')).value;
-        let labelMeta = {label: label, rotation: this._getRotationValueFromHTMLEl(div)};
+    _changeEditOverlayOnViewOverlay(div: HTMLElement, labelMeta: LabelMeta, component: any) {
         this._clearContainer(div);
         let viewTemplate = this._generateViewTemplate( labelMeta, component);
         div.append(viewTemplate);
@@ -306,25 +282,15 @@ export class FlouService {
       container.innerHTML = "";
     }
 
-    // _findConnectionMeta(sourceId, targetId): ConnectionMeta[]{
-    //   for( let i = 0; i++ ; i < this.pages.length)
-    // }
-
-    _updateConnectionLabel(sourceId: string, targetId: string, label: string) {
-      // let connectionInfo: ConnectionMeta = this.findConnectionMeta(sourceId, targetId);
-      // connectionInfo.label = label;
-      // this.saveAction();
-    }
-
     _viewTextOverlay(label?: LabelMeta): OverlaySpec {
       return [OverlayType.CUSTOM, {
         create:(component)=>{
           if( !label ) {
-            label = {label: EMPTY, rotation:0};
+            label = {label: EMPTY, rotation:0, id: this.generateId()};
           }
           const div = document.createElement('div');
-          div.style.transform +=  " rotate(" + label.rotation + "deg)";
           div.append(this._generateViewTemplate(label, component));
+          div.setAttribute("data-label-id", label.id);
           return div;
         },
         location:[0.5],
@@ -342,11 +308,22 @@ export class FlouService {
       return result;
     }
 
-    _deleteConnectionMeta(sourceId, targetId) {
-        this.pages.forEach((page) => {
-
-        });
+    findConnectionMeta(sourceId, targetId ) {
+      let pageItem = this.findPageItem(sourceId);
+      let connections: ConnectionMeta[] =  _.filter(pageItem.connectionMeta, {sourceEndpointId: sourceId,targetEndpointId: targetId});
+      return connections;
     }
+
+    findPageItem(sourceId): PageItem {
+      for ( let pageIndex = 0 ; pageIndex < this.pages.length; pageIndex++ ) {
+        let pageItem = _.find( this.pages[pageIndex].items, {endpointId: sourceId });
+        if( pageItem ) {
+          return pageItem;
+        }
+      }
+      return null;
+    }
+
 
     _generateViewTemplate( label: LabelMeta, component: any):HTMLElement {
       let div = document.createElement('div');
@@ -372,30 +349,40 @@ export class FlouService {
       };
 
       let trashButtonHandler = (ev: Event) => {
-        const connectionMeta: ConnectionMeta = {sourceEndpointId: component.sourceId, targetEndpointId: component.targetId, label:null};
         let connectionsToRemove = (<any>this.getJsPlumbInstance()).getConnections({source: component.sourceId, target: component.targetId});
         connectionsToRemove.forEach(c=>this.jsPlumbInstance.deleteConnection(c));
+        let  pageItem:PageItem = this.findPageItem(component.sourceId);
+        _.remove(pageItem.connectionMeta, meta => meta.sourceEndpointId == component.sourceId && meta.targetEndpointId == component.targetId );
+        this.saveAction();
       };
 
       let editButtonHandler = (ev: Event) => {
         removeEventListeners();
-       this._changeViewOverlayOnEditOverlay(div, component);
+       this._changeViewOverlayOnEditOverlay(div, label, component);
       };
 
       let rotateButtonHandler = (ev: Event ) => {
        let overlayContainer = div.parentElement;
        let transformStyle = overlayContainer.style.transform;
        let currentRotateValue;
-
-         currentRotateValue = this._getRotationValueFromHTMLEl(overlayContainer);
+           currentRotateValue = this._getRotationValueFromHTMLEl(overlayContainer);
          if( currentRotateValue == 270 ) {
            currentRotateValue = 0;
          } else {
            currentRotateValue+=90;
          }
+         if( transformStyle.includes('rotate')) {
            transformStyle = transformStyle.replace(/rotate\(\d+deg\)/, `rotate(${currentRotateValue}deg)`);
-       div.parentElement.style.transform  = transformStyle;
+         } else {
+           transformStyle+= ` rotate(${currentRotateValue}deg)`;
+         }
+
+         div.parentElement.style.transform  = transformStyle;
+         label.rotation = currentRotateValue;
+         this.saveAction();
       };
+
+
 
       editIcon.addEventListener(EventListenerType.CLICK,editButtonHandler);
       rotateIcon.addEventListener(EventListenerType.CLICK, rotateButtonHandler);
@@ -414,8 +401,9 @@ export class FlouService {
       let focusOutHandler = (ev: Event) => {
         removeEventListeners();
         const textArea = (<HTMLTextAreaElement>ev.target);
-        this._updateConnectionLabel(component.sourceId, component.targetId, textArea.value);
-        this._changeEditOverlayOnViewOverlay(div.parentElement, component);
+        labelMeta.label = textArea.value;
+        this.saveAction();
+        this._changeEditOverlayOnViewOverlay(div.parentElement, labelMeta, component);
       };
 
       let keyUpHandler = (ev: KeyboardEvent) => {
@@ -440,7 +428,7 @@ export class FlouService {
         create:(component)=>{
           const div = document.createElement('div');
           if( !label) {
-            label = {label: "", rotation:0};
+            label = {label: EMPTY, rotation:0, id: this.generateId()};
           }
           div.append(this._generateEditTemplate(label, component));
           return div;
@@ -458,49 +446,46 @@ export class FlouService {
     }
 
   drawViewConnection(sourceHtmlId: string, targetHtmlId: string, label: LabelMeta): Connection {
-      return this.jsPlumbInstance.connect({source: sourceHtmlId, target: targetHtmlId, overlays:[
+      let connection = this.jsPlumbInstance.connect({source: sourceHtmlId, target: targetHtmlId, overlays:[
           this._viewTextOverlay(label)
         ]});
+      let overlayContainer = (<any> connection.getOverlay(FlouService.OVERLAY_CUSTOM_ID )).canvas;
+          overlayContainer.style.transform +=" rotate(" + label.rotation + "deg)";
+      return connection;
   }
-
-    drawEditConnection(sourceHtmlId: string, targetHtmlId: string, label: LabelMeta): Connection {
-        if( _.includes( this.endpoints, sourceHtmlId) &&  _.includes( this.endpoints, targetHtmlId)) {
-            return this.jsPlumbInstance.connect({source: sourceHtmlId, target: targetHtmlId, overlays:[
-                this._editableTextOverlay(label)
-              ]});
-        } else {
-          return null;
-        }
-    }
 
     restorePage(page:Page, doSaveAction?: boolean) {
         this.pages.push(page);
     }
 
 
-    private _rebuildPages() {
-        this.removeAllPages();
-        this.initJsPlumb().then(() => {
-          let parsedPages = JSON.parse(this.currentAction.pages);
-          this.pages.push(...parsedPages);
-        });
-    }
-    
-    ctrlZ(){
-        // console.log(this.currentAction); 
-        if( this.currentAction && this.currentAction.prev ) { 
-            this.currentAction = this.currentAction.prev;
-            this.lastOperation = LastAction.undo;
-            this._rebuildPages();
+
+    ctrlZ(): Promise<any>{
+      const promise = new Promise((resolve, reject) => {
+        if( this.currentAction && this.currentAction.prev ) {
+          this.currentAction = this.currentAction.prev;
+          this.lastOperation = LastAction.undo;
+          this.initJsPlumb().then(() => {
+            this.pages = JSON.parse(this.currentAction.pages);
+            resolve();
+          });
         }
+      });
+       return promise;
     }
 
-    ctrlY(){ 
-        if( this.currentAction && this.currentAction.next ) { 
+    ctrlY(){
+      const promise = new Promise((resolve, reject) => {
+        if( this.currentAction && this.currentAction.next ) {
             this.currentAction = this.currentAction.next;
             this.lastOperation = LastAction.redo;
-            this._rebuildPages();
+          this.initJsPlumb().then(() => {
+            this.pages = JSON.parse(this.currentAction.pages);
+            resolve();
+          });
         }
+      });
+      return promise;
     }
 
     export() { 
@@ -509,7 +494,6 @@ export class FlouService {
 
     import(importedPages: Page[]): Promise<any> {
       const result = new Promise<any>((resolve, reject) => {
-        this.endpoints = [];
         this.initJsPlumb().then(() => {
           this.pages = importedPages;
           resolve()
@@ -518,10 +502,7 @@ export class FlouService {
       return result
     }
 
-    removeAllPages() { 
-        this.pages.forEach((page: Page) => { 
-            // this._clearPageFromConnections(page);
-        });
+    removeAllPages() {
         this.pages.length = 0;
     }
 
