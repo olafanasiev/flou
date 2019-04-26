@@ -45,7 +45,6 @@ export class AppModule {
   ngDoBootstrap(appRef: ApplicationRef) {
     const editableTextOverlay = createCustomElement(EditableTextOverlayComponent,
       {injector: this.injector});
-    console.log('HERE ');
     customElements.define('editable-text-overlay', editableTextOverlay);
     appRef.bootstrap(AppComponent);
   }

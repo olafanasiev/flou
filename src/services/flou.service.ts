@@ -32,7 +32,8 @@ import {RemovedPageMeta} from '../app/models/removed-page-meta';
 import {LabelMeta} from '../app/models/label-meta';
 import {ThemingService} from '../app/theming.service';
 import {EventListener} from '@angular/core/src/debug/debug_node';
-import {NgElement} from '@angular/elements';
+import {NgElement, WithProperties} from '@angular/elements';
+import {EditableTextOverlayComponent} from '../app/editable-text-overlay/editable-text-overlay.component';
 
 export namespace LastAction {
   export const undo = 'undo';
@@ -196,18 +197,6 @@ export class FlouService {
               this.saveAction();
             }
           });
-          // this.jsPlumbInstance.bind('mouseover', (newConnectionInfo, mouseEvent) => {
-          //   console.log("mouseenter");
-          //   console.log(newConnectionInfo);
-          //   debugger;
-          //   console.log(mouseEvent);
-          // });
-
-          // this.jsPlumbInstance.bind('mouseleave', (newConnectionInfo, mouseEvent) => {
-          //   console.log("mouseleave");
-          //   console.log(newConnectionInfo);
-          //   console.log(mouseEvent);
-          // });
 
           this.jsPlumbInstance.bind(JSPlumbEventType.CONNECTION, (newConnectionInfo: ConnectionMadeEventInfo, mouseEvent: MouseEvent) => {
             // If we add connection by hand then we should also add metainfo
@@ -342,11 +331,6 @@ export class FlouService {
 
   }
 
-
-  _clearContainer(container: Element) {
-    container.innerHTML = '';
-  }
-
   findConnectionMeta(sourceId, targetId): ConnectionMeta[] {
     const pageItem = this.findPageItem(sourceId);
     const connections: ConnectionMeta[] = _.filter(pageItem.connectionMeta, {sourceEndpointId: sourceId, targetEndpointId: targetId});
@@ -385,123 +369,22 @@ export class FlouService {
     // }
   }
 
-
-  // export class EditTemplate {
-  //     constructor(labelMeta: LabelMeta)
-  // }
-  _generateEditTemplate(labelMeta: LabelMeta, jsPlumbConnection: any) {
-    const div = document.createElement('div');
-    const labelDots = document.createElement('div');
-    const removeIcon = document.createElement('div');
-
-    labelDots.classList.add(FlouService.OVERLAY_CLASS_DOTS);
-
-    const textarea = document.createElement('textarea');
-    textarea.value = labelMeta.label;
-    textarea.classList.add(FlouService.OVERLAY_EDIT_CLASS);
-    this._setLabelHeight(textarea);
-
-
-    const focusOutHandler = (ev: Event) => {
-      const textArea = (<HTMLTextAreaElement>ev.target);
-      labelMeta.label = textArea.value;
-      textAreaChanged();
-      this.saveAction();
-    };
-
-    const keyUpHandler = (ev: KeyboardEvent) => {
-      this._setLabelHeight(textarea);
-      if (ev.key === KeyboardKey.ENTER && !ev.shiftKey) {
-        focusOutHandler(ev);
-      }
-    };
-
-
-    const textAreaChanged = () => {
-      // console.log(component);
-      if (textarea.value.trim().length === 0) {
-        textarea.style.display = 'none';
-        labelDots.style.display = 'block';
-        removeIcon.style.display = 'none';
-        this.adjustDotsPosition(jsPlumbConnection);
-      } else {
-        textarea.style.display = 'block';
-        labelDots.style.display = 'none';
-        removeIcon.style.display = 'block';
-      }
-    };
-
-    const clearLabel = () => {
-      textarea.value = '';
-      textAreaChanged();
-      const connectionMeta: ConnectionMeta = _.first(this.findConnectionMeta(jsPlumbConnection.sourceId, jsPlumbConnection.targetId));
-      this.saveAction();
-    };
-
-
-    const showTextAreaHideDots = () => {
-      textarea.style.display = 'block';
-      labelDots.style.display = 'none';
-      removeIcon.style.display = 'block';
-      textarea.focus();
-    };
-
-    labelDots.addEventListener(EventListenerType.CLICK, showTextAreaHideDots);
-
-    textarea.addEventListener(EventListenerType.CHANGE, textAreaChanged);
-    textarea.addEventListener(EventListenerType.FOCUS_OUT, focusOutHandler);
-    textarea.addEventListener(EventListenerType.KEYUP, keyUpHandler);
-    div.append(textarea);
-
-    removeIcon.setAttribute('class', 'overlay-remove-icon');
-    removeIcon.addEventListener(EventListenerType.CLICK, clearLabel);
-    div.append(removeIcon);
-    div.append(labelDots);
-    return div;
-  }
-
-
-  _customArrowOverlay(): OverlaySpec {
-    return [OverlayType.CUSTOM, {
-      create: (component) => {
-        const svg = document.createElement('svg');
-        svg.setAttribute('width', '22');
-        svg.setAttribute('height', '24');
-        const path = document.createElement('path');
-        path.setAttribute('d', 'M423.793-71.572l-24.361-11.3,7.4,11.3-7.4,11.3Z');
-        path.setAttribute('transform', 'translate(-60.269 -399.433) rotate(90)');
-        path.setAttribute('fill', '#f80');
-        svg.append(path);
-        return svg;
-      },
-      location: [1],
-      id: 'arrow-x'
-    }];
-  }
-
-  _editableTextOverlay(connectionMadeInfo: ConnectionMadeEventInfo, label?: LabelMeta): OverlaySpec {
-    return [OverlayType.CUSTOM, {
+  addConnectionLabel(connectionMadeInfo: ConnectionMadeEventInfo, label: LabelMeta) {
+    const jsplumbConnectionWithOverlay = (<any>connectionMadeInfo.connection).addOverlay([OverlayType.CUSTOM, {
       create: (component) => {
         // const div = document.createElement('div');
-        // if (!label) {
-        //   label = {label: EMPTY, id: this.generateId()};
-        // }
-        const textOverlay = document.createElement('editable-text-overlay') as NgElement;
-        // div.append(this._generateEditTemplate(label, component));
-        // return div;
+        if (!label) {
+          label = {label: EMPTY, id: this.generateId()};
+        }
+
+        // we are creating web component which will be controlled by angular
+        const textOverlay = document.createElement('editable-text-overlay') as NgElement & WithProperties<EditableTextOverlayComponent>;
+        textOverlay.labelMeta = label;
         return textOverlay;
       },
       location: [0.5],
       id: FlouService.OVERLAY_CUSTOM_ID
-    }];
-  }
-
-  addConnectionLabel(connectionMadeInfo: ConnectionMadeEventInfo, label: LabelMeta) {
-    const jsplumbConnectionWithOverlay = (<any>connectionMadeInfo.connection).addOverlay(this._editableTextOverlay(connectionMadeInfo, label));
-
-    // jsplumbConnectionWithOverlay.component
-    //   .getOverlay(FlouService.OVERLAY_CUSTOM_ID)
-    //   .canvas.querySelector('textarea').focus();
+    }]);
   }
 
   drawConnection(sourceHtmlId: string, targetHtmlId: string, label: LabelMeta): Connection {

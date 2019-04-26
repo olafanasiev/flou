@@ -10,13 +10,7 @@
   }
 }
 
-.overlay-label--edit{
-  background-color: transparent;
-  border: none;
-  outline: none;
-  font-size: 13px;
-  overflow: hidden;
-}
+
 
 .overlay-is-empty {
   cursor: pointer;
