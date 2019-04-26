@@ -1,13 +1,29 @@
-.main-canvas[theme="dark"] path{
-  stroke: #FFF;
-  color: #FFF;
+
+.main-canvas[theme="dark"] path {
+  stroke: #FF8800;
+  color: #FF8800;
+}
+
+.main-canvas[theme="dark"] .jtk-connector.jtk-hover path {
+  stroke: red;
+  color: red;
+  animation: pulse 1s infinite;
+}
+
+.main-canvas[theme="dark"] .jtk-connector.jtk-hover .arrow-connector {
+  fill: red;
+}
+
+.main-canvas[theme="dark"] .jtk-connector .arrow-connector{
+  fill:  #FF8800;
+}
+
+.main-canvas[theme="dark"] .jtk-connector{
+  overflow: visible;
+  animation: none;
 }
 
 .main-canvas[theme="dark"] {
-  color: #FFF;
-}
-
-.main-canvas[theme="dark"] input {
   color: #FFF;
 }
 
@@ -29,29 +45,30 @@
 }
 
 .main-canvas[theme="dark"] #pages-wrapper {
-  background-color: #254B7F;
-  background-image: url("/assets/white-dots.png");
-  background-position-x: 0;
-  background-position-y: 0;
-  background-repeat: repeat;
+  background: url("/assets/theme-dark/dark-theme-bg.png") 0 0 repeat;
 }
 
-.main-canvas[theme="dark"] .page{
-  background-color: #254b7f;
+.main-canvas[theme="dark"] .page {
+  background-color: #1e62bf;
 }
 
 .main-canvas[theme="dark"] .page__title {
-  border-bottom: 2px solid white;
-}
-
-.main-canvas[theme="dark"] .round-button{
-  color: white;
-  border: 2px solid white;
+  border-bottom: 2px solid #FFF;
+  background-color: #FFF;
+  color: #0d3163;
 }
 
 .main-canvas[theme="dark"] .trash-icon {
   width: 30px;
   height: 30px;
+}
+
+.main-canvas[theme="dark"] .jtk-connected {
+  border-left-color: #ff8800;
+}
+
+.main-canvas[theme="dark"] .jtk-droppable {
+  border-left-color: #b1bbc9;
 }
 
 .main-canvas[theme="dark"] .input-item__textarea:hover {
@@ -60,14 +77,17 @@
 
 .main-canvas[theme="dark"] .item-type-panel {
   background-color: #254B7F;
-  border:1px solid #FFF;
+  border: 1px solid #FFF;
 }
 
 .main-canvas[theme="dark"] .page {
   border: 2px solid #FFF;
 }
 
-.main-canvas[theme="dark"] .item-anchor {
-  background: #FFF;
+.main-canvas[theme="dark"] .input-item {
+  border-bottom: 1px solid #0d3163;
 }
 
+.main-canvas[theme="dark"] .right-bottom-main-panel {
+  background-color: #132339;
+}

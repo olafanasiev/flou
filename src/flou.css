@@ -1,21 +1,65 @@
+@keyframes pulse {
+  0% {
+    stroke-width: 2;
+  }
+  70% {
+    stroke-width: 6;
+  }
+  100% {
+    stroke-width: 2;
+  }
+}
+
 .overlay-label--edit{
   background-color: transparent;
   border: none;
-  padding-bottom: 20px;
   outline: none;
-  font-family: Arial;
-  font-size: 20px;
+  font-size: 13px;
   overflow: hidden;
 }
 
-.jtk-overlay {
-  min-width: 100px;
-  min-height:100px;
+.overlay-is-empty {
+  cursor: pointer;
+}
+
+.overlay-is-empty.horizontal-dots{
+  width: 20px;
+  height: 6px;
+  background:url("/assets/layout-empty-horizontal-dots.svg") no-repeat 0 0 transparent;
+  margin-bottom: 10px;
+}
+
+.overlay-is-empty.vertical-dots{
+  width: 6px;
+  height: 20px;
+  background:url("/assets/layout-empty-vertical-dots.svg") no-repeat 0 0 transparent;
+  margin-right: 10px;
+}
+
+.jtk-overlay textarea{
+  padding: 10px 50px;
+  border-radius: 10px;
+  background-color: #FF8800;
+  resize: none;
+}
+
+.jtk-overlay .overlay-remove-icon{
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  cursor: pointer;
+  background: url("/assets/remove_description.svg") no-repeat 0 0 transparent;
 }
 
 .jtk-overlay .flou-template svg{
   width: 20px;
   height: 20px;
+}
+
+.jtk-connector {
+  cursor: pointer;
 }
 
 .jtk-overlay:hover .label-control-buttons {
@@ -29,3 +73,4 @@
   top:-10px;
   cursor: pointer;
 }
+

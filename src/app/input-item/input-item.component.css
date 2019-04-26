@@ -1,5 +1,4 @@
 .input-item {
-    width: 100%;
     position: relative;
     display: flex;
     flex-direction: row;
@@ -21,17 +20,7 @@
   display: block;
 }
 
-.item-anchor {
-    width: 10px;
-    height: 5px;
-    z-index: 9999;
-    display: block;
-    cursor: pointer;
-    right: -6px;
-    position: absolute;
-}
-
-.item-remove{ 
+.item-remove{
     cursor: pointer;
     z-index: 9999;
     right: 15px;

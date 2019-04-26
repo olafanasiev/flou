@@ -1,5 +1,4 @@
 export interface LabelMeta {
-  id: string,
-  rotation: number,
-  label: string
+  id: string;
+  label: string;
 }

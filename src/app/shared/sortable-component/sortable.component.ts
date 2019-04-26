@@ -58,7 +58,6 @@ export class SortableComponent {
   }
   public onDragStart($event: any, index: number) {
     this.draggedIndex = index;
-    console.log("drag started");
     this.dragStarted.emit();
   }
   public handleDrop(droppedIndex: number) {
