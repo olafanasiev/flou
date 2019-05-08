@@ -34,7 +34,9 @@ export class AppComponent implements OnInit, AfterViewInit {
     this._flouService.pageDragStop$.subscribe(() => {
       this.appHeight = this.getNewWindowSize();
       this._flouService.saveAppHeight(this.appHeight);
+      this._flouService.getJsPlumbInstance().repaintEverything();
     });
+
   }
 
   @HostListener('window:resize', ['$event'])
@@ -97,7 +99,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.pages.forEach((page) => {
         page.items.forEach(pageItem => {
           pageItem.connectionMeta.forEach((connection) => {
-            this._flouService.drawConnection(connection.sourceEndpointId, connection.targetEndpointId, connection.label);
+            this._flouService.drawConnection(connection.sourceEndpointId, connection.targetEndpointId, connection.labelMeta);
           });
         });
       });
@@ -126,10 +128,10 @@ export class AppComponent implements OnInit, AfterViewInit {
           this._cd.detectChanges();
           removedPage.inputConnections
             .forEach(connectionMeta =>
-              this._flouService.drawConnection(connectionMeta.sourceEndpointId, connectionMeta.targetEndpointId, connectionMeta.label));
+              this._flouService.drawConnection(connectionMeta.sourceEndpointId, connectionMeta.targetEndpointId, connectionMeta.labelMeta));
           removedPage.page.items
             .forEach(pageItem => pageItem.connectionMeta
-              .forEach(connectionMeta => this._flouService.drawConnection(connectionMeta.sourceEndpointId, connectionMeta.targetEndpointId, connectionMeta.label)));
+              .forEach(connectionMeta => this._flouService.drawConnection(connectionMeta.sourceEndpointId, connectionMeta.targetEndpointId, connectionMeta.labelMeta)));
           this._snackBarRef.clear();
         },
       },

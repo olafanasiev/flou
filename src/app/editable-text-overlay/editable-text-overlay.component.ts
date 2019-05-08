@@ -1,6 +1,12 @@
-import {Component, Input, OnInit, ViewEncapsulation} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, ViewEncapsulation} from '@angular/core';
 import {FlouService} from '../../services/flou.service';
 import {LabelMeta} from '../models/label-meta';
+import {ConnectionMeta} from '../models/connection-meta';
+import * as _ from 'lodash';
+import {Connection} from 'jsplumb';
+import {Page} from '../models/page';
+import {Subscription} from 'rxjs/Subscription';
+import {PageItem} from '../models/page-item';
 
 @Component({
   selector: 'editable-text-overlay',
@@ -8,85 +14,54 @@ import {LabelMeta} from '../models/label-meta';
   styleUrls: ['./editable-text-overlay.component.css'],
   encapsulation: ViewEncapsulation.ShadowDom
 })
-export class EditableTextOverlayComponent implements OnInit {
+export class EditableTextOverlayComponent implements OnInit, OnDestroy {
   @Input()
-  labelMeta: LabelMeta;
-  constructor( private _flouService: FlouService) {
+  connectionMeta: ConnectionMeta;
+  @Input()
+  jsPlumbConnection: Connection;
 
+  pageDragStopSubscription: Subscription = null;
+  hideLabel = false;
+  isDotsVertical = false;
+
+  constructor(private _flouService: FlouService) {
+
+  }
+
+  adjustDotsPosition(jsPlumbConnection: Connection) {
+    this.isDotsVertical = parseInt((<any>jsPlumbConnection).canvas.getAttribute('height'), 10) > FlouService.OVERLAY_STRAIGHT_PATH_HEIGHT;
+  }
+
+  clear() {
+    this.connectionMeta.labelMeta.text = '';
+    this.hideLabel = true;
+    this._flouService.saveAction();
+  }
+
+  onLabelChange() {
+    this._flouService.saveAction();
+  }
+
+  hideDotsShowTextArea() {
+    this.hideLabel = false;
   }
 
   ngOnInit() {
-    console.log(this.labelMeta);
+    this.hideLabel = _.isEmpty(this.connectionMeta.labelMeta.text.trim());
+    this.adjustDotsPosition(this.jsPlumbConnection);
+    this.pageDragStopSubscription = this._flouService.pageDragStop$.subscribe((page: Page) => {
+      const itemsIncludeDraggableEndpoint = _.includes(page.items, (item: PageItem) => {
+        return item.endpointId === page.endpointId;
+      });
+      console.log(itemsIncludeDraggableEndpoint);
+      if (this.connectionMeta.targetEndpointId === page.endpointId || itemsIncludeDraggableEndpoint) {
+        this.adjustDotsPosition(this.jsPlumbConnection);
+      }
+    });
   }
-  // _generateEditTemplate(labelMeta: LabelMeta, jsPlumbConnection: any) {
-  //   const div = document.createElement('div');
-  //   const labelDots = document.createElement('div');
-  //   const removeIcon = document.createElement('div');
-  //
-  //   labelDots.classList.add(FlouService.OVERLAY_CLASS_DOTS);
-  //
-  //   const textarea = document.createElement('textarea');
-  //   textarea.value = labelMeta.label;
-  //   textarea.classList.add(FlouService.OVERLAY_EDIT_CLASS);
-  //   this._setLabelHeight(textarea);
-  //
-  //
-  //   const focusOutHandler = (ev: Event) => {
-  //     const textArea = (<HTMLTextAreaElement>ev.target);
-  //     labelMeta.label = textArea.value;
-  //     textAreaChanged();
-  //     this.saveAction();
-  //   };
-  //
-  //   const keyUpHandler = (ev: KeyboardEvent) => {
-  //     this._setLabelHeight(textarea);
-  //     if (ev.key === KeyboardKey.ENTER && !ev.shiftKey) {
-  //       focusOutHandler(ev);
-  //     }
-  //   };
-  //
-  //
-  //   const textAreaChanged = () => {
-  //     // console.log(component);
-  //     if (textarea.value.trim().length === 0) {
-  //       textarea.style.display = 'none';
-  //       labelDots.style.display = 'block';
-  //       removeIcon.style.display = 'none';
-  //       this.adjustDotsPosition(jsPlumbConnection);
-  //     } else {
-  //       textarea.style.display = 'block';
-  //       labelDots.style.display = 'none';
-  //       removeIcon.style.display = 'block';
-  //     }
-  //   };
-  //
-  //   const clearLabel = () => {
-  //     textarea.value = '';
-  //     textAreaChanged();
-  //     const connectionMeta: ConnectionMeta = _.first(this.findConnectionMeta(jsPlumbConnection.sourceId, jsPlumbConnection.targetId));
-  //     this.saveAction();
-  //   };
-  //
-  //
-  //   const showTextAreaHideDots = () => {
-  //     textarea.style.display = 'block';
-  //     labelDots.style.display = 'none';
-  //     removeIcon.style.display = 'block';
-  //     textarea.focus();
-  //   };
-  //
-  //   labelDots.addEventListener(EventListenerType.CLICK, showTextAreaHideDots);
-  //
-  //   textarea.addEventListener(EventListenerType.CHANGE, textAreaChanged);
-  //   textarea.addEventListener(EventListenerType.FOCUS_OUT, focusOutHandler);
-  //   textarea.addEventListener(EventListenerType.KEYUP, keyUpHandler);
-  //   div.append(textarea);
-  //
-  //   removeIcon.setAttribute('class', 'overlay-remove-icon');
-  //   removeIcon.addEventListener(EventListenerType.CLICK, clearLabel);
-  //   div.append(removeIcon);
-  //   div.append(labelDots);
-  //   return div;
-  // }
-  //
+
+  ngOnDestroy() {
+    this.pageDragStopSubscription.unsubscribe();
+  }
+
 }

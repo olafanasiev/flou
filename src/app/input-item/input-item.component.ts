@@ -54,13 +54,13 @@ export class InputItemComponent implements AfterViewInit {
   }
 
   removeIfEmpty(value) {
-    if (value == EMPTY) {
+    if (value === EMPTY) {
       this.onEmptyField.next(this.item.endpointId);
     }
   }
 
   onKeyUp(e) {
-    if (e.key == 'Enter' && e.target.value.trim() != '' && !e.shiftKey) {
+    if (e.key === 'Enter' && e.target.value.trim() !== '' && !e.shiftKey) {
       e.target.value = e.target.value.trim();
       this.enterPressed.next(e);
     }

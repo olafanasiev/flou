@@ -5,7 +5,6 @@ import {AppComponent} from './app.component';
 import {PageComponent} from './page/page.component';
 import {InputItemComponent} from './input-item/input-item.component';
 import {FlouService} from '../services/flou.service';
-import {SharedModule} from './shared/shared.module';
 import {InputItemService} from '../services/input-item.service';
 import {ItemContextMenuComponent} from './item-context-menu/item-context-menu.component';
 import {ClickOutsideModule} from 'ng-click-outside';
@@ -17,8 +16,9 @@ import {NgSelectModule} from '@ng-select/ng-select';
 import {AppDialogComponent} from './app-dialog/app-dialog.component';
 import {HttpClientModule} from '@angular/common/http';
 import {ThemingService} from './theming.service';
-import {TestComponent} from './test/test.component';
 import {EditableTextOverlayComponent} from './editable-text-overlay/editable-text-overlay.component';
+import {AutosizeModule} from 'ngx-autosize';
+import {DragDropModule } from '@angular/cdk/drag-drop';
 import {createCustomElement} from '@angular/elements';
 
 @NgModule({
@@ -28,11 +28,11 @@ import {createCustomElement} from '@angular/elements';
     InputItemComponent,
     ItemContextMenuComponent,
     AppDialogComponent,
-    TestComponent,
     EditableTextOverlayComponent
   ],
   imports: [
-    BrowserAnimationsModule, ClickOutsideModule, HttpClientModule, FormsModule, NgSelectModule, SnackbarModule.forRoot(), BrowserModule, SharedModule
+    BrowserAnimationsModule, AutosizeModule, ClickOutsideModule, DragDropModule,
+    HttpClientModule, FormsModule, NgSelectModule, SnackbarModule.forRoot(), BrowserModule
   ],
   entryComponents: [EditableTextOverlayComponent, AppComponent],
   providers: [FlouService, ThemingService, InputItemService, PageService, ErrorService],

@@ -1,7 +1,43 @@
+.overlay-is-empty {
+  cursor: pointer;
+}
+
+.overlay-is-empty.horizontal-dots{
+  width: 20px;
+  height: 6px;
+  background:url("/assets/layout-empty-horizontal-dots.svg") no-repeat 0 0 transparent;
+  margin-bottom: 10px;
+}
+
+.overlay-is-empty.vertical-dots{
+  width: 6px;
+  height: 20px;
+  background:url("/assets/layout-empty-vertical-dots.svg") no-repeat 0 0 transparent;
+  margin-right: 10px;
+}
+
 .overlay-label--edit{
-  background-color: transparent;
+  padding: 10px 50px;
+  border-radius: 10px;
+  background-color: #FF8800;
+  color: #FFF;
+  resize: none;
   border: none;
   outline: none;
   font-size: 13px;
   overflow: hidden;
 }
+
+.overlay-text-area-container {
+  position: relative;
+}
+.overlay-remove-icon{
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  cursor: pointer;
+  background: url("/assets/remove_description.svg") no-repeat 0 0 transparent;
+}
+

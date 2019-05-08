@@ -52,8 +52,6 @@ export class FlouService {
   pages: Page[];
   pageDragStop$: Observable<any>;
   pageDragStop: Subject<any>;
-  pageDragStart: Subject<any>;
-  pageDragStart$: Observable<any>;
   currentAction: Action;
   DEFAULT_STATE_KEY = 'default_state';
   LAST_HEIGHT = 'last_height';
@@ -63,29 +61,9 @@ export class FlouService {
     this.pageDragStop.next(page);
   }
 
-  emitPageDragStarted(page: Page) {
-    this.pageDragStart.next(page);
-  }
-
   constructor(private _errorService: ErrorService, private _zone: NgZone, private _theming: ThemingService) {
     this.pageDragStop = new Subject();
     this.pageDragStop$ = this.pageDragStop.asObservable();
-    this.pageDragStart = new Subject();
-    this.pageDragStart$ = this.pageDragStart.asObservable();
-    this.pageDragStop$.subscribe((page: Page) => {
-      const targetId = page.endpointId;
-      for (const jsPlumbConnection of (<any>this.jsPlumbInstance).getConnections({target: targetId})) {
-        this.adjustDotsPosition(jsPlumbConnection);
-      }
-
-      for (const pageItem of page.items) {
-        for (const connectionMeta of pageItem.connectionMeta) {
-          for (const jsPlumbConnection of (<any>this.jsPlumbInstance).getConnections({source: connectionMeta.sourceEndpointId})) {
-            this.adjustDotsPosition(jsPlumbConnection);
-          }
-        }
-      }
-    });
     const autoSaveState = interval(10000);
     autoSaveState.subscribe(() => {
       localStorage.setItem(this.DEFAULT_STATE_KEY, JSON.stringify(this.pages));
@@ -203,26 +181,30 @@ export class FlouService {
             if (mouseEvent) {
 
               const pageItem: PageItem = this.findPageItem(newConnectionInfo.sourceId);
-              const newLabel = {
+              const newLabel: LabelMeta = {
                 id: this.generateId(),
-                label: EMPTY,
+                text: EMPTY,
               };
 
+              const connectionMeta: ConnectionMeta = {
+                id: this.generateId(),
+                sourceEndpointId: newConnectionInfo.sourceId,
+                targetEndpointId: newConnectionInfo.targetId,
+                labelMeta: newLabel
+              };
               if (pageItem != null) {
-                pageItem.connectionMeta.push({
-                  sourceEndpointId: newConnectionInfo.sourceId,
-                  targetEndpointId: newConnectionInfo.targetId,
-                  label: newLabel
-                });
+                pageItem.connectionMeta.push(connectionMeta);
                 this.saveAction();
               }
-              this.addConnectionLabel(newConnectionInfo, newLabel);
+              console.log(connectionMeta);
+              this.addConnectionLabel(newConnectionInfo, connectionMeta);
 
             } else {
               const connectionMeta: ConnectionMeta[] = this.findConnectionMeta(newConnectionInfo.sourceId, newConnectionInfo.targetId);
               if (connectionMeta) {
                 connectionMeta.forEach((meta) => {
-                  this.addConnectionLabel(newConnectionInfo, meta.label);
+                  console.log(meta);
+                  this.addConnectionLabel(newConnectionInfo, meta);
                 });
               }
             }
@@ -353,33 +335,14 @@ export class FlouService {
   }
 
 
-  adjustDotsPosition(jsPlumbConnection: Connection) {
-    const overlayCanvas = (<any>jsPlumbConnection.getOverlay(FlouService.OVERLAY_CUSTOM_ID)).canvas;
-    if (overlayCanvas) {
-      const labelDots = document.querySelector('#' + overlayCanvas.id + ' .' + FlouService.OVERLAY_CLASS_DOTS);
-      if (parseInt((<any>jsPlumbConnection).canvas.getAttribute('height'), 10) > FlouService.OVERLAY_STRAIGHT_PATH_HEIGHT) {
-        labelDots.classList.remove('horizontal-dots');
-        labelDots.classList.add('vertical-dots');
-      } else {
-        labelDots.classList.add('horizontal-dots');
-        labelDots.classList.remove('vertical-dots');
-      }
-    }
-    // else {
-    // }
-  }
 
-  addConnectionLabel(connectionMadeInfo: ConnectionMadeEventInfo, label: LabelMeta) {
+  addConnectionLabel(connectionMadeInfo: ConnectionMadeEventInfo, connectionMeta: ConnectionMeta) {
     const jsplumbConnectionWithOverlay = (<any>connectionMadeInfo.connection).addOverlay([OverlayType.CUSTOM, {
       create: (component) => {
-        // const div = document.createElement('div');
-        if (!label) {
-          label = {label: EMPTY, id: this.generateId()};
-        }
-
         // we are creating web component which will be controlled by angular
         const textOverlay = document.createElement('editable-text-overlay') as NgElement & WithProperties<EditableTextOverlayComponent>;
-        textOverlay.labelMeta = label;
+        textOverlay.connectionMeta = connectionMeta;
+        textOverlay.jsPlumbConnection = connectionMadeInfo.connection;
         return textOverlay;
       },
       location: [0.5],
@@ -496,10 +459,6 @@ export class FlouService {
       this.currentAction = this.currentAction.addAction(_.cloneDeep(this.pages));
     }
 
-  }
-
-  dragConnectionStart(connection) {
-    this.jsPlumbInstance.fire('connectionDrag', connection, undefined);
   }
 
   generateId(): string {

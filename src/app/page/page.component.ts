@@ -12,6 +12,7 @@ import {PageItem} from '../models/page-item';
 import {Subscription} from 'rxjs';
 import {Endpoint} from 'jsplumb';
 import {RemovedPageMeta} from '../models/removed-page-meta';
+import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-page',
@@ -21,7 +22,6 @@ import {RemovedPageMeta} from '../models/removed-page-meta';
 })
 export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
   sortableSettings = {width: '100%', height: 'auto'};
-  @ViewChild('itemsContainer') itemsContainer: ElementRef;
   @Output()
   pageClicked: EventEmitter<Page> = new EventEmitter();
   @Output()
@@ -58,14 +58,33 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  onItemDragging() {
-
-  }
-
   onItemRemove(item: PageItem) {
     this._cd.detectChanges();
     this._flouService.getJsPlumbInstance().repaintEverything();
   }
+
+  drop(event: CdkDragDrop<PageItem>) {
+      moveItemInArray(this.page.items, event.previousIndex, event.currentIndex);
+      // this._flouService.getJsPlumbInstance().getConfindConnectionMeta(this.page.items[event.currentIndex].)
+      // this._flouService.getJsPlumbInstance().repaintEverything();
+    const pageItem = this.page.items[event.currentIndex];
+    pageItem.connectionMeta.forEach((connectionMeta) => {
+     const connections =  (<any>this._flouService.getJsPlumbInstance()).getConnections({
+        source: connectionMeta.sourceEndpointId,
+        target: connectionMeta.targetEndpointId
+      });
+     connections.forEach((connection) => {
+       this._flouService.getJsPlumbInstance().deleteConnection(connection);
+     });
+      console.log("drawConnection 1");
+     this._flouService.drawConnection(connectionMeta.sourceEndpointId, connectionMeta.targetEndpointId, connectionMeta.labelMeta)
+    });
+    console.log("drawConnection 2");
+      // this._cd.detectChanges();
+
+  }
+// this.enableDragging();
+//   }
 
   ngAfterViewInit() {
     this._viewRef.element.nativeElement.id = this.page.endpointId;
@@ -76,12 +95,18 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   enableDragging() {
     this._cd.detectChanges();
-    this._flouService.getJsPlumbInstance().repaintEverything();
+    // this.page.items.forEach( (pageItem) => {
+      // do
+      // console.log(document.querySelector(`#${pageItem.endpointId}`));
+      // debugger;
+      // this._flouService.getJsPlumbInstance().recalculateOffsets(document.querySelector(`#${pageItem.endpointId}`));
+      // this._flouService.getJsPlumbInstance().repaint(document.querySelector(`#${pageItem.endpointId}`));
+    // } );
     this._flouService.enableDragging(this._viewRef.element.nativeElement, {
       start: () => {
         this._flouService.saveAction();
         this._inputItemService.emitPanelHideEvent();
-        this._flouService.emitPageDragStarted(this.page);
+        this._flouService.getJsPlumbInstance().repaintEverything();
       },
       stop: (info) => {
         this.page.x = info.pos[0];
@@ -92,11 +117,12 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
       force: true
     });
     this._flouService.getJsPlumbInstance().setDraggable(this._viewRef.element.nativeElement, true);
+    this._flouService.getJsPlumbInstance().repaintEverything();
   }
 
-  disableDragging() {
-    this._flouService.disableDragging(this._viewRef.element.nativeElement);
-  }
+  // disableDragging() {
+  //   this._flouService.disableDragging(this._viewRef.element.nativeElement);
+  // }
 
   updatePosition(x, y) {
     this.page.x = x;

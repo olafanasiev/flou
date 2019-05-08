@@ -10,43 +10,6 @@
   }
 }
 
-
-
-.overlay-is-empty {
-  cursor: pointer;
-}
-
-.overlay-is-empty.horizontal-dots{
-  width: 20px;
-  height: 6px;
-  background:url("/assets/layout-empty-horizontal-dots.svg") no-repeat 0 0 transparent;
-  margin-bottom: 10px;
-}
-
-.overlay-is-empty.vertical-dots{
-  width: 6px;
-  height: 20px;
-  background:url("/assets/layout-empty-vertical-dots.svg") no-repeat 0 0 transparent;
-  margin-right: 10px;
-}
-
-.jtk-overlay textarea{
-  padding: 10px 50px;
-  border-radius: 10px;
-  background-color: #FF8800;
-  resize: none;
-}
-
-.jtk-overlay .overlay-remove-icon{
-  width: 20px;
-  height: 20px;
-  position: absolute;
-  right: 0px;
-  top: 0px;
-  cursor: pointer;
-  background: url("/assets/remove_description.svg") no-repeat 0 0 transparent;
-}
-
 .jtk-overlay .flou-template svg{
   width: 20px;
   height: 20px;

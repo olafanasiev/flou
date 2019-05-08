@@ -1,7 +1,0 @@
-  <div [style.height]='listStyle.height'>
-    <div draggable="true" (click)="selectItem(item)" *ngFor="let item of items; let i = index;" [ngClass]="{'active': item == selectedItem}"
-        (drop)="onDrop($event, i)" (dragover)="allowDrop($event,i)" (dragstart)="onDragStart($event, i)">
-      <ng-template ngFor [ngForOf]="[item]" [ngForTemplate]="itemTemplate">
-      </ng-template>
-    </div>
-  </div>

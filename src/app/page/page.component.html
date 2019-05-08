@@ -4,12 +4,8 @@
             <input #pageTitle type="text" class="title-item" [(ngModel)]="page.title"/>
             <div (click)="deletePage()" class="page__delete-button">X</div> 
         </div>
-        <div #itemsContainer class="page__items">
-          <sortable [listStyle]="sortableSettings" [items]="page.items" [name]="'List'" (dragStarted)="disableDragging()" (listSorted)="enableDragging()">
-            <ng-template let-item>
-              <app-input-item (onRemove)="onItemRemove($event)" (enterPressed)="addItem()" (onEmptyField)="removeEmptyItem(item.htmlId)" [item]="item"></app-input-item>
-            </ng-template>
-          </sortable>
+        <div cdkDropList (cdkDropListDropped)="drop($event)" class="page__items">
+              <app-input-item cdkDrag *ngFor="let item of page.items" (onRemove)="onItemRemove($event)" (enterPressed)="addItem()" (onEmptyField)="removeEmptyItem(item.endpointId)" [item]="item"></app-input-item>
         </div>
     </div>
     <div class="can-add-item add-item-panel">

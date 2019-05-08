@@ -1,5 +1,9 @@
 <div>
-  <textarea class="overlay-label--edit"></textarea>
-  <div class="overlay-is-empty"></div>
-  <div class="overlay-remove-icon"></div>
+  <div *ngIf="!hideLabel" class="overlay-text-area-container">
+    <textarea autosize (focusout)="onLabelChange()" [(ngModel)]="connectionMeta.labelMeta.text" class="overlay-label--edit"></textarea>
+    <div (click)="clear()" class="overlay-remove-icon"></div>
+  </div>
+  <div (click)="hideDotsShowTextArea()" *ngIf="hideLabel" [ngClass]="{'overlay-is-empty':true,
+                                                                      'horizontal-dots':!this.isDotsVertical,
+                                                                      'vertical-dots':this.isDotsVertical }"></div>
 </div>

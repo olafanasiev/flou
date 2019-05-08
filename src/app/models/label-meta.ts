@@ -1,4 +1,4 @@
 export interface LabelMeta {
   id: string;
-  label: string;
+  text: string;
 }
