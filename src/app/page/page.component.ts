@@ -65,26 +65,9 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   drop(event: CdkDragDrop<PageItem>) {
       moveItemInArray(this.page.items, event.previousIndex, event.currentIndex);
-      // this._flouService.getJsPlumbInstance().getConfindConnectionMeta(this.page.items[event.currentIndex].)
-      // this._flouService.getJsPlumbInstance().repaintEverything();
-    const pageItem = this.page.items[event.currentIndex];
-    pageItem.connectionMeta.forEach((connectionMeta) => {
-     const connections =  (<any>this._flouService.getJsPlumbInstance()).getConnections({
-        source: connectionMeta.sourceEndpointId,
-        target: connectionMeta.targetEndpointId
-      });
-     connections.forEach((connection) => {
-       this._flouService.getJsPlumbInstance().deleteConnection(connection);
-     });
-      console.log("drawConnection 1");
-     this._flouService.drawConnection(connectionMeta.sourceEndpointId, connectionMeta.targetEndpointId, connectionMeta.labelMeta)
-    });
-    console.log("drawConnection 2");
-      // this._cd.detectChanges();
-
+    this.enableDragging();
+    this._flouService.getJsPlumbInstance().revalidate(this.page.endpointId);
   }
-// this.enableDragging();
-//   }
 
   ngAfterViewInit() {
     this._viewRef.element.nativeElement.id = this.page.endpointId;
@@ -95,13 +78,6 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   enableDragging() {
     this._cd.detectChanges();
-    // this.page.items.forEach( (pageItem) => {
-      // do
-      // console.log(document.querySelector(`#${pageItem.endpointId}`));
-      // debugger;
-      // this._flouService.getJsPlumbInstance().recalculateOffsets(document.querySelector(`#${pageItem.endpointId}`));
-      // this._flouService.getJsPlumbInstance().repaint(document.querySelector(`#${pageItem.endpointId}`));
-    // } );
     this._flouService.enableDragging(this._viewRef.element.nativeElement, {
       start: () => {
         this._flouService.saveAction();
@@ -113,20 +89,11 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
         this.page.y = info.pos[1];
         this._flouService.saveAction();
         this._flouService.emitPageDragStopped(this.page);
+        // debugger;
+        this._flouService.getJsPlumbInstance().repaintEverything();
       },
       force: true
     });
-    this._flouService.getJsPlumbInstance().setDraggable(this._viewRef.element.nativeElement, true);
-    this._flouService.getJsPlumbInstance().repaintEverything();
-  }
-
-  // disableDragging() {
-  //   this._flouService.disableDragging(this._viewRef.element.nativeElement);
-  // }
-
-  updatePosition(x, y) {
-    this.page.x = x;
-    this.page.y = y;
   }
 
   makeActive() {

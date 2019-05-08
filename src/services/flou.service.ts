@@ -196,14 +196,12 @@ export class FlouService {
                 pageItem.connectionMeta.push(connectionMeta);
                 this.saveAction();
               }
-              console.log(connectionMeta);
               this.addConnectionLabel(newConnectionInfo, connectionMeta);
 
             } else {
               const connectionMeta: ConnectionMeta[] = this.findConnectionMeta(newConnectionInfo.sourceId, newConnectionInfo.targetId);
               if (connectionMeta) {
                 connectionMeta.forEach((meta) => {
-                  console.log(meta);
                   this.addConnectionLabel(newConnectionInfo, meta);
                 });
               }

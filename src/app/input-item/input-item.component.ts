@@ -39,7 +39,7 @@ export class InputItemComponent implements AfterViewInit {
   }
 
   removeItem(item: PageItem) {
-    let doSaveAction = true;
+    const doSaveAction = true;
     this._flouService.removeItem(item, doSaveAction).then(() => {
       this.onRemove.emit(item);
     });

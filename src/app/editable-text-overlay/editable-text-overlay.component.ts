@@ -53,7 +53,6 @@ export class EditableTextOverlayComponent implements OnInit, OnDestroy {
       const itemsIncludeDraggableEndpoint = _.includes(page.items, (item: PageItem) => {
         return item.endpointId === page.endpointId;
       });
-      console.log(itemsIncludeDraggableEndpoint);
       if (this.connectionMeta.targetEndpointId === page.endpointId || itemsIncludeDraggableEndpoint) {
         this.adjustDotsPosition(this.jsPlumbConnection);
       }
