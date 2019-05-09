@@ -31,13 +31,11 @@
     z-index: 2;
 }
 
-.page__items .sortable-header {
-  display:none;
-}
-
 .page__items{
     display: flex;
     flex-direction: column;
+    align-items: stretch;
+    flex-grow:1;
 }
 
 .jtk-drag {

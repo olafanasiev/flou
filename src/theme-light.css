@@ -1,20 +1,18 @@
 .main-canvas[theme="light"] path{
-  stroke: #000;
-  color: #000;
-}
-
-
-.main-canvas[theme="light"] path:hover{
-  stroke: red;
-  fill: red;
+  stroke: #8A8A8A;
+  color: #8A8A8A;
 }
 
 .main-canvas[theme="light"] input {
-  color: #000;
+  color: #8A8A8A;
+}
+
+.main-canvas[theme="light"] .page.--active textarea {
+  color: #1E62BF;
 }
 
 .main-canvas[theme="light"] textarea {
-  color: #000;
+  color: #8A8A8A;
 }
 
 .main-canvas[theme="light"] .page{
@@ -26,6 +24,49 @@
   stroke: none;
 }
 
+.main-canvas[theme="light"] .jtk-connector.jtk-hover path {
+  stroke: red;
+  color: red;
+  animation: pulse 1s infinite;
+}
+
+.main-canvas[theme="light"] .jtk-connector.jtk-hover .arrow-connector {
+  fill: red;
+}
+
+.main-canvas[theme="light"] .jtk-connector .arrow-connector{
+  fill:  #FF8800;
+}
+
+.main-canvas[theme="light"] .jtk-connector path{
+  stroke: #FF8800;
+}
+
+.main-canvas[theme="light"] .jtk-connector{
+  overflow: visible;
+  animation: none;
+}
+
+.main-canvas[theme="light"] .page.--active .can-add-item .flou-palette {
+  fill: #1e62bf;
+}
+
+.main-canvas[theme="light"] .right-bottom-main-panel {
+  background-color: #FFF;
+}
+
+.main-canvas[theme="light"] .right-bottom-main-panel-icons-container .button {
+  background-color: #8A8A8A;
+}
+
+.main-canvas[theme="light"] .right-bottom-main-panel-icons-container .button:hover{
+  background-color: #1e62bf;
+}
+
+.main-canvas[theme="light"] .right-bottom-main-panel .flou-palette {
+  fill: #FFF;
+}
+
 .main-canvas[theme="light"] .flou-palette.fill-none {
   fill: none;
 }
@@ -34,18 +75,17 @@
   background: url("/assets/menu-light.png") no-repeat center right transparent;
 }
 
+.main-canvas[theme="light"] .input-item{
+  border-bottom: 1px solid #DADBDC;
+}
+
 .main-canvas[theme="light"] .flou-palette {
-  stroke: #000;
-  fill: #000;
+  stroke: #8A8A8A;
+  fill: #8A8A8A;
 }
 
 .main-canvas[theme="light"] #pages-wrapper {
   background: url("/assets/theme-light/light-theme-bg.png") repeat 0 0 transparent;
-}
-
-.main-canvas[theme="light"] .round-button{
-  color: #000;
-  border: 2px solid #000;
 }
 
 .main-canvas[theme="light"] .item-type-panel {
@@ -53,18 +93,47 @@
   border:1px solid #000;
 }
 
+.main-canvas[theme="light"] .page.--active .page__title {
+  border: 2px solid #1E62BF;
+  background-color: #1E62BF;
+}
+
 .main-canvas[theme="light"] .page__title {
-  border-bottom: 2px solid #000;
+  border: 2px solid #8A8A8A;
+  background-color: #8A8A8A;
+  color: #FFF;
+  border-radius: 5px 5px 0 0;
+}
+
+.main-canvas[theme="light"] .page__title input {
+  color: #FFF;
 }
 
 .main-canvas[theme="light"] .page {
-  border: 2px solid #000;
+  border: none;
 }
 
-.main-canvas[theme="dark"] .jtk-droppable.jtk-connected {
+.main-canvas[theme="light"] .page__items-with-title {
+  flex-grow: 1;
+}
+
+.main-canvas[theme="light"] .add-item-panel {
+  border-left: 2px solid #8A8A8A;
+  border-right: 2px solid #8A8A8A;
+  border-bottom: 2px solid #8A8A8A;
+  border-radius: 0 0 5px 5px;
+}
+
+.main-canvas[theme="light"] .page__items  {
+  flex-grow: 1;
+  border-left: 2px solid #8A8A8A;
+  border-right: 2px solid #8A8A8A;
+}
+
+.main-canvas[theme="light"] .jtk-droppable.jtk-connected {
   border-left-color: #ff8800;
 }
 
-.main-canvas[theme="dark"] .jtk-droppable {
+.main-canvas[theme="light"] .jtk-droppable {
   border-left-color: #b1bbc9;
 }

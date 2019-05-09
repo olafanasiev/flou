@@ -1,16 +1,20 @@
 export namespace ConnectorType {
-    export const BEZIER = 'Bezier';
-    export const FLOWCHART = 'Flowchart';
+  export const BEZIER = 'Bezier';
+  export const FLOWCHART = 'Flowchart';
+}
+
+export namespace StorageKeys {
+  export const CURRENT_THEME = 'current_theme';
 }
 
 export namespace OverlayType {
-    export const ARROW = 'Arrow';
-    export const CUSTOM = 'Custom';
+  export const ARROW = 'Arrow';
+  export const CUSTOM = 'Custom';
 }
 
-export namespace  Strings {
-    export const EMPTY = '';
-    export const INPUT_TYPE_TEXT = 'text';
+export namespace Strings {
+  export const EMPTY = '';
+  export const INPUT_TYPE_TEXT = 'text';
 }
 
 
@@ -26,7 +30,7 @@ export namespace JSPlumbEventType {
   export const CONNECTION_DETACHED = 'connectionDetached';
 }
 
-export namespace KeyboardKey{
+export namespace KeyboardKey {
   export const ENTER = 'Enter';
 }
 

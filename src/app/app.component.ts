@@ -6,7 +6,7 @@ import {SnackbarService} from 'ngx-snackbar';
 import {ErrorService} from '../services/error.service';
 import {RemovedPageMeta} from './models/removed-page-meta';
 import {Theme, ThemingService} from './theming.service';
-import {ThemeName} from './shared/app.const';
+import {StorageKeys, ThemeName} from './shared/app.const';
 
 const Y_LETTER_CODE = 89;
 const Z_LETTER_CODE = 90;
@@ -48,6 +48,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   changeTheme() {
     this.theme = this.theme.name === ThemeName.DARK ? this._theming.changeTheme(ThemeName.LIGHT) : this._theming.changeTheme(ThemeName.DARK);
+    localStorage.setItem(StorageKeys.CURRENT_THEME, this.theme.name);
   }
 
   getNewWindowSize() {
@@ -84,7 +85,11 @@ export class AppComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this._theming.register(ThemeName.DARK, {fill: '#FF8800', stroke: '#FF8800', color: '#FFFFFF'});
     this._theming.register(ThemeName.LIGHT, {fill: '#FF8800', stroke: '#FF8800', color: '#8a8a8a'});
-    this.theme = this._theming.changeTheme(ThemeName.DARK);
+    if (localStorage.getItem(StorageKeys.CURRENT_THEME)) {
+      this.theme = this._theming.changeTheme(localStorage.getItem(StorageKeys.CURRENT_THEME));
+    } else {
+      this.theme = this._theming.changeTheme(ThemeName.DARK);
+    }
     this.appHeight = this._flouService.getLastAppHeight() || window.innerHeight;
     this._flouService.initJsPlumb().then(() => {
       this._flouService.loadLastAppState().then(() => {

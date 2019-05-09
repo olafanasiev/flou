@@ -115,7 +115,7 @@ export class FlouService {
   makeSource(inputItemId) {
     this.jsPlumbInstance.makeSource(inputItemId, {
       anchor: ['RightMiddle'],
-      endpoint: ['Rectangle', {width: 1, height: 0}]
+      endpoint: ['Rectangle', {width: 1, height: 1}]
     });
   }
 
