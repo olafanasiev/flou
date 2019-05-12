@@ -30,6 +30,12 @@
   animation: pulse 1s infinite;
 }
 
+.main-canvas[theme="light"] .page__delete-button path{
+  stroke: none;
+  fill: #FFF;
+}
+
+
 .main-canvas[theme="light"] .jtk-connector.jtk-hover .arrow-connector {
   fill: red;
 }

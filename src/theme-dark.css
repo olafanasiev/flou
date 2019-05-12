@@ -10,8 +10,16 @@
   animation: pulse 1s infinite;
 }
 
+.main-canvas[theme="dark"] .page__delete-button path{
+  stroke: none;
+}
+
 .main-canvas[theme="dark"] .jtk-connector.jtk-hover .arrow-connector {
   fill: red;
+}
+
+.main-canvas[theme="dark"] .jtk-droppable.jtk-connected {
+  border-left-color:  #FF8800;
 }
 
 .main-canvas[theme="dark"] .jtk-connector .arrow-connector{

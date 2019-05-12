@@ -25,6 +25,8 @@ export class InputItemComponent implements AfterViewInit {
   onEmptyField = new EventEmitter<any>();
   @Output()
   onRemove = new EventEmitter<PageItem>();
+  @Output()
+  jsPlumbAnchorClicked = new EventEmitter<PageItem>();
   textAreaHeight = 20;
 
   constructor(public _viewRef: ViewContainerRef,
@@ -46,8 +48,12 @@ export class InputItemComponent implements AfterViewInit {
   }
 
 
+  anchorClicked() {
+    this.jsPlumbAnchorClicked.next(this.item);
+  }
+
   ngAfterViewInit() {
-    if (new Date(this.item.created).toString() == new Date().toString()) {
+    if (new Date(this.item.created).toString() === new Date().toString()) {
       this.textAreaElRef.nativeElement.focus();
     }
     this._flouService.makeSource(this.item.endpointId);

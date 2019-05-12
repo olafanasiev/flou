@@ -1,14 +1,18 @@
-<div [style.width.px]="page.width" [style.minHeight.px]="268" (dblclick)="addItem($event)"
-     (clickOutside)="makeNotActive($event)" (mousedown)="makeActive()"
+<div [style.width.px]="page.width" [style.minHeight.px]="248" (dblclick)="addItem($event)"
+     (mousedown)="makeActive()"
      [ngClass]="{'page':true, '--active':page.isActive, 'can-add-item': true}">
   <div class="page__items-with-title">
     <div class="page__title">
       <input #pageTitle type="text" class="title-item" [(ngModel)]="page.title"/>
-      <div (click)="deletePage()" class="page__delete-button">X</div>
+      <div (click)="deletePage()" class="page__delete-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="10.999" height="11.001" viewBox="0 0 13.999 14.001">
+          <path id="close" d="M-270.745,52.164l5.292-5.292a1,1,0,0,0,0-1.414,1,1,0,0,0-1.414,0l-5.292,5.292-5.293-5.294a1,1,0,0,0-1.414,0,1,1,0,0,0,0,1.414l5.293,5.294-5.293,5.293a1,1,0,0,0,0,1.414,1,1,0,0,0,.707.293,1,1,0,0,0,.707-.293l5.293-5.293,5.292,5.292a1,1,0,0,0,.707.293,1,1,0,0,0,.707-.293,1,1,0,0,0,0-1.414Z" transform="translate(279.159 -45.163)"/>
+        </svg>
+      </div>
     </div>
     <div cdkDropList (cdkDropListDropped)="drop($event)" class="page__items">
       <app-input-item cdkDrag *ngFor="let item of page.items" (onRemove)="onItemRemove($event)"
-                      (enterPressed)="addItem()" (onEmptyField)="removeEmptyItem(item.endpointId)"
+                      (enterPressed)="addItem()" (jsPlumbAnchorClicked)="makeActive()" (onEmptyField)="removeEmptyItem(item.endpointId)"
                       [item]="item"></app-input-item>
     </div>
   </div>

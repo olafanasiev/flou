@@ -7,7 +7,6 @@ import {InputItemComponent} from './input-item/input-item.component';
 import {FlouService} from '../services/flou.service';
 import {InputItemService} from '../services/input-item.service';
 import {ItemContextMenuComponent} from './item-context-menu/item-context-menu.component';
-import {ClickOutsideModule} from 'ng-click-outside';
 import {PageService} from '../services/page.service';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ErrorService} from '../services/error.service';
@@ -31,7 +30,7 @@ import {createCustomElement} from '@angular/elements';
     EditableTextOverlayComponent
   ],
   imports: [
-    BrowserAnimationsModule, AutosizeModule, ClickOutsideModule, DragDropModule,
+    BrowserAnimationsModule, AutosizeModule, DragDropModule,
     HttpClientModule, FormsModule, NgSelectModule, SnackbarModule.forRoot(), BrowserModule
   ],
   entryComponents: [EditableTextOverlayComponent, AppComponent],

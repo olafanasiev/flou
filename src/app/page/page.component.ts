@@ -21,7 +21,6 @@ import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
   encapsulation: ViewEncapsulation.None
 })
 export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
-  sortableSettings = {width: '100%', height: 'auto'};
   @Output()
   pageClicked: EventEmitter<Page> = new EventEmitter();
   @Output()
@@ -41,6 +40,12 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
     this.subscriptions.push(this._pageService.pageActiveEvent.subscribe((htmlId) => {
       if (this.page.endpointId !== htmlId) {
         this.page.isActive = false;
+      }
+    }));
+
+    this.subscriptions.push(this._flouService.connectionWithPageEstablished$.subscribe((pageId) => {
+      if (this.page.endpointId === pageId) {
+        this.makeActive();
       }
     }));
 
@@ -64,7 +69,7 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   drop(event: CdkDragDrop<PageItem>) {
-      moveItemInArray(this.page.items, event.previousIndex, event.currentIndex);
+    moveItemInArray(this.page.items, event.previousIndex, event.currentIndex);
     this.enableDragging();
     this._flouService.getJsPlumbInstance().revalidate(this.page.endpointId);
   }
@@ -102,6 +107,7 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   makeNotActive(e) {
+    // console.log( "page is not active now ");
     if (!e.target.classList.contains('item-panel') && !e.target.classList.contains('context-menu-item')) {
       this.page.isActive = false;
     }
@@ -114,7 +120,7 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  addItem(e) {
+  addItem(e?) {
     const doSaveAction = true;
     if (e) {
       if (e.target && e.target.classList && e.target.classList.contains('can-add-item')) {

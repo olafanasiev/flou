@@ -11,12 +11,15 @@
 .page__add-item {
   width: 46px;
   height: 46px;
+  margin-right: 4px;
+  margin-bottom: 4px;
+  margin-top: 4px;
   background: url('/assets/fab_button.svg') 0 0 no-repeat transparent;
   cursor: pointer;
 }
 
 .page__title { 
-    height: 45px;
+    height: 35px;
     display: flex;
     flex-direction: row;
 }
@@ -44,7 +47,7 @@
 
 .page__delete-button {
     width: 30px;
-    line-height: 30px;
+    line-height: 35px;
     text-align: center;
     cursor: pointer;
 }
@@ -52,7 +55,7 @@
 
 .title-item{ 
     border: none;
-    margin-left: 4px;
+    margin-left: 6px;
     outline: none;
     width: 191px;
     text-overflow:ellipsis;

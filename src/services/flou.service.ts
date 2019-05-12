@@ -52,6 +52,8 @@ export class FlouService {
   pages: Page[];
   pageDragStop$: Observable<any>;
   pageDragStop: Subject<any>;
+  connectionWithPageEstablished: Subject<String>;
+  connectionWithPageEstablished$: Observable<String>;
   currentAction: Action;
   DEFAULT_STATE_KEY = 'default_state';
   LAST_HEIGHT = 'last_height';
@@ -64,6 +66,8 @@ export class FlouService {
   constructor(private _errorService: ErrorService, private _zone: NgZone, private _theming: ThemingService) {
     this.pageDragStop = new Subject();
     this.pageDragStop$ = this.pageDragStop.asObservable();
+    this.connectionWithPageEstablished = new Subject();
+    this.connectionWithPageEstablished$ = this.connectionWithPageEstablished.asObservable();
     const autoSaveState = interval(10000);
     autoSaveState.subscribe(() => {
       localStorage.setItem(this.DEFAULT_STATE_KEY, JSON.stringify(this.pages));
@@ -196,8 +200,10 @@ export class FlouService {
                 pageItem.connectionMeta.push(connectionMeta);
                 this.saveAction();
               }
-              this.addConnectionLabel(newConnectionInfo, connectionMeta);
 
+              this.addConnectionLabel(newConnectionInfo, connectionMeta);
+              this.connectionWithPageEstablished.next(
+                _.first(pageItem.connectionMeta).targetEndpointId);
             } else {
               const connectionMeta: ConnectionMeta[] = this.findConnectionMeta(newConnectionInfo.sourceId, newConnectionInfo.targetId);
               if (connectionMeta) {
@@ -231,8 +237,8 @@ export class FlouService {
     this.pages.forEach((page) => {
       page.isActive = false;
     });
-    const pageWidth = 230;
-    const defaultPageHeight = 268;
+    const pageWidth = 200;
+    const defaultPageHeight = 248;
     const halfPageHeight = defaultPageHeight / 2;
     const halfPageWidth = pageWidth / 2;
     let y = (window.innerHeight / 2 + window.scrollY) - halfPageHeight;
