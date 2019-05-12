@@ -14,9 +14,11 @@
   stroke: none;
 }
 
-.main-canvas[theme="dark"] .jtk-connector.jtk-hover .arrow-connector {
-  fill: red;
+.main-canvas[theme="dark"] .page.--active .page__delete-button path {
+  fill: #8B2C33
 }
+
+
 
 .main-canvas[theme="dark"] .jtk-droppable.jtk-connected {
   border-left-color:  #FF8800;
@@ -60,6 +62,10 @@
   background-color: #1e62bf;
 }
 
+.main-canvas[theme="dark"] .page.--active {
+  background-color: #BC4F53;
+}
+
 .main-canvas[theme="dark"] .page__title {
   border-bottom: 2px solid #FFF;
   background-color: #FFF;
@@ -94,6 +100,14 @@
 
 .main-canvas[theme="dark"] .input-item {
   border-bottom: 1px solid #0d3163;
+}
+
+.main-canvas[theme="dark"] .page.--active .input-item {
+  border-bottom: 1px solid #8B2C33;
+}
+
+.main-canvas[theme="dark"] .page.--active .title-item {
+  color: #8B2C33;
 }
 
 .main-canvas[theme="dark"] .right-bottom-main-panel {
