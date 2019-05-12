@@ -118,7 +118,9 @@ export class AppComponent implements OnInit, AfterViewInit {
 
 
   clearApp() {
-
+    this._flouService.removeAllPages();
+    this._flouService.getJsPlumbInstance().reset();
+    localStorage.clear();
   }
 
   onPageDelete(removedPage: RemovedPageMeta) {
