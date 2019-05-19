@@ -74,6 +74,13 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
     this._flouService.getJsPlumbInstance().revalidate(this.page.endpointId);
   }
 
+  updateConnections() {
+    this._cd.detectChanges();
+    setTimeout(() => {
+      this._flouService.getJsPlumbInstance().revalidate(this.page.endpointId);
+    }, 0);
+  }
+
   ngAfterViewInit() {
     this._viewRef.element.nativeElement.id = this.page.endpointId;
     this._flouService.makeTarget(this.page.endpointId);

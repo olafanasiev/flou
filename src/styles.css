@@ -67,7 +67,7 @@ html, body {
   background: none;
   cursor: pointer;
   position: absolute;
-  bottom: 15px;
+  top: 9px;
   right: -13px;
 }
 
@@ -81,17 +81,4 @@ html, body {
 }
 
 
-.input-item {
-  height: 37px;
-}
 
-
-.input-icon{ 
-    margin-top: 10px;
-    cursor: pointer;
-}
-
-.input-icon:hover{ 
-    cursor: pointer;
-    background-color:transparent;
-}

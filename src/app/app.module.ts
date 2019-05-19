@@ -16,8 +16,7 @@ import {AppDialogComponent} from './app-dialog/app-dialog.component';
 import {HttpClientModule} from '@angular/common/http';
 import {ThemingService} from './theming.service';
 import {EditableTextOverlayComponent} from './editable-text-overlay/editable-text-overlay.component';
-import {AutosizeModule} from 'ngx-autosize';
-import {DragDropModule } from '@angular/cdk/drag-drop';
+import {DragDropModule} from '@angular/cdk/drag-drop';
 import {createCustomElement} from '@angular/elements';
 
 @NgModule({
@@ -30,7 +29,7 @@ import {createCustomElement} from '@angular/elements';
     EditableTextOverlayComponent
   ],
   imports: [
-    BrowserAnimationsModule, AutosizeModule, DragDropModule,
+    BrowserAnimationsModule, DragDropModule,
     HttpClientModule, FormsModule, NgSelectModule, SnackbarModule.forRoot(), BrowserModule
   ],
   entryComponents: [EditableTextOverlayComponent, AppComponent],

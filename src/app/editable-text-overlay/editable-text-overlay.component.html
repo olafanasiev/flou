@@ -1,6 +1,6 @@
 <div>
   <div *ngIf="!hideLabel" class="overlay-text-area-container">
-    <textarea autosize (focusout)="onLabelChange()" [(ngModel)]="connectionMeta.labelMeta.text" class="overlay-label--edit"></textarea>
+    <textarea [style.minHeight.px]="20" [style.height.px]="textareaHeight" #textareaElRef (keyup)="onKeyUp()" (focusout)="onLabelChange()" [(ngModel)]="connectionMeta.labelMeta.text" class="overlay-label--edit"></textarea>
     <div (click)="clear()" class="overlay-remove-icon"></div>
   </div>
   <div (click)="hideDotsShowTextArea()" *ngIf="hideLabel" [ngClass]="{'overlay-is-empty':true,

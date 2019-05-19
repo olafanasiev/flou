@@ -1,4 +1,4 @@
-.main-canvas[theme="light"] path{
+.main-canvas[theme="light"] path {
   stroke: #8A8A8A;
   color: #8A8A8A;
 }
@@ -15,40 +15,38 @@
   color: #8A8A8A;
 }
 
-.main-canvas[theme="light"] .page{
+.main-canvas[theme="light"] .page {
   background-color: #FFF;
 }
-
 
 .main-canvas[theme="light"] .flou-palette.stroke-none {
   stroke: none;
 }
 
-.main-canvas[theme="light"] .jtk-connector.jtk-hover path {
+.main-canvas[theme="light"] .page__delete-button path {
+  stroke: none;
+  fill: #FFF;
+}
+
+.main-canvas[theme="light"] .jtk-connector:hover path {
   stroke: red;
   color: red;
   animation: pulse 1s infinite;
 }
 
-.main-canvas[theme="light"] .page__delete-button path{
-  stroke: none;
-  fill: #FFF;
-}
-
-
-.main-canvas[theme="light"] .jtk-connector.jtk-hover .arrow-connector {
+.main-canvas[theme="light"] .jtk-connector:hover path:nth-last-child(1) {
   fill: red;
 }
 
-.main-canvas[theme="light"] .jtk-connector .arrow-connector{
-  fill:  #FF8800;
+.main-canvas[theme="light"] .jtk-connector .arrow-connector {
+  fill: #FF8800;
 }
 
-.main-canvas[theme="light"] .jtk-connector path{
+.main-canvas[theme="light"] .jtk-connector path {
   stroke: #FF8800;
 }
 
-.main-canvas[theme="light"] .jtk-connector{
+.main-canvas[theme="light"] .jtk-connector {
   overflow: visible;
   animation: none;
 }
@@ -65,7 +63,7 @@
   background-color: #8A8A8A;
 }
 
-.main-canvas[theme="light"] .right-bottom-main-panel-icons-container .button:hover{
+.main-canvas[theme="light"] .right-bottom-main-panel-icons-container .button:hover {
   background-color: #1e62bf;
 }
 
@@ -81,7 +79,7 @@
   background: url("/assets/menu-light.png") no-repeat center right transparent;
 }
 
-.main-canvas[theme="light"] .input-item{
+.main-canvas[theme="light"] .input-item {
   border-bottom: 1px solid #DADBDC;
 }
 
@@ -96,7 +94,7 @@
 
 .main-canvas[theme="light"] .item-type-panel {
   background-color: #FFF;
-  border:1px solid #000;
+  border: 1px solid #000;
 }
 
 .main-canvas[theme="light"] .page.--active .page__title {
@@ -130,7 +128,7 @@
   border-radius: 0 0 5px 5px;
 }
 
-.main-canvas[theme="light"] .page__items  {
+.main-canvas[theme="light"] .page__items {
   flex-grow: 1;
   border-left: 2px solid #8A8A8A;
   border-right: 2px solid #8A8A8A;

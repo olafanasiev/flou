@@ -4,20 +4,21 @@
     flex-direction: row;
     align-items:center;
     padding: 0 0 0 6px;
+    min-height: 37px;
 }
 
-
-.input-icon {
+.input-icon:hover{
   cursor: pointer;
+  background-color:transparent;
 }
 
 .trash-icon {
-  display: none;
+  visibility: hidden;
   cursor: pointer;
 }
 
 .input-item:hover .trash-icon {
-  display: block;
+  visibility: visible;
 }
 
 .item-remove{

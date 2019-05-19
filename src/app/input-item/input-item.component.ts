@@ -16,6 +16,7 @@ import EMPTY = Strings.EMPTY;
 
 })
 export class InputItemComponent implements AfterViewInit {
+  static HEIGHT_MULTIPLIER = 1.1;
   @Input()
   item: PageItem;
   @ViewChild('textArea') textAreaElRef: ElementRef;
@@ -23,6 +24,8 @@ export class InputItemComponent implements AfterViewInit {
   enterPressed = new EventEmitter<any>();
   @Output()
   onEmptyField = new EventEmitter<any>();
+  @Output()
+  inputChanged = new EventEmitter<any>();
   @Output()
   onRemove = new EventEmitter<PageItem>();
   @Output()
@@ -57,6 +60,11 @@ export class InputItemComponent implements AfterViewInit {
       this.textAreaElRef.nativeElement.focus();
     }
     this._flouService.makeSource(this.item.endpointId);
+    setTimeout(() => {
+      this.textAreaHeight = this.textAreaElRef.nativeElement.scrollHeight;
+      this.cd.detectChanges();
+      this.inputChanged.emit();
+    }, 0);
   }
 
   removeIfEmpty(value) {
@@ -65,16 +73,19 @@ export class InputItemComponent implements AfterViewInit {
     }
   }
 
-  onKeyUp(e) {
-    if (e.key === 'Enter' && e.target.value.trim() !== '' && !e.shiftKey) {
+  onKeyUp(e?) {
+    if (e && e.key === 'Enter' && e.target.value.trim() !== '' && !e.shiftKey) {
       e.target.value = e.target.value.trim();
       this.enterPressed.next(e);
     }
 
     if (this.textAreaElRef.nativeElement.scrollHeight > this.textAreaElRef.nativeElement.clientHeight) {
+      // textarea creates one empty row more after changes applied so we should remove it
       this.textAreaHeight = this.textAreaElRef.nativeElement.scrollHeight;
     }
-  }
+      this.inputChanged.emit();
+    }
+
 
   showItemTypes() {
     this._inputItemService.emitPanelShowEvent(this);

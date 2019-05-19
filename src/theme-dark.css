@@ -4,12 +4,6 @@
   color: #FF8800;
 }
 
-.main-canvas[theme="dark"] .jtk-connector.jtk-hover path {
-  stroke: red;
-  color: red;
-  animation: pulse 1s infinite;
-}
-
 .main-canvas[theme="dark"] .page__delete-button path{
   stroke: none;
 }
@@ -18,7 +12,23 @@
   fill: #8B2C33
 }
 
+.main-canvas[theme="dark"] .jtk-connector .arrow-connector {
+  fill: #FF8800;
+}
 
+.main-canvas[theme="dark"] .jtk-connector path {
+  stroke: #FF8800;
+}
+
+.main-canvas[theme="dark"] .jtk-connector:hover path {
+  stroke: red;
+  color: red;
+  animation: pulse 1s infinite;
+}
+
+.main-canvas[theme="dark"] .jtk-connector:hover path:nth-last-child(1) {
+  fill: red;
+}
 
 .main-canvas[theme="dark"] .jtk-droppable.jtk-connected {
   border-left-color:  #FF8800;
