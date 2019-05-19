@@ -79,10 +79,9 @@ export class InputItemComponent implements AfterViewInit {
       this.enterPressed.next(e);
     }
 
-    if (this.textAreaElRef.nativeElement.scrollHeight > this.textAreaElRef.nativeElement.clientHeight) {
-      // textarea creates one empty row more after changes applied so we should remove it
-      this.textAreaHeight = this.textAreaElRef.nativeElement.scrollHeight;
-    }
+    this.textAreaHeight = 1;
+    this.cd.detectChanges();
+    this.textAreaHeight =  this.textAreaElRef.nativeElement.scrollHeight;
       this.inputChanged.emit();
     }
 

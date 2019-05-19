@@ -33,7 +33,7 @@ export class EditableTextOverlayComponent implements OnInit, OnDestroy, AfterVie
   jsPlumbConnection: Connection;
   @ViewChild('textareaElRef')
   textareaElRef: ElementRef;
-  textareaHeight = 0;
+  textareaHeight = 1;
   pageDragStopSubscription: Subscription = null;
   hideLabel = false;
   isDotsVertical = false;
@@ -53,13 +53,9 @@ export class EditableTextOverlayComponent implements OnInit, OnDestroy, AfterVie
   }
 
   onKeyUp() {
-    if (this.textareaElRef.nativeElement.scrollHeight > this.textareaElRef.nativeElement.clientHeight) {
-      // textarea creates one empty row more after changes applied so we should remove it
-      this.textareaHeight = this.textareaElRef.nativeElement.scrollHeight - EditableTextOverlayComponent.ROW_HEIGHT;
-    } else if (this.textareaElRef.nativeElement.scrollHeight === this.textareaElRef.nativeElement.clientHeight) {
-      this.textareaHeight = Math.round(this.textareaElRef.nativeElement.value.length * EditableTextOverlayComponent.HEIGHT_MULTIPLIER);
-    }
-
+    this.textareaHeight = 1;
+    this._cd.detectChanges();
+    this.textareaHeight =  this.textareaElRef.nativeElement.scrollHeight;
   }
 
   onLabelChange() {
