@@ -27,6 +27,8 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
   pageDeleted: EventEmitter<RemovedPageMeta> = new EventEmitter();
   @Input()
   page: Page;
+
+
   subscriptions: Subscription[] = [];
 
   constructor(private _flouService: FlouService,
@@ -129,13 +131,7 @@ export class PageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   addItem(e?) {
     const doSaveAction = true;
-    if (e) {
-      if (e.target && e.target.classList && e.target.classList.contains('can-add-item')) {
-        this._flouService.addItem(this.page, null, doSaveAction);
-      }
-    } else {
-      this._flouService.addItem(this.page, null, doSaveAction);
-    }
+    this._flouService.addItem(this.page, null, doSaveAction);
     this._cd.detectChanges();
   }
 

@@ -10,8 +10,8 @@
         </svg>
       </div>
     </div>
-    <div cdkDropList (dblclick)="addItem($event)" (cdkDropListDropped)="drop($event)" class="page__items">
-      <app-input-item cdkDrag *ngFor="let item of page.items" (onRemove)="onItemRemove($event)"
+    <div cdkDropList (cdkDropListDropped)="drop($event)" class="page__items">
+      <app-input-item (click)="makeActive()" cdkDrag *ngFor="let item of page.items" (onRemove)="onItemRemove($event)"
                       (inputChanged)="updateConnections()"
                       (enterPressed)="addItem()" (jsPlumbAnchorClicked)="makeActive()" (onEmptyField)="removeEmptyItem(item.endpointId)"
                       [item]="item"></app-input-item>
