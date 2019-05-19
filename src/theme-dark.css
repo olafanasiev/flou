@@ -116,6 +116,10 @@
   border-bottom: 1px solid #8B2C33;
 }
 
+.main-canvas[theme="dark"] .page .title-item{
+  color: #0D3163;
+}
+
 .main-canvas[theme="dark"] .page.--active .title-item {
   color: #8B2C33;
 }
