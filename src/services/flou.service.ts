@@ -200,15 +200,16 @@ export class FlouService {
                 pageItem.connectionMeta.push(connectionMeta);
                 this.saveAction();
               }
-
-              this.addConnectionLabel(newConnectionInfo, connectionMeta);
+              const jsPlumbConnection = (<any> newConnectionInfo).connection;
+              this.addConnectionLabel(jsPlumbConnection, connectionMeta);
               this.connectionWithPageEstablished.next(
                 _.first(pageItem.connectionMeta).targetEndpointId);
             } else {
               const connectionMeta: ConnectionMeta[] = this.findConnectionMeta(newConnectionInfo.sourceId, newConnectionInfo.targetId);
               if (connectionMeta) {
                 connectionMeta.forEach((meta) => {
-                  this.addConnectionLabel(newConnectionInfo, meta);
+                  const jsPlumbConnection = (<any> meta).connection;
+                  this.addConnectionLabel(jsPlumbConnection, meta);
                 });
               }
             }
@@ -339,14 +340,13 @@ export class FlouService {
   }
 
 
-
-  addConnectionLabel(connectionMadeInfo: ConnectionMadeEventInfo, connectionMeta: ConnectionMeta) {
-    const jsplumbConnectionWithOverlay = (<any>connectionMadeInfo.connection).addOverlay([OverlayType.CUSTOM, {
+  addConnectionLabel(jsplumbConnection: any, connectionMeta: ConnectionMeta) {
+    const jsplumbConnectionWithOverlay = jsplumbConnection.addOverlay([OverlayType.CUSTOM, {
       create: (component) => {
         // we are creating web component which will be controlled by angular
         const textOverlay = document.createElement('editable-text-overlay') as NgElement & WithProperties<EditableTextOverlayComponent>;
         textOverlay.connectionMeta = connectionMeta;
-        textOverlay.jsPlumbConnection = connectionMadeInfo.connection;
+        textOverlay.jsPlumbConnection = jsplumbConnection;
         return textOverlay;
       },
       location: [0.5],
@@ -354,7 +354,7 @@ export class FlouService {
     }]);
   }
 
-  drawConnection(sourceHtmlId: string, targetHtmlId: string, label: LabelMeta): Connection {
+  drawConnection(sourceHtmlId: string, targetHtmlId: string): Connection {
     const connection = this.jsPlumbInstance.connect({
       detachable: true,
       source: sourceHtmlId, target: targetHtmlId,

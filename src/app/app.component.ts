@@ -104,7 +104,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.pages.forEach((page) => {
         page.items.forEach(pageItem => {
           pageItem.connectionMeta.forEach((connection) => {
-            this._flouService.drawConnection(connection.sourceEndpointId, connection.targetEndpointId, connection.labelMeta);
+            this._flouService.drawConnection(connection.sourceEndpointId, connection.targetEndpointId);
           });
         });
       });
@@ -134,11 +134,13 @@ export class AppComponent implements OnInit, AfterViewInit {
           this._flouService.restorePage(removedPage.page, doSaveAction);
           this._cd.detectChanges();
           removedPage.inputConnections
-            .forEach(connectionMeta =>
-              this._flouService.drawConnection(connectionMeta.sourceEndpointId, connectionMeta.targetEndpointId, connectionMeta.labelMeta));
+            .forEach(connectionMeta => {
+              const jsPlumbConnection = this._flouService.drawConnection(connectionMeta.sourceEndpointId, connectionMeta.targetEndpointId);
+              this._flouService.addConnectionLabel(jsPlumbConnection, connectionMeta);
+            });
           removedPage.page.items
             .forEach(pageItem => pageItem.connectionMeta
-              .forEach(connectionMeta => this._flouService.drawConnection(connectionMeta.sourceEndpointId, connectionMeta.targetEndpointId, connectionMeta.labelMeta)));
+              .forEach(connectionMeta => this._flouService.drawConnection(connectionMeta.sourceEndpointId, connectionMeta.targetEndpointId)));
           this._snackBarRef.clear();
         },
       },
