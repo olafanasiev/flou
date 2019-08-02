@@ -7,7 +7,7 @@
     "start": "ng serve",
     "build": "ng build --prod",
     "prod": "npm run build && cd ./dist && sudo http-server -p 80",
-    "deploy": "npm run build --prod && scp -r ./dist/flou/* root@flou.app:/var/www/html",
+    "deploy": "ssh -n -f root@flou.app \"sh -c 'cd /var/www/html && rm -rf * && exit'\" && npm run build --prod && scp -r ./dist/flou/* root@flou.app:/var/www/html",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
