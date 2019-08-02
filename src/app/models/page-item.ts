@@ -5,5 +5,5 @@ export interface PageItem {
     title: string;
     endpointId: string;
     created: number;
-    connectionMeta: ConnectionMeta[]
+    connectionMeta: ConnectionMeta[];
 }

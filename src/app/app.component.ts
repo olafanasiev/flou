@@ -1,4 +1,4 @@
-import {Component, AfterViewInit, OnInit, ChangeDetectorRef, HostListener, ViewChild, ElementRef} from '@angular/core';
+import {Component, AfterViewInit, OnInit, ChangeDetectorRef, HostListener, ViewChild, ElementRef, NgZone} from '@angular/core';
 import {FlouService} from '../services/flou.service';
 import {Page} from './models/page';
 import * as _ from 'lodash';
@@ -30,6 +30,7 @@ export class AppComponent implements OnInit, AfterViewInit {
               private _snackBarRef: SnackbarService,
               private _theming: ThemingService,
               private _cd: ChangeDetectorRef,
+              private _zone: NgZone,
               private _errorService: ErrorService) {
     this._flouService.pageDragStop$.subscribe(() => {
       this.appHeight = this.getNewWindowSize();
@@ -131,17 +132,10 @@ export class AppComponent implements OnInit, AfterViewInit {
       action: {
         text: 'Undo',
         onClick: (snack) => {
-          this._flouService.restorePage(removedPage.page, doSaveAction);
-          this._cd.detectChanges();
-          removedPage.inputConnections
-            .forEach(connectionMeta => {
-              const jsPlumbConnection = this._flouService.drawConnection(connectionMeta.sourceEndpointId, connectionMeta.targetEndpointId);
-              this._flouService.addConnectionLabel(jsPlumbConnection, connectionMeta);
-            });
-          removedPage.page.items
-            .forEach(pageItem => pageItem.connectionMeta
-              .forEach(connectionMeta => this._flouService.drawConnection(connectionMeta.sourceEndpointId, connectionMeta.targetEndpointId)));
-          this._snackBarRef.clear();
+            this._flouService.getJsPlumbInstance().deleteEveryEndpoint();
+            this._flouService.restorePage(removedPage.page, doSaveAction);
+            this.redrawConnections();
+            this._snackBarRef.clear();
         },
       },
     });

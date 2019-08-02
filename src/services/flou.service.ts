@@ -205,13 +205,14 @@ export class FlouService {
               this.connectionWithPageEstablished.next(
                 _.first(pageItem.connectionMeta).targetEndpointId);
             } else {
+              const jsPlumbConnection = newConnectionInfo.connection;
               const connectionMeta: ConnectionMeta[] = this.findConnectionMeta(newConnectionInfo.sourceId, newConnectionInfo.targetId);
               if (connectionMeta) {
                 connectionMeta.forEach((meta) => {
-                  const jsPlumbConnection = (<any> meta).connection;
                   this.addConnectionLabel(jsPlumbConnection, meta);
                 });
               }
+
             }
           });
         }
